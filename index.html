@@ -55,10 +55,11 @@
             border-color: #9a9a9a;
         }
         .message-log {
-            height: 80px;
+            min-height: 80px;
             overflow-y: auto;
             font-size: 10px;
             line-height: 1.4;
+            flex: 1;
         }
         .game-over-screen, .intro-screen, .victory-screen {
             background-color: rgba(0, 0, 0, 0.85);
@@ -78,7 +79,7 @@
             <div class="bg-gray-900 p-2 rounded">🌲 WOOD: <span id="woodCount">0</span></div>
             <div class="bg-gray-900 p-2 rounded">⛏️ STONE: <span id="stoneCount">0</span></div>
             <div class="bg-gray-900 p-2 rounded">🍓 BERRY: <span id="berryCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🥩 RAW: <span id="rawMeatCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🥩 MEAT: <span id="rawMeatCount">0</span></div>
             <div class="bg-gray-900 p-2 rounded">💎 GEM: <span id="gemCount">0</span></div>
             <div class="bg-gray-900 p-2 rounded">🌸 PETAL: <span id="petalCount">0</span></div>
             <div class="bg-gray-900 p-2 rounded">🔥 COOKED: <span id="cookedMeatCount">0</span></div>
@@ -129,9 +130,9 @@
             </div>
 
             <!-- Message Log -->
-            <div class="mt-auto">
+            <div class="flex-grow flex flex-col">
                 <h2 class="text-lg text-yellow-400 mb-2 text-center">LOG</h2>
-                <div id="messageLog" class="message-log bg-gray-900 p-2 rounded"></div>
+                <div id="messageLog" class="message-log bg-gray-900 p-2 rounded flex-grow"></div>
             </div>
         </aside>
 
