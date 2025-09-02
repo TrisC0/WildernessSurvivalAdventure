@@ -17,6 +17,8 @@
             background-color: #3a5941;
             cursor: crosshair;
             image-rendering: pixelated; /* Sharp pixels for pixel art */
+            width: 100%;
+            height: 100%;
         }
         .ui-panel {
             background-color: rgba(0, 0, 0, 0.7);
@@ -35,12 +37,12 @@
             border-radius: 9999px;
             transition: width 0.3s ease-in-out;
         }
-        .craft-button {
+        .craft-button, .tab-button {
             border: 2px solid #5a5a5a;
             background-color: #3c3c3c;
             transition: all 0.2s;
         }
-        .craft-button:hover:not(:disabled) {
+        .craft-button:hover:not(:disabled), .tab-button:hover {
             background-color: #4c4c4c;
             border-color: #7a7a7a;
         }
@@ -48,92 +50,145 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
+        .tab-button.active {
+            background-color: #6c6c6c;
+            border-color: #9a9a9a;
+        }
         .message-log {
             height: 80px;
             overflow-y: auto;
             font-size: 10px;
             line-height: 1.4;
         }
-        .game-over-screen {
+        .game-over-screen, .intro-screen, .victory-screen {
             background-color: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(5px);
         }
+        .hidden-tab {
+            display: none;
+        }
     </style>
 </head>
-<body class="flex flex-col md:flex-row items-center justify-center min-h-screen p-2 md:p-4">
+<body class="bg-black text-white flex flex-col h-screen p-2 md:p-4 gap-2 md:gap-4">
 
-    <!-- Game Canvas -->
-    <div class="w-full max-w-[80vh] md:max-w-[calc(100vh-4rem)] aspect-square border-4 border-gray-800 rounded-lg shadow-2xl">
-        <canvas id="gameCanvas"></canvas>
-    </div>
-
-    <!-- UI Panel -->
-    <div class="w-full md:w-64 lg:w-80 md:ml-4 mt-4 md:mt-0 ui-panel flex-shrink-0">
-        <h1 class="text-xl text-yellow-400 text-center mb-4">Survival</h1>
-
-        <!-- Stats -->
-        <div class="space-y-3 mb-4">
-            <div>
-                <span class="text-sm">❤️ HEALTH</span>
-                <div class="stat-bar-bg h-4"><div id="healthBar" class="stat-bar bg-red-500" style="width: 100%;"></div></div>
-            </div>
-            <div>
-                <span class="text-sm">🍖 HUNGER</span>
-                <div class="stat-bar-bg h-4"><div id="hungerBar" class="stat-bar bg-yellow-500" style="width: 100%;"></div></div>
-            </div>
-            <div>
-                <span class="text-sm">⚡ ENERGY</span>
-                <div class="stat-bar-bg h-4"><div id="energyBar" class="stat-bar bg-blue-500" style="width: 100%;"></div></div>
-            </div>
+    <!-- Top Bar: Inventory -->
+    <header class="ui-panel flex-shrink-0">
+        <h2 class="text-lg text-yellow-400 mb-2 text-center hidden md:block">INVENTORY</h2>
+        <div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-center text-xs">
+            <div class="bg-gray-900 p-2 rounded">🌲W: <span id="woodCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">⛏️S: <span id="stoneCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🍓B: <span id="berryCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🥩R: <span id="rawMeatCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">💎G: <span id="gemCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🌸P: <span id="petalCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🔥C: <span id="cookedMeatCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🗿CS: <span id="carvedStoneCount">0</span></div>
         </div>
+    </header>
 
-        <!-- Time -->
-        <div class="text-center mb-4 p-2 bg-gray-900 rounded-md">
-            <div id="timeDisplay" class="text-lg text-cyan-300">Day 1 - 07:00</div>
-            <div id="seasonDisplay" class="text-xs text-green-400">Spring</div>
-        </div>
-
-        <!-- Inventory -->
-        <div class="mb-4">
-            <h2 class="text-lg text-yellow-400 mb-2 text-center">INVENTORY</h2>
-            <div class="grid grid-cols-2 gap-2 text-center text-sm">
-                <div class="bg-gray-900 p-2 rounded">🌲 WOOD: <span id="woodCount">0</span></div>
-                <div class="bg-gray-900 p-2 rounded">⛏️ STONE: <span id="stoneCount">0</span></div>
-                <div class="bg-gray-900 p-2 rounded">🍓 BERRY: <span id="berryCount">0</span></div>
-                <div class="bg-gray-900 p-2 rounded">🥩 MEAT: <span id="meatCount">0</span></div>
-            </div>
-        </div>
-
-        <!-- Crafting -->
-        <div class="mb-4">
-            <h2 class="text-lg text-yellow-400 mb-2 text-center">CRAFTING</h2>
-            <div class="grid grid-cols-2 gap-2 text-xs">
-                <button id="craftAxe" class="craft-button p-2 rounded">Wood Axe (15W)</button>
-                <button id="craftPickaxe" class="craft-button p-2 rounded">Wood Pick (20W)</button>
-                <button id="craftCampfire" class="craft-button p-2 rounded">Fire (15W, 5S)</button>
-                <button id="craftTent" class="craft-button p-2 rounded">Tent (20W, 10S)</button>
-            </div>
-            <div class="text-center text-xs mt-2">Tools: <span id="toolStatus">None</span></div>
-        </div>
+    <!-- Main Content -->
+    <main class="flex-grow flex flex-col md:flex-row gap-2 md:gap-4 overflow-hidden">
         
-        <!-- Eat Action -->
-         <div class="mb-4">
-             <button id="eatBerry" class="w-full craft-button p-2 rounded text-xs">Eat Berry (+10 Hunger)</button>
+        <!-- Left Panel: Other UI -->
+        <aside class="w-full md:w-64 lg:w-80 ui-panel flex flex-col overflow-y-auto order-1 md:order-1 flex-shrink-0">
+            <h1 class="text-xl text-yellow-400 text-center mb-4">Survival</h1>
+            
+            <!-- Quest Log -->
+            <div class="mb-4">
+                <h2 class="text-lg text-yellow-400 mb-2 text-center">OBJECTIVE</h2>
+                <div id="questLog" class="text-xs bg-gray-900 p-2 rounded text-cyan-300">Survive the crash. Find a way to signal for help.</div>
+            </div>
+
+            <!-- Actions Panel -->
+            <div class="mb-4">
+                <h2 class="text-lg text-yellow-400 mb-2 text-center">ACTIONS</h2>
+                <div class="flex mb-2">
+                    <button id="tabCraft" class="tab-button active w-1/2 p-2 rounded-l-md text-xs">Craft</button>
+                    <button id="tabBasic" class="tab-button w-1/2 p-2 rounded-r-md text-xs">Basic</button>
+                </div>
+                <!-- Crafting Tab -->
+                <div id="craftingContent">
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <button id="craftAxe" class="craft-button p-2 rounded">Wood Axe (15W)</button>
+                        <button id="craftPickaxe" class="craft-button p-2 rounded">Wood Pick (20W)</button>
+                        <button id="craftSword" class="craft-button p-2 rounded">Sword (25W)</button>
+                        <button id="craftCarvedStone" class="craft-button p-2 rounded">Carved Stone (50S)</button>
+                        <button id="craftCampfire" class="craft-button p-2 rounded">Fire (15W, 5S)</button>
+                        <button id="craftTent" class="craft-button p-2 rounded">Tent (20W, 10S)</button>
+                    </div>
+                    <div class="text-center text-xs mt-2">Tools: <span id="toolStatus">None</span></div>
+                </div>
+                 <!-- Basic Actions Tab -->
+                <div id="basicActionsContent" class="hidden-tab">
+                     <div class="grid grid-cols-2 gap-2 text-xs">
+                         <button id="eatBerry" class="w-full craft-button p-2 rounded">Eat Berry</button>
+                         <button id="eatCookedMeat" class="w-full craft-button p-2 rounded">Eat Meat</button>
+                         <button id="cookMeat" class="w-full craft-button p-2 rounded col-span-2 mt-2">Cook Meat (at fire)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Message Log -->
+            <div class="mt-auto">
+                <h2 class="text-lg text-yellow-400 mb-2 text-center">LOG</h2>
+                <div id="messageLog" class="message-log bg-gray-900 p-2 rounded"></div>
+            </div>
+        </aside>
+
+        <!-- Right Panel: Game Canvas -->
+        <div class="flex-grow flex items-center justify-center order-2 md:order-2 overflow-hidden">
+            <div class="w-full h-full aspect-square border-4 border-gray-800 rounded-lg shadow-2xl">
+                <canvas id="gameCanvas"></canvas>
+            </div>
         </div>
 
+    </main>
 
-        <!-- Message Log -->
-        <div>
-            <h2 class="text-lg text-yellow-400 mb-2 text-center">LOG</h2>
-            <div id="messageLog" class="message-log bg-gray-900 p-2 rounded">Welcome! Use WASD or Arrow Keys to move. Press Spacebar to interact.</div>
+    <!-- Bottom Bar: Stats & Time -->
+    <footer class="ui-panel flex-shrink-0">
+         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+            <!-- Stats -->
+            <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div>
+                    <span class="text-sm">❤️ HEALTH</span>
+                    <div class="stat-bar-bg h-4"><div id="healthBar" class="stat-bar bg-red-500" style="width: 100%;"></div></div>
+                </div>
+                <div>
+                    <span class="text-sm">🍖 HUNGER</span>
+                    <div class="stat-bar-bg h-4"><div id="hungerBar" class="stat-bar bg-yellow-500" style="width: 100%;"></div></div>
+                </div>
+                <div>
+                    <span class="text-sm">⚡ ENERGY</span>
+                    <div class="stat-bar-bg h-4"><div id="energyBar" class="stat-bar bg-blue-500" style="width: 100%;"></div></div>
+                </div>
+            </div>
+            <!-- Time -->
+            <div class="w-full md:w-auto text-center p-2 bg-gray-900 rounded-md flex-shrink-0">
+                <div id="timeDisplay" class="text-lg text-cyan-300">Day 1 - 07:00</div>
+                <div id="seasonDisplay" class="text-xs text-green-400">Spring</div>
+            </div>
         </div>
-    </div>
+    </footer>
     
+    <!-- Intro Screen -->
+    <div id="introScreen" class="absolute inset-0 flex flex-col items-center justify-center intro-screen text-center p-8">
+        <h1 class="text-4xl text-yellow-400 mb-4">The Lost Expedition</h1>
+        <p class="text-lg text-white mb-8 max-w-2xl text-center">Your research plane has crashed in an uncharted wilderness. The radio is broken. Looking at your notes, you remember this region is known for strange monoliths that emit a powerful energy. If you can find and reactivate them, the energy surge might be enough to signal for rescue.</p>
+        <button id="startButton" class="craft-button text-2xl py-4 px-8 rounded">Begin Survival</button>
+    </div>
+
     <!-- Game Over Screen -->
     <div id="gameOverScreen" class="hidden absolute inset-0 flex-col items-center justify-center game-over-screen">
         <h1 class="text-6xl text-red-600 mb-4">GAME OVER</h1>
         <p id="gameOverReason" class="text-xl text-white mb-8">You have perished.</p>
         <button onclick="window.location.reload()" class="craft-button text-2xl py-4 px-8 rounded">Retry</button>
+    </div>
+
+    <!-- Victory Screen -->
+    <div id="victoryScreen" class="hidden absolute inset-0 flex-col items-center justify-center victory-screen text-center">
+        <h1 class="text-6xl text-green-500 mb-4">RESCUED!</h1>
+        <p class="text-xl text-white mb-8">The monoliths flare to life, sending a beam of pure energy into the sky. You've done it! A rescue team will find you soon.</p>
+        <button onclick="window.location.reload()" class="craft-button text-2xl py-4 px-8 rounded">Play Again</button>
     </div>
 
 
@@ -149,16 +204,24 @@ const timeDisplay = document.getElementById('timeDisplay');
 const woodCountUI = document.getElementById('woodCount');
 const stoneCountUI = document.getElementById('stoneCount');
 const berryCountUI = document.getElementById('berryCount');
-const meatCountUI = document.getElementById('meatCount');
+const rawMeatCountUI = document.getElementById('rawMeatCount');
+const cookedMeatCountUI = document.getElementById('cookedMeatCount');
+const gemCountUI = document.getElementById('gemCount');
+const petalCountUI = document.getElementById('petalCount');
+const carvedStoneCountUI = document.getElementById('carvedStoneCount');
 const toolStatusUI = document.getElementById('toolStatus');
 const messageLog = document.getElementById('messageLog');
+const questLog = document.getElementById('questLog');
+const introScreen = document.getElementById('introScreen');
+const startButton = document.getElementById('startButton');
 const gameOverScreen = document.getElementById('gameOverScreen');
 const gameOverReason = document.getElementById('gameOverReason');
+const victoryScreen = document.getElementById('victoryScreen');
 
 // --- Game Configuration ---
-const TILE_SIZE = 64; // Increased tile size for zoom effect
-const MAP_SIZE = 35; // Increased map size for more exploration
-const VIEWPORT_TILE_COUNT = 11; // How many tiles are visible on screen
+const TILE_SIZE = 64;
+const MAP_SIZE = 110; // Increased map size for a larger world
+const VIEWPORT_TILE_COUNT = 11;
 
 canvas.width = VIEWPORT_TILE_COUNT * TILE_SIZE;
 canvas.height = VIEWPORT_TILE_COUNT * TILE_SIZE;
@@ -174,6 +237,10 @@ const TILES = {
     STUMP: 7,
     MINED_ROCK: 8,
     EMPTY_BUSH: 9,
+    MOONPETAL_FLOWER: 10,
+    MONOLITH: 11,
+    MONOLITH_ACTIVATED: 12,
+    MOUNTAIN: 13,
 };
 
 const TILE_COLORS = {
@@ -187,11 +254,16 @@ const TILE_COLORS = {
     [TILES.STUMP]: '#6b4f3a',
     [TILES.MINED_ROCK]: '#6a6a6a',
     [TILES.EMPTY_BUSH]: '#71845a',
+    [TILES.MOONPETAL_FLOWER]: '#a188d9',
+    [TILES.MONOLITH]: '#4a5568',
+    [TILES.MONOLITH_ACTIVATED]: '#f6e05e',
+    [TILES.MOUNTAIN]: '#6b7280',
 };
 
 
 // --- Game State ---
 let gameState = {
+    paused: true,
     player: {
         x: Math.floor(MAP_SIZE / 2),
         y: Math.floor(MAP_SIZE / 2),
@@ -200,6 +272,7 @@ let gameState = {
         energy: 100,
         direction: 'down',
         isMoving: false,
+        moveCooldown: 0,
     },
     camera: {
         x: 0,
@@ -209,11 +282,20 @@ let gameState = {
         wood: 0,
         stone: 0,
         berries: 0,
-        meat: 0,
+        rawMeat: 0,
+        cookedMeat: 0,
+        gems: 0,
+        petals: 0,
+        carvedStone: 0,
     },
     tools: {
         axe: false,
         pickaxe: false,
+        sword: false,
+    },
+    quest: {
+        monolithsActivated: 0,
+        totalMonoliths: 3,
     },
     world: [],
     animals: [],
@@ -225,12 +307,12 @@ let gameState = {
     },
     playerAnimation: {
         walkCycle: 0,
-        toolSwing: 0, // Timer for the tool swing animation
+        toolSwing: 0, 
     },
     isNight: false,
     isGameOver: false,
-    placedObjects: {}, // for campfires, tents etc.
-    worldObjects: {}, // for trees, rocks with health
+    placedObjects: {}, 
+    worldObjects: {}, 
     activeAnimations: [],
 };
 
@@ -244,32 +326,95 @@ function logMessage(message, color = '#e0e0e0') {
     messageLog.scrollTop = messageLog.scrollHeight;
 }
 
-function generateWorld() {
-    gameState.world = Array(MAP_SIZE).fill(null).map(() => Array(MAP_SIZE).fill(TILES.GRASS));
-    gameState.worldObjects = {}; // Reset on new world
+function updateQuestLog() {
+    const activated = gameState.quest.monolithsActivated;
+    const total = gameState.quest.totalMonoliths;
+    if (activated < total) {
+        questLog.textContent = `Activate the Monoliths (${activated}/${total}).`;
+    } else {
+        questLog.textContent = "Signal sent! You have been rescued!";
+    }
+}
 
+function generateWorld() {
+    // Start with a solid mountain map
+    gameState.world = Array(MAP_SIZE).fill(null).map(() => Array(MAP_SIZE).fill(TILES.MOUNTAIN));
+    gameState.worldObjects = {};
+
+    let walker = { x: Math.floor(MAP_SIZE / 2), y: Math.floor(MAP_SIZE / 2) };
+    const landTilesToGenerate = Math.floor(MAP_SIZE * MAP_SIZE * 0.6); // 60% of map is land
+    let landGenerated = 0;
+
+    // Random walk to carve out land
+    while(landGenerated < landTilesToGenerate) {
+        if (gameState.world[walker.y][walker.x] === TILES.MOUNTAIN) {
+            gameState.world[walker.y][walker.x] = TILES.GRASS;
+            landGenerated++;
+        }
+
+        const dir = Math.floor(Math.random() * 4);
+        switch(dir) {
+            case 0: walker.y--; break; // Up
+            case 1: walker.y++; break; // Down
+            case 2: walker.x--; break; // Left
+            case 3: walker.x++; break; // Right
+        }
+
+        // Clamp walker to stay inside the mountain border
+        walker.x = Math.max(1, Math.min(MAP_SIZE - 2, walker.x));
+        walker.y = Math.max(1, Math.min(MAP_SIZE - 2, walker.y));
+    }
+    
+    // Now, place resources only on grass tiles
+    let grassTiles = [];
     for (let y = 0; y < MAP_SIZE; y++) {
         for (let x = 0; x < MAP_SIZE; x++) {
-            const r = Math.random();
-            const key = `${x},${y}`;
-            if (r < 0.2) {
-                gameState.world[y][x] = TILES.TREE;
-                gameState.worldObjects[key] = { type: TILES.TREE, health: 10 };
-            } else if (r < 0.28) {
-                gameState.world[y][x] = TILES.ROCK;
-                gameState.worldObjects[key] = { type: TILES.ROCK, health: 15 };
-            } else if (r < 0.32) {
-                gameState.world[y][x] = TILES.BERRY_BUSH;
+            if (gameState.world[y][x] === TILES.GRASS) {
+                grassTiles.push({x, y});
             }
         }
     }
+
+    // Shuffle grass tiles for random placement
+    grassTiles.sort(() => 0.5 - Math.random());
+
+    const numTrees = Math.floor(grassTiles.length * 0.2);
+    const numRocks = Math.floor(grassTiles.length * 0.08);
+    const numBushes = Math.floor(grassTiles.length * 0.04);
+
+    for(let i = 0; i < grassTiles.length; i++) {
+        const tile = grassTiles[i];
+        const key = `${tile.x},${tile.y}`;
+        const distToPlayer = Math.sqrt(Math.pow(tile.x - gameState.player.x, 2) + Math.pow(tile.y - gameState.player.y, 2));
+        
+        if (distToPlayer <= 2) continue; // Keep spawn area clear
+
+        if (i < numTrees) {
+             gameState.world[tile.y][tile.x] = TILES.TREE;
+             gameState.worldObjects[key] = { type: TILES.TREE, health: 10 };
+        } else if (i < numTrees + numRocks) {
+            gameState.world[tile.y][tile.x] = TILES.ROCK;
+            gameState.worldObjects[key] = { type: TILES.ROCK, health: 15 };
+        } else if (i < numTrees + numRocks + numBushes) {
+             gameState.world[tile.y][tile.x] = TILES.BERRY_BUSH;
+        }
+    }
     
-    const spawn_radius = 2;
-    for(let y = gameState.player.y - spawn_radius; y <= gameState.player.y + spawn_radius; y++){
-        for(let x = gameState.player.x - spawn_radius; x <= gameState.player.x + spawn_radius; x++){
-            if(x >= 0 && x < MAP_SIZE && y >= 0 && y < MAP_SIZE){
-                gameState.world[y][x] = TILES.GRASS;
-            }
+    // Place Monoliths on distant grass tiles
+    let monolithsPlaced = 0;
+    for(let i = 0; i < grassTiles.length && monolithsPlaced < gameState.quest.totalMonoliths; i++) {
+        const tile = grassTiles[i];
+         const distToPlayer = Math.sqrt(Math.pow(tile.x - gameState.player.x, 2) + Math.pow(tile.y - gameState.player.y, 2));
+
+        if(distToPlayer > 12) { // Place monoliths far away
+            gameState.world[tile.y][tile.x] = TILES.MONOLITH;
+            const requirements = ['gems', 'petals', 'carvedStone'];
+            gameState.worldObjects[`${tile.x},${tile.y}`] = { 
+                type: TILES.MONOLITH,
+                requires: requirements[monolithsPlaced],
+                amount: requirements[monolithsPlaced] === 'carvedStone' ? 1 : 5
+            };
+            monolithsPlaced++;
         }
     }
 }
@@ -289,6 +434,23 @@ function interact() {
     const target = getTileInFront();
     if (target.x < 0 || target.x >= MAP_SIZE || target.y < 0 || target.y >= MAP_SIZE) return;
 
+    // Combat
+    const animal = gameState.animals.find(a => a.x === target.x && a.y === target.y);
+    if (animal) {
+        const damage = gameState.tools.sword ? 5 : 2;
+        animal.hp -= damage;
+        animal.lastHitTimer = 30;
+        logMessage(`You hit the wolf for ${damage} damage!`, '#e06c75');
+        
+        if (animal.hp <= 0) {
+            logMessage(`You defeated the wolf! You find 2 Raw Meat.`, '#98c379');
+            gameState.inventory.rawMeat += 2;
+            gameState.animals = gameState.animals.filter(a => a !== animal);
+        }
+        gameState.playerAnimation.toolSwing = 15;
+        return;
+    }
+
     const tile = gameState.world[target.y][target.x];
     const targetKey = `${target.x},${target.y}`;
     let interactionDidDamage = false;
@@ -296,26 +458,20 @@ function interact() {
     switch (tile) {
         case TILES.TREE: {
             let tree = gameState.worldObjects[targetKey];
-            if (!tree) { // Safety check for trees from older saves/versions
+            if (!tree) {
                 tree = { type: TILES.TREE, health: 10 };
                 gameState.worldObjects[targetKey] = tree;
             }
-
             const damage = gameState.tools.axe ? 5 : 1;
-            const energyCost = gameState.tools.axe ? (1.5 / 3) : (1 / 3);
-            
             tree.health -= damage;
-            depleteEnergy(energyCost);
+            depleteEnergy(gameState.tools.axe ? (1.5 / 12) : (1 / 12));
             gameState.activeAnimations.push({ x: target.x, y: target.y, type: 'chop', progress: 0, maxProgress: 20 });
             interactionDidDamage = true;
-
-
             if (tree.health <= 0) {
-                const woodGained = 5;
-                gameState.inventory.wood += woodGained;
+                gameState.inventory.wood += 5;
                 gameState.world[target.y][target.x] = TILES.STUMP;
                 delete gameState.worldObjects[targetKey];
-                logMessage(`You felled the tree and got ${woodGained} wood.`, '#98c379');
+                logMessage(`You felled the tree and got 5 wood.`, '#98c379');
             } else {
                 logMessage(`You chop at the tree. (${tree.health}/10)`, '#e5c07b');
             }
@@ -324,24 +480,25 @@ function interact() {
         case TILES.ROCK: {
             if (gameState.tools.pickaxe) {
                 let rock = gameState.worldObjects[targetKey];
-                if (!rock) { // Safety check
+                if (!rock) {
                     rock = { type: TILES.ROCK, health: 15 };
                     gameState.worldObjects[targetKey] = rock;
                 }
-
                 const damage = 5;
                 rock.health -= damage;
-                depleteEnergy(8 / 9);
+                depleteEnergy(8 / 36);
                 gameState.activeAnimations.push({ x: target.x, y: target.y, type: 'mine', progress: 0, maxProgress: 20 });
                 interactionDidDamage = true;
-
                 
                 if (rock.health <= 0) {
-                    const stoneGained = 5;
-                    gameState.inventory.stone += stoneGained;
+                    gameState.inventory.stone += 5;
                     gameState.world[target.y][target.x] = TILES.MINED_ROCK;
                     delete gameState.worldObjects[targetKey];
-                    logMessage(`You broke the rock and got ${stoneGained} stone.`, '#98c379');
+                    logMessage(`You broke the rock and got 5 stone.`, '#98c379');
+                    if (Math.random() < 0.1) { // 10% chance for a gem
+                        gameState.inventory.gems++;
+                        logMessage(`You found a rare gem!`, '#61afef');
+                    }
                 } else {
                     logMessage(`You strike the rock. (${rock.health}/15)`, '#c7c7c7');
                 }
@@ -351,10 +508,36 @@ function interact() {
             break;
         }
         case TILES.BERRY_BUSH: {
-            const berriesGained = 3;
-            gameState.inventory.berries += berriesGained;
+            gameState.inventory.berries += 3;
             gameState.world[target.y][target.x] = TILES.EMPTY_BUSH;
-            logMessage(`You found ${berriesGained} berries.`, '#c56183');
+            logMessage(`You found 3 berries.`, '#c56183');
+            break;
+        }
+        case TILES.MOONPETAL_FLOWER: {
+            gameState.inventory.petals++;
+            gameState.world[target.y][target.x] = TILES.GRASS;
+            logMessage(`You carefully picked a glowing Moonpetal.`, '#a188d9');
+            break;
+        }
+        case TILES.MONOLITH: {
+            const monolith = gameState.worldObjects[targetKey];
+            if (monolith) {
+                if (gameState.inventory[monolith.requires] >= monolith.amount) {
+                    gameState.inventory[monolith.requires] -= monolith.amount;
+                    gameState.world[target.y][target.x] = TILES.MONOLITH_ACTIVATED;
+                    delete gameState.worldObjects[targetKey];
+                    gameState.quest.monolithsActivated++;
+                    logMessage("The monolith hums with power! It's active!", '#f6e05e');
+                    updateQuestLog();
+                    if (gameState.quest.monolithsActivated >= gameState.quest.totalMonoliths) {
+                        victoryScreen.classList.remove('hidden');
+                        victoryScreen.classList.add('flex');
+                        gameState.paused = true;
+                    }
+                } else {
+                    logMessage(`The monolith seems to require ${monolith.amount} ${monolith.requires}.`, '#e06c75');
+                }
+            }
             break;
         }
         case TILES.TENT: {
@@ -369,13 +552,13 @@ function interact() {
     }
     
     if (interactionDidDamage) {
-        gameState.playerAnimation.toolSwing = 15; // Animation lasts for 15 frames
+        gameState.playerAnimation.toolSwing = 15;
     }
 }
 
 let keysPressed = {};
 function handleInput() {
-    if (gameState.isGameOver) return;
+    if (gameState.isGameOver || gameState.paused || gameState.player.moveCooldown > 0) return;
     const { player } = gameState;
     let newX = player.x;
     let newY = player.y;
@@ -383,17 +566,18 @@ function handleInput() {
     player.isMoving = false;
 
     if (keysPressed['w'] || keysPressed['ArrowUp']) { player.direction = 'up'; newY--; player.isMoving = true; }
-    if (keysPressed['s'] || keysPressed['ArrowDown']) { player.direction = 'down'; newY++; player.isMoving = true; }
-    if (keysPressed['a'] || keysPressed['ArrowLeft']) { player.direction = 'left'; newX--; player.isMoving = true; }
-    if (keysPressed['d'] || keysPressed['ArrowRight']) { player.direction = 'right'; newX++; player.isMoving = true; }
+    else if (keysPressed['s'] || keysPressed['ArrowDown']) { player.direction = 'down'; newY++; player.isMoving = true; }
+    else if (keysPressed['a'] || keysPressed['ArrowLeft']) { player.direction = 'left'; newX--; player.isMoving = true; }
+    else if (keysPressed['d'] || keysPressed['ArrowRight']) { player.direction = 'right'; newX++; player.isMoving = true; }
     
     if (player.isMoving) {
         if (newX >= 0 && newX < MAP_SIZE && newY >= 0 && newY < MAP_SIZE) {
             const targetTile = gameState.world[newY][newX];
-            if (targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER) {
+            if (targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN) {
                 player.x = newX;
                 player.y = newY;
-                depleteEnergy(0.2 / 3);
+                player.moveCooldown = 5; // Add a short delay between steps
+                depleteEnergy(0.2 / 12);
             }
         }
     }
@@ -406,7 +590,6 @@ function updateAnimations() {
         return anim.progress < anim.maxProgress;
     });
 
-    // Player animations
     const { playerAnimation, player } = gameState;
     if (player.isMoving) {
         playerAnimation.walkCycle = (playerAnimation.walkCycle + 0.25) % (Math.PI * 2);
@@ -437,13 +620,19 @@ function spawnAnimals(count) {
         do {
             x = Math.floor(Math.random() * MAP_SIZE);
             y = Math.floor(Math.random() * MAP_SIZE);
-        } while (gameState.world[y][x] !== TILES.GRASS || (Math.abs(x-gameState.player.x) < 10 && Math.abs(y-gameState.player.y) < 10)); // Spawn further away
+        } while (gameState.world[y][x] !== TILES.GRASS || (Math.abs(x-gameState.player.x) < 10 && Math.abs(y-gameState.player.y) < 10)); 
         gameState.animals.push({
             x, 
             y, 
             type: 'wolf',
             state: 'wander',
             wanderTarget: { x: null, y: null },
+            direction: 'down',
+            isMoving: false,
+            walkCycle: 0,
+            hp: 10,
+            maxHp: 10,
+            lastHitTimer: 0,
         });
     }
 }
@@ -465,29 +654,36 @@ function updateAnimals() {
     const playerSafe = isNearCampfire(player.x, player.y);
 
     gameState.animals.forEach(animal => {
+        const oldX = animal.x;
+        const oldY = animal.y;
+        
+        if (animal.lastHitTimer > 0) animal.lastHitTimer--;
+        
         const distToPlayer = Math.sqrt(Math.pow(player.x - animal.x, 2) + Math.pow(player.y - animal.y, 2));
         const nearFire = isNearCampfire(animal.x, animal.y);
 
         // State logic
         if (nearFire) {
             animal.state = 'flee';
-        } else if (distToPlayer <= 4) {
+        } else if (distToPlayer <= 4 || animal.hp < animal.maxHp) {
             animal.state = 'hunt';
-        } else if (distToPlayer > 5) { // Hysteresis to prevent state flapping
+        } else if (distToPlayer > 5) { 
             animal.state = 'wander';
         }
         
         // Movement Logic
+        let moveX = 0;
+        let moveY = 0;
         switch (animal.state) {
             case 'hunt':
-                if (animal.x < player.x) animal.x++; else if (animal.x > player.x) animal.x--;
-                if (animal.y < player.y) animal.y++; else if (animal.y > player.y) animal.y--;
+                if (animal.x < player.x) moveX = 1; else if (animal.x > player.x) moveX = -1;
+                if (animal.y < player.y) moveY = 1; else if (animal.y > player.y) moveY = -1;
                 break;
             case 'flee':
                 const fire = Object.values(gameState.placedObjects).find(o => o.type === TILES.CAMPFIRE);
                 if (fire) {
-                     if (animal.x < fire.x) animal.x--; if (animal.x > fire.x) animal.x++;
-                     if (animal.y < fire.y) animal.y--; if (animal.y > fire.y) animal.y++;
+                     if (animal.x < fire.x) moveX = -1; if (animal.x > fire.x) moveX = 1;
+                     if (animal.y < fire.y) moveY = -1; if (animal.y > fire.y) moveY = 1;
                 }
                 break;
             case 'wander':
@@ -495,16 +691,39 @@ function updateAnimals() {
                     animal.wanderTarget.x = animal.x + Math.floor(Math.random() * 11) - 5;
                     animal.wanderTarget.y = animal.y + Math.floor(Math.random() * 11) - 5;
                 } else {
-                    if (animal.x < animal.wanderTarget.x) animal.x++; else if (animal.x > animal.wanderTarget.x) animal.x--;
-                    if (animal.y < animal.wanderTarget.y) animal.y++; else if (animal.y > animal.wanderTarget.y) animal.y--;
+                    if (animal.x < animal.wanderTarget.x) moveX = 1; else if (animal.x > animal.wanderTarget.x) moveX = -1;
+                    if (animal.y < animal.wanderTarget.y) moveY = 1; else if (animal.y > animal.wanderTarget.y) moveY = -1;
                 }
                 break;
+        }
+
+        const newAnimalX = animal.x + moveX;
+        const newAnimalY = animal.y + moveY;
+        const targetTile = gameState.world[newAnimalY] ? gameState.world[newAnimalY][newAnimalX] : TILES.MOUNTAIN;
+
+        if (targetTile !== undefined && targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN) {
+            animal.x = newAnimalX;
+            animal.y = newAnimalY;
         }
 
         animal.x = Math.max(0, Math.min(MAP_SIZE - 1, animal.x));
         animal.y = Math.max(0, Math.min(MAP_SIZE - 1, animal.y));
         
-        // Attack logic
+        const dx = animal.x - oldX;
+        const dy = animal.y - oldY;
+
+        if (dx === 0 && dy === 0) {
+            animal.isMoving = false;
+        } else {
+            animal.isMoving = true;
+            animal.walkCycle = (animal.walkCycle + 0.2) % (Math.PI * 2);
+            if (Math.abs(dx) > Math.abs(dy)) {
+                animal.direction = dx > 0 ? 'right' : 'left';
+            } else {
+                animal.direction = dy > 0 ? 'down' : 'up';
+            }
+        }
+
         if (animal.state === 'hunt' && animal.x === player.x && animal.y === player.y) {
             if (!playerSafe) {
                 gameState.player.health = Math.max(0, gameState.player.health - 1);
@@ -521,17 +740,15 @@ function sleep() {
     gameState.time.hour = 7;
     gameState.time.minute = 0;
     gameState.time.day++;
-    const energyRestored = Math.min(100, gameState.player.energy + hoursToSleep * 8);
-    const healthRestored = Math.min(100, gameState.player.health + hoursToSleep * 2);
-    gameState.player.energy = energyRestored;
-    gameState.player.health = healthRestored;
+    gameState.player.energy = Math.min(100, gameState.player.energy + hoursToSleep * 8);
+    gameState.player.health = Math.min(100, gameState.player.health + hoursToSleep * 2);
     gameState.player.hunger = Math.max(0, gameState.player.hunger - hoursToSleep * 1.5);
     logMessage(`You restored health and energy.`);
     regrowResources();
 }
 
 let timeTickCounter = 0;
-const timeSpeed = 3; // A game minute now passes every 3 logic ticks (i.e., 300ms)
+const timeSpeed = 3; 
 
 function manageSpawning() {
     gameState.time.animalSpawnTimer--;
@@ -539,10 +756,10 @@ function manageSpawning() {
         if (gameState.isNight) {
             logMessage("You hear a howl in the distance...", "#c7c7c7");
             spawnAnimals(3);
-            gameState.time.animalSpawnTimer = 100 + Math.random() * 100; // Faster spawns at night
+            gameState.time.animalSpawnTimer = 100 + Math.random() * 100;
         } else {
             spawnAnimals(1);
-            gameState.time.animalSpawnTimer = 300 + Math.random() * 200; // Slower spawns during day
+            gameState.time.animalSpawnTimer = 300 + Math.random() * 200;
         }
     }
 }
@@ -551,9 +768,9 @@ function manageSpawning() {
 function updateTime() {
     timeTickCounter++;
     if (timeTickCounter < timeSpeed) {
-        return; // Don't advance time this tick
+        return;
     }
-    timeTickCounter = 0; // Reset counter
+    timeTickCounter = 0;
 
     gameState.time.minute += 1;
     if (gameState.time.minute >= 60) {
@@ -566,14 +783,32 @@ function updateTime() {
         regrowResources();
     }
     
+    const wasNight = gameState.isNight;
     gameState.isNight = gameState.time.hour >= 20 || gameState.time.hour < 6;
 
-    if (gameState.time.hour === 20 && gameState.time.minute === 0) {
+    if (gameState.isNight && !wasNight) {
         logMessage("Night is falling. The wilderness grows restless...", '#e06c75');
-        spawnAnimals(4); // Initial night spawn burst
+        spawnAnimals(4);
+        // Spawn Moonpetals
+        for(let i = 0; i < 5; i++) {
+            let x, y;
+            do {
+                x = Math.floor(Math.random() * MAP_SIZE);
+                y = Math.floor(Math.random() * MAP_SIZE);
+            } while (gameState.world[y][x] !== TILES.GRASS);
+            gameState.world[y][x] = TILES.MOONPETAL_FLOWER;
+        }
     }
-    if (gameState.time.hour === 6 && gameState.time.minute === 0) {
+    if (!gameState.isNight && wasNight) {
         logMessage("The sun is rising.", '#61afef');
+        // Despawn moonpetals
+         for (let y = 0; y < MAP_SIZE; y++) {
+            for (let x = 0; x < MAP_SIZE; x++) {
+                if (gameState.world[y][x] === TILES.MOONPETAL_FLOWER) {
+                    gameState.world[y][x] = TILES.GRASS;
+                }
+            }
+        }
     }
 }
 
@@ -648,7 +883,8 @@ function drawPlayerSprite(x, y, frame) {
         backpackBrown: '#654321', darkBackpackBrown: '#50341a',
         skin: '#fbd7a3', darkSkin: '#e4a768',
         black: '#212121', white: '#ffffff',
-        toolHandle: '#966F33', toolHead: '#a9a9a9'
+        toolHandle: '#966F33', toolHead: '#a9a9a9',
+        swordHilt: '#4a2b13', swordBlade: '#dadada',
     };
 
     ctx.save();
@@ -797,6 +1033,14 @@ function drawPlayerSprite(x, y, frame) {
             // Pickaxe Head
             [0,3,colors.toolHead],[1,3,colors.toolHead],[2,3,colors.toolHead],[3,3,colors.toolHead],[2,4,colors.toolHead],
         ],
+         'using_sword_down': [
+            ...spriteData.standing_down,
+            [0,7,colors.black],[1,7,colors.skin],[2,7,colors.skin],[3,7,colors.black],
+            [0,8,colors.black],[1,8,colors.skin],[2,8,colors.black],
+            [1,9,colors.black],[2,9,colors.black],
+            [4,5,colors.swordHilt],[5,6,colors.swordHilt],[6,7,colors.swordHilt],
+            [5,4,colors.swordBlade],[6,3,colors.swordBlade],[7,2,colors.swordBlade],
+        ],
         'using_axe_up': [
              ...spriteData.standing_up,
              [1,5,colors.toolHandle],[2,5,colors.toolHandle],[3,5,colors.toolHandle],
@@ -807,6 +1051,11 @@ function drawPlayerSprite(x, y, frame) {
              ...spriteData.standing_up,
              [1,5,colors.toolHandle],[2,5,colors.toolHandle],[3,5,colors.toolHandle],
              [-2,3,colors.toolHead],[-1,3,colors.toolHead],[0,3,colors.toolHead],[1,3,colors.toolHead],[0,4,colors.toolHead],
+        ],
+         'using_sword_up': [
+             ...spriteData.standing_up,
+             [2,5,colors.swordHilt],[3,5,colors.swordHilt],[4,5,colors.swordHilt],
+             [3,4,colors.swordBlade],[3,3,colors.swordBlade],[3,2,colors.swordBlade],
         ],
         'using_axe_left': [
             ...spriteData.standing_left,
@@ -820,6 +1069,12 @@ function drawPlayerSprite(x, y, frame) {
             [10,6,colors.black],[11,6,colors.skin],[12,6,colors.black],
             [11,7,colors.skin],[10,8,colors.toolHandle],[11,8,colors.skin],[12,8,colors.black],
             [9,7,colors.toolHandle],[7,5,colors.toolHead],[8,5,colors.toolHead],[9,5,colors.toolHead],[10,5,colors.toolHead],[9,6,colors.toolHead],
+        ],
+         'using_sword_left': [
+            ...spriteData.standing_left,
+            [10,6,colors.black],[11,6,colors.skin],[12,6,colors.black],
+            [11,7,colors.skin],[10,8,colors.swordHilt],[11,8,colors.skin],[12,8,colors.black],
+            [9,7,colors.swordHilt],[8,6,colors.swordBlade],[7,5,colors.swordBlade],[6,4,colors.swordBlade],
         ],
     };
     
@@ -840,8 +1095,10 @@ function drawPlayerSprite(x, y, frame) {
         let sourceFrame;
         if (leftFrameName in toolFrames) {
             sourceFrame = toolFrames[leftFrameName];
-        } else {
+        } else if (leftFrameName in spriteData) {
             sourceFrame = spriteData[leftFrameName];
+        } else {
+            sourceFrame = spriteData['standing_left'];
         }
         pixels = sourceFrame.map(([px, py, color]) => [SPRITE_WIDTH - 1 - px, py, color]);
     } else {
@@ -853,8 +1110,131 @@ function drawPlayerSprite(x, y, frame) {
     ctx.restore();
 }
 
+function drawAnimalSprite(x, y, frame) {
+    const PIXEL_SIZE = 4;
+    const SPRITE_WIDTH = 16;
+    const SPRITE_HEIGHT = 16;
+    const SPRITE_OFFSET_X = TILE_SIZE / 2 - (SPRITE_WIDTH * PIXEL_SIZE) / 2;
+    const SPRITE_OFFSET_Y = 10;
+
+    const colors = {
+        grey: '#a1a1a1',
+        darkGrey: '#6b6b6b',
+        black: '#212121',
+        white: '#ffffff',
+        nose: '#303030'
+    };
+
+    ctx.save();
+    ctx.translate(x + SPRITE_OFFSET_X, y + SPRITE_OFFSET_Y);
+
+    const p = (px, py, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * PIXEL_SIZE, py * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    };
+
+    const spriteData = {
+        'standing_down': [
+            [6, 3, colors.grey], [7, 3, colors.grey], [8, 3, colors.grey], [9, 3, colors.grey],
+            [5, 4, colors.grey], [6, 4, colors.darkGrey], [7, 4, colors.darkGrey], [8, 4, colors.darkGrey], [9, 4, colors.darkGrey], [10, 4, colors.grey],
+            [5, 5, colors.grey], [6, 5, colors.black], [7, 5, colors.nose], [8, 5, colors.nose], [9, 5, colors.black], [10, 5, colors.grey],
+            [4, 6, colors.grey], [5, 6, colors.grey], [6, 6, colors.darkGrey], [7, 6, colors.darkGrey], [8, 6, colors.darkGrey], [9, 6, colors.darkGrey], [10, 6, colors.grey], [11, 6, colors.grey],
+            [3, 7, colors.grey], [4, 7, colors.darkGrey], [5, 7, colors.darkGrey], [6, 7, colors.darkGrey], [7, 7, colors.darkGrey], [8, 7, colors.darkGrey], [9, 7, colors.darkGrey], [10, 7, colors.darkGrey], [11, 7, colors.grey], [12, 7, colors.grey],
+            [3, 8, colors.grey], [4, 8, colors.darkGrey], [5, 8, colors.darkGrey], [6, 8, colors.grey], [7, 8, colors.grey], [8, 8, colors.grey], [9, 8, colors.grey], [10, 8, colors.darkGrey], [11, 8, colors.darkGrey], [12, 8, colors.grey],
+            [4, 9, colors.grey], [5, 9, colors.grey], [9, 9, colors.grey], [10, 9, colors.grey],
+            [4, 10, colors.darkGrey], [5, 10, colors.darkGrey], [9, 10, colors.darkGrey], [10, 10, colors.darkGrey],
+            [7,9,colors.grey],[8,9,colors.grey],[7,10,colors.darkGrey]
+        ],
+        'walking_down_1': [
+            [6, 3, colors.grey], [7, 3, colors.grey], [8, 3, colors.grey], [9, 3, colors.grey],
+            [5, 4, colors.grey], [6, 4, colors.darkGrey], [7, 4, colors.darkGrey], [8, 4, colors.darkGrey], [9, 4, colors.darkGrey], [10, 4, colors.grey],
+            [5, 5, colors.grey], [6, 5, colors.black], [7, 5, colors.nose], [8, 5, colors.nose], [9, 5, colors.black], [10, 5, colors.grey],
+            [4, 6, colors.grey], [5, 6, colors.grey], [6, 6, colors.darkGrey], [7, 6, colors.darkGrey], [8, 6, colors.darkGrey], [9, 6, colors.darkGrey], [10, 6, colors.grey], [11, 6, colors.grey],
+            [3, 7, colors.grey], [4, 7, colors.darkGrey], [5, 7, colors.darkGrey], [6, 7, colors.darkGrey], [7, 7, colors.darkGrey], [8, 7, colors.darkGrey], [9, 7, colors.darkGrey], [10, 7, colors.darkGrey], [11, 7, colors.grey], [12, 7, colors.grey],
+            [3, 8, colors.grey], [4, 8, colors.darkGrey], [5, 8, colors.darkGrey], [6, 8, colors.grey], [7, 8, colors.grey], [8, 8, colors.grey], [9, 8, colors.grey], [10, 8, colors.darkGrey], [11, 8, colors.darkGrey], [12, 8, colors.grey],
+            [3, 9, colors.grey], [4, 9, colors.grey], [9, 9, colors.grey], [10, 9, colors.grey],
+            [3, 10, colors.darkGrey], [4, 10, colors.darkGrey], [9, 10, colors.darkGrey], [10, 10, colors.darkGrey],
+            [7,9,colors.grey],[8,9,colors.grey],[7,10,colors.darkGrey]
+        ],
+        'walking_down_2': [
+            [6, 3, colors.grey], [7, 3, colors.grey], [8, 3, colors.grey], [9, 3, colors.grey],
+            [5, 4, colors.grey], [6, 4, colors.darkGrey], [7, 4, colors.darkGrey], [8, 4, colors.darkGrey], [9, 4, colors.darkGrey], [10, 4, colors.grey],
+            [5, 5, colors.grey], [6, 5, colors.black], [7, 5, colors.nose], [8, 5, colors.nose], [9, 5, colors.black], [10, 5, colors.grey],
+            [4, 6, colors.grey], [5, 6, colors.grey], [6, 6, colors.darkGrey], [7, 6, colors.darkGrey], [8, 6, colors.darkGrey], [9, 6, colors.darkGrey], [10, 6, colors.grey], [11, 6, colors.grey],
+            [3, 7, colors.grey], [4, 7, colors.darkGrey], [5, 7, colors.darkGrey], [6, 7, colors.darkGrey], [7, 7, colors.darkGrey], [8, 7, colors.darkGrey], [9, 7, colors.darkGrey], [10, 7, colors.darkGrey], [11, 7, colors.grey], [12, 7, colors.grey],
+            [3, 8, colors.grey], [4, 8, colors.darkGrey], [5, 8, colors.darkGrey], [6, 8, colors.grey], [7, 8, colors.grey], [8, 8, colors.grey], [9, 8, colors.grey], [10, 8, colors.darkGrey], [11, 8, colors.darkGrey], [12, 8, colors.grey],
+            [4, 9, colors.grey], [5, 9, colors.grey], [10, 9, colors.grey], [11, 9, colors.grey],
+            [4, 10, colors.darkGrey], [5, 10, colors.darkGrey], [10, 10, colors.darkGrey], [11, 10, colors.darkGrey],
+            [7,9,colors.grey],[8,9,colors.grey],[7,10,colors.darkGrey]
+        ],
+         'standing_up': [
+            [6, 3, colors.grey], [7, 3, colors.grey], [8, 3, colors.grey], [9, 3, colors.grey],
+            [5, 4, colors.grey], [6, 4, colors.darkGrey], [7, 4, colors.darkGrey], [8, 4, colors.darkGrey], [9, 4, colors.darkGrey], [10, 4, colors.grey],
+            [4, 5, colors.grey], [5, 5, colors.grey], [6, 5, colors.darkGrey], [7, 5, colors.darkGrey], [8, 5, colors.darkGrey], [9, 5, colors.darkGrey], [10, 5, colors.grey], [11, 5, colors.grey],
+            [3, 6, colors.grey], [4, 6, colors.darkGrey], [5, 6, colors.darkGrey], [6, 6, colors.grey], [7, 6, colors.grey], [8, 6, colors.grey], [9, 6, colors.grey], [10, 6, colors.darkGrey], [11, 6, colors.darkGrey], [12, 6, colors.grey],
+            [3, 7, colors.grey], [4, 7, colors.darkGrey], [5, 7, colors.darkGrey], [6, 7, colors.darkGrey], [7, 7, colors.darkGrey], [8, 7, colors.darkGrey], [9, 7, colors.darkGrey], [10, 7, colors.darkGrey], [11, 7, colors.darkGrey], [12, 7, colors.grey],
+            [4, 8, colors.grey], [5, 8, colors.grey], [9, 8, colors.grey], [10, 8, colors.grey],
+            [4, 9, colors.darkGrey], [5, 9, colors.darkGrey], [9, 9, colors.darkGrey], [10, 9, colors.darkGrey],
+        ],
+        'walking_up_1': [
+            [6, 3, colors.grey], [7, 3, colors.grey], [8, 3, colors.grey], [9, 3, colors.grey],
+            [5, 4, colors.grey], [6, 4, colors.darkGrey], [7, 4, colors.darkGrey], [8, 4, colors.darkGrey], [9, 4, colors.darkGrey], [10, 4, colors.grey],
+            [4, 5, colors.grey], [5, 5, colors.grey], [6, 5, colors.darkGrey], [7, 5, colors.darkGrey], [8, 5, colors.darkGrey], [9, 5, colors.darkGrey], [10, 5, colors.grey], [11, 5, colors.grey],
+            [3, 6, colors.grey], [4, 6, colors.darkGrey], [5, 6, colors.darkGrey], [6, 6, colors.grey], [7, 6, colors.grey], [8, 6, colors.grey], [9, 6, colors.grey], [10, 6, colors.darkGrey], [11, 6, colors.darkGrey], [12, 6, colors.grey],
+            [3, 7, colors.grey], [4, 7, colors.darkGrey], [5, 7, colors.darkGrey], [6, 7, colors.darkGrey], [7, 7, colors.darkGrey], [8, 7, colors.darkGrey], [9, 7, colors.darkGrey], [10, 7, colors.darkGrey], [11, 7, colors.darkGrey], [12, 7, colors.grey],
+            [3, 8, colors.grey], [4, 8, colors.grey], [9, 8, colors.grey], [10, 8, colors.grey],
+            [3, 9, colors.darkGrey], [4, 9, colors.darkGrey], [9, 9, colors.darkGrey], [10, 9, colors.darkGrey],
+        ],
+        'walking_up_2': [
+            [6, 3, colors.grey], [7, 3, colors.grey], [8, 3, colors.grey], [9, 3, colors.grey],
+            [5, 4, colors.grey], [6, 4, colors.darkGrey], [7, 4, colors.darkGrey], [8, 4, colors.darkGrey], [9, 4, colors.darkGrey], [10, 4, colors.grey],
+            [4, 5, colors.grey], [5, 5, colors.grey], [6, 5, colors.darkGrey], [7, 5, colors.darkGrey], [8, 5, colors.darkGrey], [9, 5, colors.darkGrey], [10, 5, colors.grey], [11, 5, colors.grey],
+            [3, 6, colors.grey], [4, 6, colors.darkGrey], [5, 6, colors.darkGrey], [6, 6, colors.grey], [7, 6, colors.grey], [8, 6, colors.grey], [9, 6, colors.grey], [10, 6, colors.darkGrey], [11, 6, colors.darkGrey], [12, 6, colors.grey],
+            [3, 7, colors.grey], [4, 7, colors.darkGrey], [5, 7, colors.darkGrey], [6, 7, colors.darkGrey], [7, 7, colors.darkGrey], [8, 7, colors.darkGrey], [9, 7, colors.darkGrey], [10, 7, colors.darkGrey], [11, 7, colors.darkGrey], [12, 7, colors.grey],
+            [4, 8, colors.grey], [5, 8, colors.grey], [10, 8, colors.grey], [11, 8, colors.grey],
+            [4, 9, colors.darkGrey], [5, 9, colors.darkGrey], [10, 9, colors.darkGrey], [11, 9, colors.darkGrey],
+        ],
+         'standing_left': [
+            [3,4,colors.grey],[4,4,colors.grey],
+            [2,5,colors.grey],[3,5,colors.darkGrey],[4,5,colors.darkGrey],
+            [1,6,colors.nose],[2,6,colors.grey],[3,6,colors.black],
+            [4,6,colors.darkGrey],[5,6,colors.grey],[6,6,colors.grey],
+            [3,7,colors.darkGrey],[4,7,colors.grey],[5,7,colors.grey],[6,7,colors.grey],[7,7,colors.grey],
+            [3,8,colors.darkGrey],[4,8,colors.grey],[5,8,colors.grey],[6,8,colors.grey],[7,8,colors.grey],
+            [4,9,colors.grey],[6,9,colors.grey],[4,10,colors.darkGrey],[6,10,colors.darkGrey],
+            [8,7,colors.grey],[9,7,colors.grey],[8,8,colors.darkGrey]
+        ],
+        'walking_left_1': [
+            [3,4,colors.grey],[4,4,colors.grey],
+            [2,5,colors.grey],[3,5,colors.darkGrey],[4,5,colors.darkGrey],
+            [1,6,colors.nose],[2,6,colors.grey],[3,6,colors.black],
+            [4,6,colors.darkGrey],[5,6,colors.grey],[6,6,colors.grey],
+            [3,7,colors.darkGrey],[4,7,colors.grey],[5,7,colors.grey],[6,7,colors.grey],[7,7,colors.grey],
+            [3,8,colors.darkGrey],[4,8,colors.grey],[5,8,colors.grey],[6,8,colors.grey],[7,8,colors.grey],
+            [3,9,colors.grey],[6,9,colors.grey],[3,10,colors.darkGrey],[6,10,colors.darkGrey],
+            [8,7,colors.grey],[9,7,colors.grey],[8,8,colors.darkGrey]
+        ],
+    };
+    
+    let pixels;
+    if (frame in spriteData) {
+        pixels = spriteData[frame];
+    } else {
+        pixels = spriteData['standing_down'];
+    }
+
+    if (frame.includes('right')) {
+        const leftFrame = frame.replace('right', 'left');
+        pixels = spriteData[leftFrame].map(([px, py, color]) => [SPRITE_WIDTH - 1 - px, py, color]);
+    }
+
+    pixels.forEach(([px, py, color]) => p(px, py, color));
+
+    ctx.restore();
+}
+
 function draw() {
-    if (gameState.isGameOver) return;
+    if (gameState.isGameOver || gameState.paused) return;
     
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -932,7 +1312,6 @@ function draw() {
                            ctx.beginPath(); ctx.moveTo((x+0.7)*TILE_SIZE+shakeX, (y+0.3)*TILE_SIZE+shakeY); ctx.lineTo((x+0.8)*TILE_SIZE+shakeX, (y+0.7)*TILE_SIZE+shakeY); ctx.stroke();
                         }
                     }
-
                     break;
                 case TILES.BERRY_BUSH:
                      ctx.fillStyle = '#2d4828'; ctx.beginPath(); ctx.arc((x + 0.5) * TILE_SIZE, (y + 0.6) * TILE_SIZE, TILE_SIZE * 0.4, 0, Math.PI * 2); ctx.fill();
@@ -959,6 +1338,41 @@ function draw() {
                     break;
                 case TILES.MINED_ROCK: ctx.fillStyle = '#6a6a6a'; ctx.fillRect(x * TILE_SIZE+16, y * TILE_SIZE+32, 32, 16); break;
                 case TILES.EMPTY_BUSH: ctx.fillStyle = '#2d4828'; ctx.beginPath(); ctx.arc((x + 0.5) * TILE_SIZE, (y + 0.6) * TILE_SIZE, TILE_SIZE * 0.4, 0, Math.PI * 2); ctx.fill(); break;
+                 case TILES.MOONPETAL_FLOWER:
+                    ctx.fillStyle = '#6a4a9c'; ctx.fillRect(x * TILE_SIZE + 30, y * TILE_SIZE + 30, 4, 20); // Stem
+                    ctx.fillStyle = '#a188d9'; 
+                    ctx.beginPath(); ctx.arc(x*TILE_SIZE+32, y*TILE_SIZE+28, 12, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#d4c2fc';
+                    ctx.beginPath(); ctx.arc(x*TILE_SIZE+32, y*TILE_SIZE+28, 6, 0, Math.PI * 2); ctx.fill();
+                    break;
+                case TILES.MONOLITH:
+                case TILES.MONOLITH_ACTIVATED:
+                    ctx.fillStyle = tile === TILES.MONOLITH ? '#4a5568' : '#68604a';
+                    ctx.fillRect(x*TILE_SIZE + 12, y*TILE_SIZE+8, 40, 48);
+                    ctx.fillStyle = tile === TILES.MONOLITH ? '#2d3748' : '#4a442d';
+                    ctx.fillRect(x*TILE_SIZE + 18, y*TILE_SIZE+14, 28, 36);
+                    if (tile === TILES.MONOLITH_ACTIVATED) {
+                        ctx.fillStyle = '#f6e05e';
+                        ctx.beginPath(); ctx.arc(x * TILE_SIZE + 32, y * TILE_SIZE + 32, 8, 0, Math.PI * 2); ctx.fill();
+                    }
+                    break;
+                case TILES.MOUNTAIN:
+                    ctx.fillStyle = '#6b7280';
+                    ctx.beginPath();
+                    ctx.moveTo(x * TILE_SIZE, y * TILE_SIZE + TILE_SIZE);
+                    ctx.lineTo(x * TILE_SIZE + TILE_SIZE * 0.5, y * TILE_SIZE + TILE_SIZE * 0.2);
+                    ctx.lineTo(x * TILE_SIZE + TILE_SIZE, y * TILE_SIZE + TILE_SIZE);
+                    ctx.closePath();
+                    ctx.fill();
+                    
+                    ctx.fillStyle = '#4a5568';
+                    ctx.beginPath();
+                    ctx.moveTo(x * TILE_SIZE + TILE_SIZE * 0.2, y * TILE_SIZE + TILE_SIZE);
+                    ctx.lineTo(x * TILE_SIZE + TILE_SIZE * 0.7, y * TILE_SIZE + TILE_SIZE * 0.4);
+                    ctx.lineTo(x * TILE_SIZE + TILE_SIZE * 0.8, y * TILE_SIZE + TILE_SIZE);
+                    ctx.closePath();
+                    ctx.fill();
+                    break;
             }
         }
     }
@@ -992,15 +1406,18 @@ function draw() {
     let frame;
     if (toolSwing > 0) {
         const target = getTileInFront();
-        if (target.x >= 0 && target.x < MAP_SIZE && target.y >= 0 && target.y < MAP_SIZE) {
+        const animalInFront = gameState.animals.find(a => a.x === target.x && a.y === target.y);
+
+        if (animalInFront) {
+            frame = `using_sword_${direction}`;
+        } else if (target.x >= 0 && target.x < MAP_SIZE && target.y >= 0 && target.y < MAP_SIZE) {
             const targetTile = gameState.world[target.y][target.x];
             if (targetTile === TILES.ROCK && gameState.tools.pickaxe) {
                 frame = `using_pickaxe_${direction}`;
             } else if (targetTile === TILES.TREE) {
-                // Show axe swing even if using hands
                 frame = `using_axe_${direction}`;
             } else {
-                 frame = `standing_${direction}`; // Default if interacting with something else (e.g., bush)
+                 frame = `standing_${direction}`;
             }
         } else {
             frame = `standing_${direction}`;
@@ -1019,16 +1436,31 @@ function draw() {
     drawPlayerSprite(px, py, frame);
 
     gameState.animals.forEach(animal => {
-        const ax = animal.x * TILE_SIZE;
-        const ay = animal.y * TILE_SIZE;
-        // Body
-        ctx.fillStyle = '#7a7a7a';
-        ctx.fillRect(ax + 16, ay + 24, 32, 16);
-        // Head
-        ctx.fillStyle = '#8d8d8d';
-        ctx.fillRect(ax + 40, ay + 20, 12, 12);
-        // Tail
-        ctx.fillRect(ax + 8, ay + 28, 8, 4);
+        const { x, y, direction, isMoving, walkCycle } = animal;
+        const ax = x * TILE_SIZE;
+        const ay = y * TILE_SIZE;
+
+        let frame;
+        if (isMoving) {
+            const frameNum = Math.floor(walkCycle / Math.PI) + 1;
+            if ((direction === 'left' || direction === 'right')) {
+                frame = `walking_${direction}_1`;
+            } else {
+                frame = `walking_${direction}_${frameNum}`;
+            }
+        } else {
+            frame = `standing_${direction}`;
+        }
+        
+        drawAnimalSprite(ax, ay, frame);
+        
+        if(animal.lastHitTimer > 0) {
+            const healthPercentage = animal.hp / animal.maxHp;
+            ctx.fillStyle = '#4a4a4a';
+            ctx.fillRect(ax + 8, ay, 48, 6);
+            ctx.fillStyle = '#e06c75';
+            ctx.fillRect(ax + 8, ay, 48 * healthPercentage, 6);
+        }
     });
 
     if (gameState.isNight) {
@@ -1053,49 +1485,93 @@ function updateUI() {
     woodCountUI.textContent = gameState.inventory.wood;
     stoneCountUI.textContent = gameState.inventory.stone;
     berryCountUI.textContent = gameState.inventory.berries;
-    meatCountUI.textContent = gameState.inventory.meat;
+    rawMeatCountUI.textContent = gameState.inventory.rawMeat;
+    cookedMeatCountUI.textContent = gameState.inventory.cookedMeat;
+    gemCountUI.textContent = gameState.inventory.gems;
+    petalCountUI.textContent = gameState.inventory.petals;
+    carvedStoneCountUI.textContent = gameState.inventory.carvedStone;
     let tools = [];
     if (gameState.tools.axe) tools.push('Axe');
     if (gameState.tools.pickaxe) tools.push('Pickaxe');
+    if (gameState.tools.sword) tools.push('Sword');
     toolStatusUI.textContent = tools.length > 0 ? tools.join(', ') : 'None';
+    
     document.getElementById('craftAxe').disabled = gameState.inventory.wood < 15 || gameState.tools.axe;
     document.getElementById('craftPickaxe').disabled = gameState.inventory.wood < 20 || gameState.tools.pickaxe;
+    document.getElementById('craftSword').disabled = gameState.inventory.wood < 25 || gameState.tools.sword;
+    document.getElementById('craftCarvedStone').disabled = gameState.inventory.stone < 50;
     document.getElementById('craftCampfire').disabled = gameState.inventory.wood < 15 || gameState.inventory.stone < 5;
     document.getElementById('craftTent').disabled = gameState.inventory.wood < 20 || gameState.inventory.stone < 10;
+    
     document.getElementById('eatBerry').disabled = gameState.inventory.berries <= 0;
+    document.getElementById('eatCookedMeat').disabled = gameState.inventory.cookedMeat <= 0;
+
+    const playerIsNearFire = isNearCampfire(gameState.player.x, gameState.player.y);
+    document.getElementById('cookMeat').disabled = gameState.inventory.rawMeat <= 0 || !playerIsNearFire;
 }
 
 
 // --- Game Loop ---
 let lastTime = 0;
-const gameTick = 100; // ms per game logic update
+const gameTick = 100;
 
 function gameLoop(timestamp) {
     if (gameState.isGameOver) return;
     
-    handleInput(); // Handle continuous input
+    if (!gameState.paused) {
+        if (gameState.player.moveCooldown > 0) {
+            gameState.player.moveCooldown--;
+        }
+        handleInput();
 
-    if (timestamp - lastTime > gameTick) {
-        lastTime = timestamp;
-        manageSpawning();
-        updateTime();
-        updateStats();
-        updateAnimals();
+        if (timestamp - lastTime > gameTick) {
+            lastTime = timestamp;
+            manageSpawning();
+            updateTime();
+            updateStats();
+            updateAnimals();
+        }
+        
+        updateAnimations();
+        updateCamera();
+        updateUI();
     }
     
-    updateAnimations();
-    updateCamera();
     draw();
-    updateUI();
     requestAnimationFrame(gameLoop);
 }
 
 // --- Event Listeners and Init ---
 function setupEventListeners() {
+    const tabCraft = document.getElementById('tabCraft');
+    const tabBasic = document.getElementById('tabBasic');
+    const craftingContent = document.getElementById('craftingContent');
+    const basicActionsContent = document.getElementById('basicActionsContent');
+
+    tabCraft.addEventListener('click', () => {
+        tabCraft.classList.add('active');
+        tabBasic.classList.remove('active');
+        craftingContent.classList.remove('hidden-tab');
+        basicActionsContent.classList.add('hidden-tab');
+    });
+
+    tabBasic.addEventListener('click', () => {
+        tabBasic.classList.add('active');
+        tabCraft.classList.remove('active');
+        basicActionsContent.classList.remove('hidden-tab');
+        craftingContent.classList.add('hidden-tab');
+    });
+    
+    startButton.addEventListener('click', () => {
+        introScreen.classList.add('hidden');
+        gameState.paused = false;
+        logMessage("The humming of the monoliths calls to you...", "#a188d9");
+    });
+    
     window.addEventListener('keydown', (e) => {
         keysPressed[e.key] = true;
         if(e.key === ' '){
-             e.preventDefault(); // Prevent spacebar from scrolling page
+             e.preventDefault(); 
              interact();
         }
     });
@@ -1117,6 +1593,22 @@ function setupEventListeners() {
             gameState.inventory.wood -= 20;
             gameState.tools.pickaxe = true;
             logMessage('You crafted a crude wooden pickaxe!', '#98c379');
+        }
+    });
+
+    document.getElementById('craftSword').addEventListener('click', () => {
+        if (gameState.inventory.wood >= 25 && !gameState.tools.sword) {
+            gameState.inventory.wood -= 25;
+            gameState.tools.sword = true;
+            logMessage('You crafted a wooden sword!', '#98c379');
+        }
+    });
+
+     document.getElementById('craftCarvedStone').addEventListener('click', () => {
+        if (gameState.inventory.stone >= 50) {
+            gameState.inventory.stone -= 50;
+            gameState.inventory.carvedStone++;
+            logMessage('You carefully carved a stone effigy.', '#c7c7c7');
         }
     });
 
@@ -1162,8 +1654,25 @@ function setupEventListeners() {
         if (gameState.inventory.berries > 0) {
             gameState.inventory.berries--;
             gameState.player.hunger = Math.min(100, gameState.player.hunger + 10);
-            logMessage("You ate a berry.", "#c56183");
+            logMessage("You ate a berry. (+10 Hunger)", "#c56183");
         }
+    });
+    
+    document.getElementById('eatCookedMeat').addEventListener('click', () => {
+        if (gameState.inventory.cookedMeat > 0) {
+            gameState.inventory.cookedMeat--;
+            gameState.player.hunger = Math.min(100, gameState.player.hunger + 40);
+            gameState.player.health = Math.min(100, gameState.player.health + 10);
+            logMessage("You ate cooked meat. (+40 Hunger, +10 Health)", "#e5c07b");
+        }
+    });
+
+    document.getElementById('cookMeat').addEventListener('click', () => {
+         if (gameState.inventory.rawMeat > 0 && isNearCampfire(gameState.player.x, gameState.player.y)) {
+             gameState.inventory.rawMeat--;
+             gameState.inventory.cookedMeat++;
+             logMessage("You cooked some meat over the fire.", "#e5c07b");
+         }
     });
     
     window.addEventListener('resize', resizeCanvas);
