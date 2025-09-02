@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wilderness Survival</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #2c2c2c;
+            color: #e0e0e0;
+            overflow: hidden; /* Prevent scrolling */
+        }
+        canvas {
+            background-color: #3a5941;
+            cursor: crosshair;
+            image-rendering: pixelated; /* Sharp pixels for pixel art */
+        }
+        .ui-panel {
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 2px solid #5a5a5a;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .stat-bar-bg {
+            background-color: #4a4a4a;
+            border-radius: 9999px;
+            overflow: hidden;
+            border: 1px solid #6a6a6a;
+        }
+        .stat-bar {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.3s ease-in-out;
+        }
+        .craft-button {
+            border: 2px solid #5a5a5a;
+            background-color: #3c3c3c;
+            transition: all 0.2s;
+        }
+        .craft-button:hover:not(:disabled) {
+            background-color: #4c4c4c;
+            border-color: #7a7a7a;
+        }
+        .craft-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .message-log {
+            height: 80px;
+            overflow-y: auto;
+            font-size: 10px;
+            line-height: 1.4;
+        }
+        .game-over-screen {
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(5px);
+        }
+    </style>
+</head>
+<body class="flex flex-col md:flex-row items-center justify-center min-h-screen p-2 md:p-4">
+
+    <!-- Game Canvas -->
+    <div class="w-full max-w-[80vh] md:max-w-[calc(100vh-4rem)] aspect-square border-4 border-gray-800 rounded-lg shadow-2xl">
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <!-- UI Panel -->
+    <div class="w-full md:w-64 lg:w-80 md:ml-4 mt-4 md:mt-0 ui-panel flex-shrink-0">
+        <h1 class="text-xl text-yellow-400 text-center mb-4">Survival</h1>
+
+        <!-- Stats -->
+        <div class="space-y-3 mb-4">
+            <div>
+                <span class="text-sm">❤️ HEALTH</span>
+                <div class="stat-bar-bg h-4"><div id="healthBar" class="stat-bar bg-red-500" style="width: 100%;"></div></div>
+            </div>
+            <div>
+                <span class="text-sm">🍖 HUNGER</span>
+                <div class="stat-bar-bg h-4"><div id="hungerBar" class="stat-bar bg-yellow-500" style="width: 100%;"></div></div>
+            </div>
+            <div>
+                <span class="text-sm">⚡ ENERGY</span>
+                <div class="stat-bar-bg h-4"><div id="energyBar" class="stat-bar bg-blue-500" style="width: 100%;"></div></div>
+            </div>
+        </div>
+
+        <!-- Time -->
+        <div class="text-center mb-4 p-2 bg-gray-900 rounded-md">
+            <div id="timeDisplay" class="text-lg text-cyan-300">Day 1 - 07:00</div>
+            <div id="seasonDisplay" class="text-xs text-green-400">Spring</div>
+        </div>
+
+        <!-- Inventory -->
+        <div class="mb-4">
+            <h2 class="text-lg text-yellow-400 mb-2 text-center">INVENTORY</h2>
+            <div class="grid grid-cols-2 gap-2 text-center text-sm">
+                <div class="bg-gray-900 p-2 rounded">🌲 WOOD: <span id="woodCount">0</span></div>
+                <div class="bg-gray-900 p-2 rounded">⛏️ STONE: <span id="stoneCount">0</span></div>
+                <div class="bg-gray-900 p-2 rounded">🍓 BERRY: <span id="berryCount">0</span></div>
+                <div class="bg-gray-900 p-2 rounded">🥩 MEAT: <span id="meatCount">0</span></div>
+            </div>
+        </div>
+
+        <!-- Crafting -->
+        <div class="mb-4">
+            <h2 class="text-lg text-yellow-400 mb-2 text-center">CRAFTING</h2>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <button id="craftAxe" class="craft-button p-2 rounded">Wood Axe (15W)</button>
+                <button id="craftPickaxe" class="craft-button p-2 rounded">Wood Pick (20W)</button>
+                <button id="craftCampfire" class="craft-button p-2 rounded">Fire (15W, 5S)</button>
+                <button id="craftTent" class="craft-button p-2 rounded">Tent (20W, 10S)</button>
+            </div>
+            <div class="text-center text-xs mt-2">Tools: <span id="toolStatus">None</span></div>
+        </div>
+        
+        <!-- Eat Action -->
+         <div class="mb-4">
+             <button id="eatBerry" class="w-full craft-button p-2 rounded text-xs">Eat Berry (+10 Hunger)</button>
+        </div>
+
+
+        <!-- Message Log -->
+        <div>
+            <h2 class="text-lg text-yellow-400 mb-2 text-center">LOG</h2>
+            <div id="messageLog" class="message-log bg-gray-900 p-2 rounded">Welcome! Use WASD or Arrow Keys to move. Press Spacebar to interact.</div>
+        </div>
+    </div>
+    
+    <!-- Game Over Screen -->
+    <div id="gameOverScreen" class="hidden absolute inset-0 flex-col items-center justify-center game-over-screen">
+        <h1 class="text-6xl text-red-600 mb-4">GAME OVER</h1>
+        <p id="gameOverReason" class="text-xl text-white mb-8">You have perished.</p>
+        <button onclick="window.location.reload()" class="craft-button text-2xl py-4 px-8 rounded">Retry</button>
+    </div>
+
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+// UI Elements
+const healthBar = document.getElementById('healthBar');
+const hungerBar = document.getElementById('hungerBar');
+const energyBar = document.getElementById('energyBar');
+const timeDisplay = document.getElementById('timeDisplay');
+const woodCountUI = document.getElementById('woodCount');
+const stoneCountUI = document.getElementById('stoneCount');
+const berryCountUI = document.getElementById('berryCount');
+const meatCountUI = document.getElementById('meatCount');
+const toolStatusUI = document.getElementById('toolStatus');
+const messageLog = document.getElementById('messageLog');
+const gameOverScreen = document.getElementById('gameOverScreen');
+const gameOverReason = document.getElementById('gameOverReason');
+
+// --- Game Configuration ---
+const TILE_SIZE = 64; // Increased tile size for zoom effect
+const MAP_SIZE = 35; // Increased map size for more exploration
+const VIEWPORT_TILE_COUNT = 11; // How many tiles are visible on screen
+
+canvas.width = VIEWPORT_TILE_COUNT * TILE_SIZE;
+canvas.height = VIEWPORT_TILE_COUNT * TILE_SIZE;
+
+const TILES = {
+    GRASS: 0,
+    TREE: 1,
+    ROCK: 2,
+    BERRY_BUSH: 3,
+    WATER: 4,
+    CAMPFIRE: 5,
+    TENT: 6,
+    STUMP: 7,
+    MINED_ROCK: 8,
+    EMPTY_BUSH: 9,
+};
+
+const TILE_COLORS = {
+    [TILES.GRASS]: '#5a8b41',
+    [TILES.WATER]: '#4a90e2',
+    [TILES.TREE]: '#3a5941',
+    [TILES.ROCK]: '#8d8d8d',
+    [TILES.BERRY_BUSH]: '#c56183',
+    [TILES.CAMPFIRE]: '#ff8c00',
+    [TILES.TENT]: '#a0522d',
+    [TILES.STUMP]: '#6b4f3a',
+    [TILES.MINED_ROCK]: '#6a6a6a',
+    [TILES.EMPTY_BUSH]: '#71845a',
+};
+
+
+// --- Game State ---
+let gameState = {
+    player: {
+        x: Math.floor(MAP_SIZE / 2),
+        y: Math.floor(MAP_SIZE / 2),
+        health: 100,
+        hunger: 100,
+        energy: 100,
+        direction: 'down',
+        isMoving: false,
+    },
+    camera: {
+        x: 0,
+        y: 0,
+    },
+    inventory: {
+        wood: 0,
+        stone: 0,
+        berries: 0,
+        meat: 0,
+    },
+    tools: {
+        axe: false,
+        pickaxe: false,
+    },
+    world: [],
+    animals: [],
+    time: {
+        day: 1,
+        hour: 7,
+        minute: 0,
+        animalSpawnTimer: 200,
+    },
+    playerAnimation: {
+        walkCycle: 0,
+        toolSwing: 0, // Timer for the tool swing animation
+    },
+    isNight: false,
+    isGameOver: false,
+    placedObjects: {}, // for campfires, tents etc.
+    worldObjects: {}, // for trees, rocks with health
+    activeAnimations: [],
+};
+
+// --- Game Logic ---
+
+function logMessage(message, color = '#e0e0e0') {
+    const p = document.createElement('p');
+    p.textContent = `> ${message}`;
+    p.style.color = color;
+    messageLog.appendChild(p);
+    messageLog.scrollTop = messageLog.scrollHeight;
+}
+
+function generateWorld() {
+    gameState.world = Array(MAP_SIZE).fill(null).map(() => Array(MAP_SIZE).fill(TILES.GRASS));
+    gameState.worldObjects = {}; // Reset on new world
+
+    for (let y = 0; y < MAP_SIZE; y++) {
+        for (let x = 0; x < MAP_SIZE; x++) {
+            const r = Math.random();
+            const key = `${x},${y}`;
+            if (r < 0.2) {
+                gameState.world[y][x] = TILES.TREE;
+                gameState.worldObjects[key] = { type: TILES.TREE, health: 10 };
+            } else if (r < 0.28) {
+                gameState.world[y][x] = TILES.ROCK;
+                gameState.worldObjects[key] = { type: TILES.ROCK, health: 15 };
+            } else if (r < 0.32) {
+                gameState.world[y][x] = TILES.BERRY_BUSH;
+            }
+        }
+    }
+    
+    const spawn_radius = 2;
+    for(let y = gameState.player.y - spawn_radius; y <= gameState.player.y + spawn_radius; y++){
+        for(let x = gameState.player.x - spawn_radius; x <= gameState.player.x + spawn_radius; x++){
+            if(x >= 0 && x < MAP_SIZE && y >= 0 && y < MAP_SIZE){
+                gameState.world[y][x] = TILES.GRASS;
+            }
+        }
+    }
+}
+
+function getTileInFront() {
+    let { x, y, direction } = gameState.player;
+    switch (direction) {
+        case 'up': y--; break;
+        case 'down': y++; break;
+        case 'left': x--; break;
+        case 'right': x++; break;
+    }
+    return { x, y };
+}
+
+function interact() {
+    const target = getTileInFront();
+    if (target.x < 0 || target.x >= MAP_SIZE || target.y < 0 || target.y >= MAP_SIZE) return;
+
+    const tile = gameState.world[target.y][target.x];
+    const targetKey = `${target.x},${target.y}`;
+    let interactionDidDamage = false;
+    
+    switch (tile) {
+        case TILES.TREE: {
+            let tree = gameState.worldObjects[targetKey];
+            if (!tree) { // Safety check for trees from older saves/versions
+                tree = { type: TILES.TREE, health: 10 };
+                gameState.worldObjects[targetKey] = tree;
+            }
+
+            const damage = gameState.tools.axe ? 5 : 1;
+            const energyCost = gameState.tools.axe ? (1.5 / 3) : (1 / 3);
+            
+            tree.health -= damage;
+            depleteEnergy(energyCost);
+            gameState.activeAnimations.push({ x: target.x, y: target.y, type: 'chop', progress: 0, maxProgress: 20 });
+            interactionDidDamage = true;
+
+
+            if (tree.health <= 0) {
+                const woodGained = 5;
+                gameState.inventory.wood += woodGained;
+                gameState.world[target.y][target.x] = TILES.STUMP;
+                delete gameState.worldObjects[targetKey];
+                logMessage(`You felled the tree and got ${woodGained} wood.`, '#98c379');
+            } else {
+                logMessage(`You chop at the tree. (${tree.health}/10)`, '#e5c07b');
+            }
+            break;
+        }
+        case TILES.ROCK: {
+            if (gameState.tools.pickaxe) {
+                let rock = gameState.worldObjects[targetKey];
+                if (!rock) { // Safety check
+                    rock = { type: TILES.ROCK, health: 15 };
+                    gameState.worldObjects[targetKey] = rock;
+                }
+
+                const damage = 5;
+                rock.health -= damage;
+                depleteEnergy(8 / 9);
+                gameState.activeAnimations.push({ x: target.x, y: target.y, type: 'mine', progress: 0, maxProgress: 20 });
+                interactionDidDamage = true;
+
+                
+                if (rock.health <= 0) {
+                    const stoneGained = 5;
+                    gameState.inventory.stone += stoneGained;
+                    gameState.world[target.y][target.x] = TILES.MINED_ROCK;
+                    delete gameState.worldObjects[targetKey];
+                    logMessage(`You broke the rock and got ${stoneGained} stone.`, '#98c379');
+                } else {
+                    logMessage(`You strike the rock. (${rock.health}/15)`, '#c7c7c7');
+                }
+            } else {
+                logMessage("You need a pickaxe to mine this.", '#e06c75');
+            }
+            break;
+        }
+        case TILES.BERRY_BUSH: {
+            const berriesGained = 3;
+            gameState.inventory.berries += berriesGained;
+            gameState.world[target.y][target.x] = TILES.EMPTY_BUSH;
+            logMessage(`You found ${berriesGained} berries.`, '#c56183');
+            break;
+        }
+        case TILES.TENT: {
+             if (gameState.isNight) {
+                logMessage("You sleep until morning.", '#61afef');
+                sleep();
+             } else {
+                logMessage("You can only sleep at night.", '#e06c75');
+             }
+             break;
+        }
+    }
+    
+    if (interactionDidDamage) {
+        gameState.playerAnimation.toolSwing = 15; // Animation lasts for 15 frames
+    }
+}
+
+let keysPressed = {};
+function handleInput() {
+    if (gameState.isGameOver) return;
+    const { player } = gameState;
+    let newX = player.x;
+    let newY = player.y;
+    
+    player.isMoving = false;
+
+    if (keysPressed['w'] || keysPressed['ArrowUp']) { player.direction = 'up'; newY--; player.isMoving = true; }
+    if (keysPressed['s'] || keysPressed['ArrowDown']) { player.direction = 'down'; newY++; player.isMoving = true; }
+    if (keysPressed['a'] || keysPressed['ArrowLeft']) { player.direction = 'left'; newX--; player.isMoving = true; }
+    if (keysPressed['d'] || keysPressed['ArrowRight']) { player.direction = 'right'; newX++; player.isMoving = true; }
+    
+    if (player.isMoving) {
+        if (newX >= 0 && newX < MAP_SIZE && newY >= 0 && newY < MAP_SIZE) {
+            const targetTile = gameState.world[newY][newX];
+            if (targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER) {
+                player.x = newX;
+                player.y = newY;
+                depleteEnergy(0.2 / 3);
+            }
+        }
+    }
+}
+
+
+function updateAnimations() {
+    gameState.activeAnimations = gameState.activeAnimations.filter(anim => {
+        anim.progress++;
+        return anim.progress < anim.maxProgress;
+    });
+
+    // Player animations
+    const { playerAnimation, player } = gameState;
+    if (player.isMoving) {
+        playerAnimation.walkCycle = (playerAnimation.walkCycle + 0.25) % (Math.PI * 2);
+    }
+    
+    if (playerAnimation.toolSwing > 0) {
+        playerAnimation.toolSwing--;
+    }
+}
+
+function gameOver(reason) {
+    if (gameState.isGameOver) return;
+    gameState.isGameOver = true;
+    gameOverReason.textContent = reason;
+    gameOverScreen.classList.remove('hidden');
+    gameOverScreen.classList.add('flex');
+}
+
+function spawnAnimals(count) {
+    const maxAnimals = 10;
+    const currentAnimalCount = gameState.animals.length;
+    if (currentAnimalCount >= maxAnimals) return;
+
+    const numToSpawn = Math.min(count, maxAnimals - currentAnimalCount);
+
+    for (let i = 0; i < numToSpawn; i++) {
+        let x, y;
+        do {
+            x = Math.floor(Math.random() * MAP_SIZE);
+            y = Math.floor(Math.random() * MAP_SIZE);
+        } while (gameState.world[y][x] !== TILES.GRASS || (Math.abs(x-gameState.player.x) < 10 && Math.abs(y-gameState.player.y) < 10)); // Spawn further away
+        gameState.animals.push({
+            x, 
+            y, 
+            type: 'wolf',
+            state: 'wander',
+            wanderTarget: { x: null, y: null },
+        });
+    }
+}
+
+function isNearCampfire(x, y) {
+    const radius = 4;
+    for (let key in gameState.placedObjects) {
+        const obj = gameState.placedObjects[key];
+        if (obj.type === TILES.CAMPFIRE) {
+            const dist = Math.sqrt(Math.pow(x - obj.x, 2) + Math.pow(y - obj.y, 2));
+            if (dist <= radius) return true;
+        }
+    }
+    return false;
+}
+
+function updateAnimals() {
+    const { player } = gameState;
+    const playerSafe = isNearCampfire(player.x, player.y);
+
+    gameState.animals.forEach(animal => {
+        const distToPlayer = Math.sqrt(Math.pow(player.x - animal.x, 2) + Math.pow(player.y - animal.y, 2));
+        const nearFire = isNearCampfire(animal.x, animal.y);
+
+        // State logic
+        if (nearFire) {
+            animal.state = 'flee';
+        } else if (distToPlayer <= 4) {
+            animal.state = 'hunt';
+        } else if (distToPlayer > 5) { // Hysteresis to prevent state flapping
+            animal.state = 'wander';
+        }
+        
+        // Movement Logic
+        switch (animal.state) {
+            case 'hunt':
+                if (animal.x < player.x) animal.x++; else if (animal.x > player.x) animal.x--;
+                if (animal.y < player.y) animal.y++; else if (animal.y > player.y) animal.y--;
+                break;
+            case 'flee':
+                const fire = Object.values(gameState.placedObjects).find(o => o.type === TILES.CAMPFIRE);
+                if (fire) {
+                     if (animal.x < fire.x) animal.x--; if (animal.x > fire.x) animal.x++;
+                     if (animal.y < fire.y) animal.y--; if (animal.y > fire.y) animal.y++;
+                }
+                break;
+            case 'wander':
+                if (animal.wanderTarget.x === null || (animal.x === animal.wanderTarget.x && animal.y === animal.wanderTarget.y)) {
+                    animal.wanderTarget.x = animal.x + Math.floor(Math.random() * 11) - 5;
+                    animal.wanderTarget.y = animal.y + Math.floor(Math.random() * 11) - 5;
+                } else {
+                    if (animal.x < animal.wanderTarget.x) animal.x++; else if (animal.x > animal.wanderTarget.x) animal.x--;
+                    if (animal.y < animal.wanderTarget.y) animal.y++; else if (animal.y > animal.wanderTarget.y) animal.y--;
+                }
+                break;
+        }
+
+        animal.x = Math.max(0, Math.min(MAP_SIZE - 1, animal.x));
+        animal.y = Math.max(0, Math.min(MAP_SIZE - 1, animal.y));
+        
+        // Attack logic
+        if (animal.state === 'hunt' && animal.x === player.x && animal.y === player.y) {
+            if (!playerSafe) {
+                gameState.player.health = Math.max(0, gameState.player.health - 1);
+                logMessage("A wolf attacks you!", '#e06c75');
+            } else {
+                logMessage("The campfire keeps the wolf at bay.", '#61afef');
+            }
+        }
+    });
+}
+
+function sleep() {
+    const hoursToSleep = (24 - gameState.time.hour) + 7;
+    gameState.time.hour = 7;
+    gameState.time.minute = 0;
+    gameState.time.day++;
+    const energyRestored = Math.min(100, gameState.player.energy + hoursToSleep * 8);
+    const healthRestored = Math.min(100, gameState.player.health + hoursToSleep * 2);
+    gameState.player.energy = energyRestored;
+    gameState.player.health = healthRestored;
+    gameState.player.hunger = Math.max(0, gameState.player.hunger - hoursToSleep * 1.5);
+    logMessage(`You restored health and energy.`);
+    regrowResources();
+}
+
+let timeTickCounter = 0;
+const timeSpeed = 3; // A game minute now passes every 3 logic ticks (i.e., 300ms)
+
+function manageSpawning() {
+    gameState.time.animalSpawnTimer--;
+    if (gameState.time.animalSpawnTimer <= 0) {
+        if (gameState.isNight) {
+            logMessage("You hear a howl in the distance...", "#c7c7c7");
+            spawnAnimals(3);
+            gameState.time.animalSpawnTimer = 100 + Math.random() * 100; // Faster spawns at night
+        } else {
+            spawnAnimals(1);
+            gameState.time.animalSpawnTimer = 300 + Math.random() * 200; // Slower spawns during day
+        }
+    }
+}
+
+
+function updateTime() {
+    timeTickCounter++;
+    if (timeTickCounter < timeSpeed) {
+        return; // Don't advance time this tick
+    }
+    timeTickCounter = 0; // Reset counter
+
+    gameState.time.minute += 1;
+    if (gameState.time.minute >= 60) {
+        gameState.time.minute = 0;
+        gameState.time.hour++;
+    }
+    if (gameState.time.hour >= 24) {
+        gameState.time.hour = 0;
+        gameState.time.day++;
+        regrowResources();
+    }
+    
+    gameState.isNight = gameState.time.hour >= 20 || gameState.time.hour < 6;
+
+    if (gameState.time.hour === 20 && gameState.time.minute === 0) {
+        logMessage("Night is falling. The wilderness grows restless...", '#e06c75');
+        spawnAnimals(4); // Initial night spawn burst
+    }
+    if (gameState.time.hour === 6 && gameState.time.minute === 0) {
+        logMessage("The sun is rising.", '#61afef');
+    }
+}
+
+function regrowResources(){
+    logMessage("The forest feels a little fuller.", "#98c379");
+    for (let y = 0; y < MAP_SIZE; y++) {
+        for (let x = 0; x < MAP_SIZE; x++) {
+            const tile = gameState.world[y][x];
+            const key = `${x},${y}`;
+            if([TILES.STUMP, TILES.MINED_ROCK, TILES.EMPTY_BUSH].includes(tile)){
+                if(Math.random() < 0.25){
+                    if(tile === TILES.STUMP) {
+                        gameState.world[y][x] = TILES.TREE;
+                        gameState.worldObjects[key] = { type: TILES.TREE, health: 10 };
+                    }
+                    if(tile === TILES.MINED_ROCK) {
+                        gameState.world[y][x] = TILES.ROCK;
+                        gameState.worldObjects[key] = { type: TILES.ROCK, health: 15 };
+                    }
+                    if(tile === TILES.EMPTY_BUSH) gameState.world[y][x] = TILES.BERRY_BUSH;
+                }
+            }
+        }
+    }
+}
+
+
+function depleteEnergy(amount) {
+    gameState.player.energy = Math.max(0, gameState.player.energy - amount);
+    if(gameState.player.energy === 0){
+        gameState.player.health = Math.max(0, gameState.player.health - amount * 2);
+    }
+}
+
+function updateStats() {
+    gameState.player.hunger = Math.max(0, gameState.player.hunger - 0.01);
+    if (gameState.player.hunger === 0) {
+        gameState.player.health = Math.max(0, gameState.player.health - 0.05);
+    }
+    if (gameState.player.health <= 0) gameOver("You ran out of health!");
+    if (gameState.player.hunger <= 0 && gameState.player.health <= 0) gameOver("You starved!");
+    if (gameState.player.energy <= 0 && gameState.player.health <= 0) gameOver("You collapsed from exhaustion!");
+}
+
+function updateCamera() {
+    const { camera, player } = gameState;
+    const targetX = player.x * TILE_SIZE - canvas.width / 2 + TILE_SIZE / 2;
+    const targetY = player.y * TILE_SIZE - canvas.height / 2 + TILE_SIZE / 2;
+    
+    camera.x += (targetX - camera.x) * 0.1;
+    camera.y += (targetY - camera.y) * 0.1;
+
+    const maxX = MAP_SIZE * TILE_SIZE - canvas.width;
+    const maxY = MAP_SIZE * TILE_SIZE - canvas.height;
+    camera.x = Math.max(0, Math.min(camera.x, maxX));
+    camera.y = Math.max(0, Math.min(camera.y, maxY));
+}
+
+// --- Drawing ---
+
+function drawPlayerSprite(x, y, frame) {
+    const PIXEL_SIZE = 4; 
+    const SPRITE_WIDTH = 16;
+    const SPRITE_HEIGHT = 16;
+    const SPRITE_OFFSET_X = TILE_SIZE / 2 - (SPRITE_WIDTH * PIXEL_SIZE) / 2;
+    const SPRITE_OFFSET_Y = 10;
+
+    const colors = {
+        hatGreen: '#556b2f', darkHatGreen: '#455a25',
+        vestBrown: '#8b4513', shirtGrey: '#4a4a4a',
+        pantsGrey: '#696969', darkPantsGrey: '#505050',
+        backpackBrown: '#654321', darkBackpackBrown: '#50341a',
+        skin: '#fbd7a3', darkSkin: '#e4a768',
+        black: '#212121', white: '#ffffff',
+        toolHandle: '#966F33', toolHead: '#a9a9a9'
+    };
+
+    ctx.save();
+    ctx.translate(x + SPRITE_OFFSET_X, y + SPRITE_OFFSET_Y);
+
+    const p = (px, py, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * PIXEL_SIZE, py * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    };
+    
+    const spriteData = {
+        'standing_down': [
+            // Hat
+            [5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+            [4,1,colors.hatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+            [3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+            [3,3,colors.black],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.skin],[8,3,colors.skin],[9,3,colors.skin],[10,3,colors.skin],[11,3,colors.skin],[12,3,colors.black],
+            [3,4,colors.black],[4,4,colors.skin],[5,4,colors.black],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.black],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+            [4,5,colors.darkSkin],[5,5,colors.skin],[6,5,colors.darkSkin],[7,5,colors.darkSkin],[8,5,colors.darkSkin],[9,5,colors.darkSkin],[10,5,colors.skin],[11,5,colors.darkSkin],
+            // Body
+            [3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],[9,6,colors.black],[10,6,colors.black],[11,6,colors.black],[12,6,colors.black],
+            [3,7,colors.black],[4,7,colors.skin],[5,7,colors.skin],[6,7,colors.vestBrown],[7,7,colors.vestBrown],[8,7,colors.vestBrown],[9,7,colors.vestBrown],[10,7,colors.skin],[11,7,colors.skin],[12,7,colors.black],
+            [2,8,colors.black],[3,8,colors.skin],[4,8,colors.skin],[5,8,colors.shirtGrey],[6,8,colors.shirtGrey],[7,8,colors.shirtGrey],[8,8,colors.shirtGrey],[9,8,colors.shirtGrey],[10,8,colors.skin],[11,8,colors.skin],[12,8,colors.skin],[13,8,colors.black],
+            [2,9,colors.black],[3,9,colors.black],[4,9,colors.black],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.black],[8,9,colors.black],[9,9,colors.pantsGrey],[10,9,colors.pantsGrey],[11,9,colors.black],[12,9,colors.black],[13,9,colors.black],
+            [4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[9,10,colors.pantsGrey],[10,10,colors.pantsGrey],[11,10,colors.pantsGrey],
+            [4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[9,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],
+        ],
+        'walking_down_1': [ // Right leg forward
+            [5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+            [4,1,colors.hatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+            [3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+            [3,3,colors.black],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.skin],[8,3,colors.skin],[9,3,colors.skin],[10,3,colors.skin],[11,3,colors.skin],[12,3,colors.black],
+            [3,4,colors.black],[4,4,colors.skin],[5,4,colors.black],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.black],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+            [4,5,colors.darkSkin],[5,5,colors.skin],[6,5,colors.darkSkin],[7,5,colors.darkSkin],[8,5,colors.darkSkin],[9,5,colors.darkSkin],[10,5,colors.skin],[11,5,colors.darkSkin],
+             [2,6,colors.black],[3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],[9,6,colors.black],[10,6,colors.black],[11,6,colors.black],[12,6,colors.black],
+            [2,7,colors.black],[3,7,colors.skin],[4,7,colors.vestBrown],[5,7,colors.vestBrown],[6,7,colors.vestBrown],[7,7,colors.vestBrown],[8,7,colors.skin],[9,7,colors.skin],[10,7,colors.black],
+            [2,8,colors.black],[3,8,colors.skin],[4,8,colors.shirtGrey],[5,8,colors.shirtGrey],[6,8,colors.shirtGrey],[7,8,colors.shirtGrey],[8,8,colors.skin],[9,8,colors.black],
+            [3,9,colors.black],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.black],[8,9,colors.pantsGrey],[9,9,colors.pantsGrey],[10,9,colors.black],
+            [4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[8,10,colors.pantsGrey],[9,10,colors.pantsGrey],[10,10,colors.pantsGrey],
+            [4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[8,11,colors.darkPantsGrey],[9,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey]
+        ],
+        'walking_down_2': [ // Left leg forward (mirrored of 1)
+            [5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+            [4,1,colors.hatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+            [3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+            [3,3,colors.black],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.skin],[8,3,colors.skin],[9,3,colors.skin],[10,3,colors.skin],[11,3,colors.skin],[12,3,colors.black],
+            [3,4,colors.black],[4,4,colors.skin],[5,4,colors.black],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.black],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+            [4,5,colors.darkSkin],[5,5,colors.skin],[6,5,colors.darkSkin],[7,5,colors.darkSkin],[8,5,colors.darkSkin],[9,5,colors.darkSkin],[10,5,colors.skin],[11,5,colors.darkSkin],
+             [3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],[9,6,colors.black],[10,6,colors.black],[11,6,colors.black],[12,6,colors.black],[13,6,colors.black],
+            [5,7,colors.black],[6,7,colors.skin],[7,7,colors.skin],[8,7,colors.vestBrown],[9,7,colors.vestBrown],[10,7,colors.vestBrown],[11,7,colors.vestBrown],[12,7,colors.skin],[13,7,colors.black],
+            [6,8,colors.black],[7,8,colors.skin],[8,8,colors.shirtGrey],[9,8,colors.shirtGrey],[10,8,colors.shirtGrey],[11,8,colors.shirtGrey],[12,8,colors.skin],[13,8,colors.black],
+            [5,9,colors.black],[6,9,colors.pantsGrey],[7,9,colors.pantsGrey],[9,9,colors.black],[10,9,colors.pantsGrey],[11,9,colors.pantsGrey],[12,9,colors.black],
+            [5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[7,10,colors.pantsGrey],[10,10,colors.pantsGrey],[11,10,colors.pantsGrey],
+            [5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],
+        ],
+        'standing_up': [
+             [5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+             [4,1,colors.hatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+             [3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+             [3,3,colors.black],[4,3,colors.black],[5,3,colors.black],[6,3,colors.black],[7,3,colors.black],[8,3,colors.black],[9,3,colors.black],[10,3,colors.black],[11,3,colors.black],[12,3,colors.black],
+             [3,4,colors.black],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+             [2,5,colors.black],[3,5,colors.black],[4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],[10,5,colors.black],[11,5,colors.black],[12,5,colors.black],[13,5,colors.black],
+             [2,6,colors.black],[3,6,colors.backpackBrown],[4,6,colors.backpackBrown],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],[9,6,colors.backpackBrown],[10,6,colors.backpackBrown],[11,6,colors.backpackBrown],[12,6,colors.backpackBrown],[13,6,colors.black],
+             [2,7,colors.black],[3,7,colors.backpackBrown],[4,7,colors.darkBackpackBrown],[5,7,colors.darkBackpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],[9,7,colors.darkBackpackBrown],[10,7,colors.darkBackpackBrown],[11,7,colors.darkBackpackBrown],[12,7,colors.darkBackpackBrown],[13,7,colors.black],
+             [2,8,colors.black],[3,8,colors.backpackBrown],[4,8,colors.darkBackpackBrown],[5,8,colors.backpackBrown],[6,8,colors.backpackBrown],[7,8,colors.backpackBrown],[8,8,colors.backpackBrown],[9,8,colors.backpackBrown],[10,8,colors.backpackBrown],[11,8,colors.backpackBrown],[12,8,colors.darkBackpackBrown],[13,8,colors.black],
+             [3,9,colors.black],[4,9,colors.black],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.black],[8,9,colors.black],[9,9,colors.pantsGrey],[10,9,colors.pantsGrey],[11,9,colors.black],[12,9,colors.black],
+             [4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[9,10,colors.pantsGrey],[10,10,colors.pantsGrey],[11,10,colors.pantsGrey],
+             [4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[9,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],
+        ],
+        'walking_up_1': [
+            [5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+             [4,1,colors.hatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+             [3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+             [3,3,colors.black],[4,3,colors.black],[5,3,colors.black],[6,3,colors.black],[7,3,colors.black],[8,3,colors.black],[9,3,colors.black],[10,3,colors.black],[11,3,colors.black],[12,3,colors.black],
+             [3,4,colors.black],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+             [2,5,colors.black],[3,5,colors.black],[4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],[10,5,colors.black],[11,5,colors.black],[12,5,colors.black],[13,5,colors.black],
+             [2,6,colors.black],[3,6,colors.backpackBrown],[4,6,colors.backpackBrown],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],[9,6,colors.backpackBrown],[10,6,colors.backpackBrown],[11,6,colors.backpackBrown],[12,6,colors.backpackBrown],[13,6,colors.black],
+             [2,7,colors.black],[3,7,colors.backpackBrown],[4,7,colors.darkBackpackBrown],[5,7,colors.darkBackpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],[9,7,colors.darkBackpackBrown],[10,7,colors.darkBackpackBrown],[11,7,colors.darkBackpackBrown],[12,7,colors.darkBackpackBrown],[13,7,colors.black],
+             [2,8,colors.black],[3,8,colors.backpackBrown],[4,8,colors.darkBackpackBrown],[5,8,colors.backpackBrown],[6,8,colors.backpackBrown],[7,8,colors.backpackBrown],[8,8,colors.backpackBrown],[9,8,colors.backpackBrown],[10,8,colors.backpackBrown],[11,8,colors.backpackBrown],[12,8,colors.darkBackpackBrown],[13,8,colors.black],
+             [3,9,colors.black],[4,9,colors.black],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.black],[9,9,colors.pantsGrey],[10,9,colors.pantsGrey],[11,9,colors.black],[12,9,colors.black],
+             [4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[10,10,colors.pantsGrey],[11,10,colors.pantsGrey],
+             [4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey]
+        ],
+        'walking_up_2': [
+            [5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+             [4,1,colors.hatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+             [3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+             [3,3,colors.black],[4,3,colors.black],[5,3,colors.black],[6,3,colors.black],[7,3,colors.black],[8,3,colors.black],[9,3,colors.black],[10,3,colors.black],[11,3,colors.black],[12,3,colors.black],
+             [3,4,colors.black],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+             [2,5,colors.black],[3,5,colors.black],[4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],[10,5,colors.black],[11,5,colors.black],[12,5,colors.black],[13,5,colors.black],
+             [2,6,colors.black],[3,6,colors.backpackBrown],[4,6,colors.backpackBrown],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],[9,6,colors.backpackBrown],[10,6,colors.backpackBrown],[11,6,colors.backpackBrown],[12,6,colors.backpackBrown],[13,6,colors.black],
+             [2,7,colors.black],[3,7,colors.backpackBrown],[4,7,colors.darkBackpackBrown],[5,7,colors.darkBackpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],[9,7,colors.darkBackpackBrown],[10,7,colors.darkBackpackBrown],[11,7,colors.darkBackpackBrown],[12,7,colors.darkBackpackBrown],[13,7,colors.black],
+             [2,8,colors.black],[3,8,colors.backpackBrown],[4,8,colors.darkBackpackBrown],[5,8,colors.backpackBrown],[6,8,colors.backpackBrown],[7,8,colors.backpackBrown],[8,8,colors.backpackBrown],[9,8,colors.backpackBrown],[10,8,colors.backpackBrown],[11,8,colors.backpackBrown],[12,8,colors.darkBackpackBrown],[13,8,colors.black],
+             [3,9,colors.black],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[8,9,colors.black],[9,9,colors.pantsGrey],[10,9,colors.pantsGrey],[11,9,colors.black],[12,9,colors.black],
+             [3,10,colors.pantsGrey],[4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[9,10,colors.pantsGrey],[10,10,colors.pantsGrey],
+             [3,11,colors.darkPantsGrey],[4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[9,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey]
+        ],
+        'standing_left': [
+            [4,0,colors.hatGreen],[5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],
+            [3,1,colors.hatGreen],[4,1,colors.darkHatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.hatGreen],
+            [2,2,colors.hatGreen],[3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],
+            [2,3,colors.black],[3,3,colors.skin],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.skin],[8,3,colors.black],
+            [2,4,colors.black],[3,4,colors.skin],[4,4,colors.black],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.black],[9,4,colors.black],
+            [2,5,colors.black],[3,5,colors.darkSkin],[4,5,colors.skin],[5,5,colors.darkSkin],[6,5,colors.darkSkin],[7,5,colors.darkSkin],[8,5,colors.black],
+            [3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],
+            [3,7,colors.black],[4,7,colors.shirtGrey],[5,7,colors.vestBrown],[6,7,colors.vestBrown],[7,7,colors.shirtGrey],[8,7,colors.black],
+            [2,8,colors.black],[3,8,colors.skin],[4,8,colors.shirtGrey],[5,8,colors.shirtGrey],[6,8,colors.shirtGrey],[7,8,colors.shirtGrey],[8,8,colors.shirtGrey],[9,8,colors.skin],[10,8,colors.black],
+            [2,9,colors.black],[3,9,colors.black],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.pantsGrey],[8,9,colors.black],[9,9,colors.black],
+            [3,10,colors.pantsGrey],[4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[7,10,colors.pantsGrey],[8,10,colors.pantsGrey],
+            [3,11,colors.darkPantsGrey],[4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],[8,11,colors.darkPantsGrey],
+        ],
+        'walking_left_1': [
+            [4,0,colors.hatGreen],[5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],
+            [3,1,colors.hatGreen],[4,1,colors.darkHatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.hatGreen],
+            [2,2,colors.hatGreen],[3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],
+            [2,3,colors.black],[3,3,colors.skin],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.skin],[8,3,colors.black],
+            [2,4,colors.black],[3,4,colors.skin],[4,4,colors.black],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.black],[9,4,colors.black],
+            [2,5,colors.black],[3,5,colors.darkSkin],[4,5,colors.skin],[5,5,colors.darkSkin],[6,5,colors.darkSkin],[7,5,colors.darkSkin],[8,5,colors.black],
+            [3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],[9,6,colors.black],
+            [2,7,colors.black],[3,7,colors.shirtGrey],[4,7,colors.vestBrown],[5,7,colors.vestBrown],[6,7,colors.vestBrown],[7,7,colors.shirtGrey],[8,7,colors.skin],[9,7,colors.black],
+            [2,8,colors.black],[3,8,colors.skin],[4,8,colors.shirtGrey],[5,8,colors.shirtGrey],[6,8,colors.shirtGrey],[7,8,colors.shirtGrey],[8,8,colors.skin],[9,8,colors.black],
+            [3,9,colors.black],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.black],[8,9,colors.black],
+            [4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[7,10,colors.pantsGrey],
+            [4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],
+        ],
+    };
+
+    const toolFrames = {
+        'using_axe_down': [
+            ...spriteData.standing_down,
+            // Right arm raised
+            [0,7,colors.black],[1,7,colors.skin],[2,7,colors.skin],[3,7,colors.black],
+            [0,8,colors.black],[1,8,colors.skin],[2,8,colors.black],
+            [1,9,colors.black],[2,9,colors.black],
+             // Axe
+            [3,5,colors.toolHandle],[4,6,colors.toolHandle],[5,7,colors.toolHandle],
+            [1,3,colors.toolHead],[2,4,colors.toolHead],[3,4,colors.toolHead],
+            [1,4,colors.toolHead],[2,3,colors.toolHead],[3,3,colors.toolHead]
+        ],
+        'using_pickaxe_down': [
+            ...spriteData.standing_down,
+            [0,7,colors.black],[1,7,colors.skin],[2,7,colors.skin],[3,7,colors.black],
+            [0,8,colors.black],[1,8,colors.skin],[2,8,colors.black],
+            [1,9,colors.black],[2,9,colors.black],
+            [3,5,colors.toolHandle],[4,6,colors.toolHandle],[5,7,colors.toolHandle],
+            // Pickaxe Head
+            [0,3,colors.toolHead],[1,3,colors.toolHead],[2,3,colors.toolHead],[3,3,colors.toolHead],[2,4,colors.toolHead],
+        ],
+        'using_axe_up': [
+             ...spriteData.standing_up,
+             [1,5,colors.toolHandle],[2,5,colors.toolHandle],[3,5,colors.toolHandle],
+             [-1,3,colors.toolHead],[0,3,colors.toolHead],[1,3,colors.toolHead],
+             [-1,4,colors.toolHead],[0,4,colors.toolHead],[0,2,colors.toolHead]
+        ],
+        'using_pickaxe_up': [
+             ...spriteData.standing_up,
+             [1,5,colors.toolHandle],[2,5,colors.toolHandle],[3,5,colors.toolHandle],
+             [-2,3,colors.toolHead],[-1,3,colors.toolHead],[0,3,colors.toolHead],[1,3,colors.toolHead],[0,4,colors.toolHead],
+        ],
+        'using_axe_left': [
+            ...spriteData.standing_left,
+            [10,6,colors.black],[11,6,colors.skin],[12,6,colors.black],
+            [11,7,colors.skin],[10,8,colors.toolHandle],[11,8,colors.skin],[12,8,colors.black],
+            [9,7,colors.toolHandle],[8,6,colors.toolHead],[9,6,colors.toolHead],[10,6,colors.toolHead],
+            [8,5,colors.toolHead],[9,5,colors.toolHead],[9,4,colors.toolHead]
+        ],
+        'using_pickaxe_left': [
+            ...spriteData.standing_left,
+            [10,6,colors.black],[11,6,colors.skin],[12,6,colors.black],
+            [11,7,colors.skin],[10,8,colors.toolHandle],[11,8,colors.skin],[12,8,colors.black],
+            [9,7,colors.toolHandle],[7,5,colors.toolHead],[8,5,colors.toolHead],[9,5,colors.toolHead],[10,5,colors.toolHead],[9,6,colors.toolHead],
+        ],
+    };
+    
+    let pixels;
+    let currentFrameData;
+
+    if (frame in toolFrames) {
+        currentFrameData = toolFrames[frame];
+    } else if (frame in spriteData) {
+        currentFrameData = spriteData[frame];
+    } else {
+        currentFrameData = spriteData['standing_down']; // Fallback
+    }
+    
+    // Create right-facing sprites by mirroring left-facing ones
+    if (frame.includes('right')) {
+        const leftFrameName = frame.replace('right', 'left');
+        let sourceFrame;
+        if (leftFrameName in toolFrames) {
+            sourceFrame = toolFrames[leftFrameName];
+        } else {
+            sourceFrame = spriteData[leftFrameName];
+        }
+        pixels = sourceFrame.map(([px, py, color]) => [SPRITE_WIDTH - 1 - px, py, color]);
+    } else {
+        pixels = currentFrameData;
+    }
+
+    pixels.forEach(([px, py, color]) => p(px, py, color));
+    
+    ctx.restore();
+}
+
+function draw() {
+    if (gameState.isGameOver) return;
+    
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.save();
+    ctx.translate(-gameState.camera.x, -gameState.camera.y);
+
+    const startX = Math.floor(gameState.camera.x / TILE_SIZE);
+    const endX = startX + VIEWPORT_TILE_COUNT + 1;
+    const startY = Math.floor(gameState.camera.y / TILE_SIZE);
+    const endY = startY + VIEWPORT_TILE_COUNT + 1;
+
+    for (let y = Math.max(0, startY); y < Math.min(MAP_SIZE, endY); y++) {
+        for (let x = Math.max(0, startX); x < Math.min(MAP_SIZE, endX); x++) {
+            const tile = gameState.world[y][x];
+            // Base Grass Tile
+            ctx.fillStyle = TILE_COLORS[TILES.GRASS];
+            ctx.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+            // Grass Details
+            ctx.fillStyle = 'rgba(0,0,0,0.07)';
+            ctx.fillRect(x * TILE_SIZE + 10, y * TILE_SIZE + 15, 4, 12);
+            ctx.fillRect(x * TILE_SIZE + 40, y * TILE_SIZE + 45, 4, 12);
+
+            const key = `${x},${y}`;
+            let shakeX = 0;
+            let shakeY = 0;
+
+            const activeAnim = gameState.activeAnimations.find(a => a.x === x && a.y === y);
+            if (activeAnim) {
+                const intensity = (activeAnim.maxProgress - activeAnim.progress) / activeAnim.maxProgress;
+                shakeX = (Math.random() - 0.5) * 8 * intensity;
+                shakeY = (Math.random() - 0.5) * 8 * intensity;
+            }
+
+
+            switch(tile) {
+                case TILES.TREE:
+                    // Trunk with highlight
+                    ctx.fillStyle = '#6b4f3a'; ctx.fillRect(x * TILE_SIZE + TILE_SIZE/2 - 8 + shakeX, y * TILE_SIZE + TILE_SIZE/2 + shakeY, 16, TILE_SIZE/2 + 4);
+                    ctx.fillStyle = '#8a6f5a'; ctx.fillRect(x * TILE_SIZE + TILE_SIZE/2 - 8 + shakeX, y * TILE_SIZE + TILE_SIZE/2 + shakeY, 5, TILE_SIZE/2 + 4);
+                    // Canopy with shadow
+                    ctx.fillStyle = '#3a5941'; ctx.beginPath(); ctx.arc((x + 0.5) * TILE_SIZE + shakeX, (y + 0.4) * TILE_SIZE + shakeY, TILE_SIZE * 0.5, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#2d4828'; ctx.beginPath(); ctx.arc((x + 0.6) * TILE_SIZE + shakeX, (y + 0.5) * TILE_SIZE + shakeY, TILE_SIZE * 0.25, 0, Math.PI * 2); ctx.fill();
+
+                    // Damage cracks
+                    const tree = gameState.worldObjects[key];
+                    if (tree) {
+                        const healthPercent = tree.health / 10;
+                        ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                        if (healthPercent < 0.7) {
+                           ctx.fillRect(x * TILE_SIZE + 28 + shakeX, y * TILE_SIZE + 40 + shakeY, 2, 12);
+                        }
+                        if (healthPercent < 0.4) {
+                           ctx.fillRect(x * TILE_SIZE + 22 + shakeX, y * TILE_SIZE + 50 + shakeY, 15, 2);
+                        }
+                    }
+                    break;
+                case TILES.ROCK:
+                    // More complex rock shape
+                    ctx.save();
+                    ctx.translate(shakeX, shakeY);
+                    ctx.fillStyle = '#8d8d8d'; ctx.beginPath(); ctx.moveTo((x+0.2)*TILE_SIZE, (y+0.8)*TILE_SIZE); ctx.lineTo((x+0.8)*TILE_SIZE, (y+0.8)*TILE_SIZE); ctx.lineTo((x+0.7)*TILE_SIZE, (y+0.3)*TILE_SIZE); ctx.lineTo((x+0.5)*TILE_SIZE, (y+0.2)*TILE_SIZE); ctx.closePath(); ctx.fill();
+                    ctx.fillStyle = '#7a7a7a'; ctx.beginPath(); ctx.moveTo((x+0.2)*TILE_SIZE, (y+0.8)*TILE_SIZE); ctx.lineTo((x+0.4)*TILE_SIZE, (y+0.85)*TILE_SIZE); ctx.lineTo((x+0.5)*TILE_SIZE, (y+0.2)*TILE_SIZE); ctx.closePath(); ctx.fill();
+                    ctx.restore();
+                    
+                     // Damage cracks
+                    const rock = gameState.worldObjects[key];
+                    if (rock) {
+                        const healthPercent = rock.health / 15;
+                        ctx.strokeStyle = 'rgba(0,0,0,0.4)';
+                        ctx.lineWidth = 2;
+                        if (healthPercent < 0.8) {
+                           ctx.beginPath(); ctx.moveTo((x+0.5)*TILE_SIZE+shakeX, (y+0.2)*TILE_SIZE+shakeY); ctx.lineTo((x+0.4)*TILE_SIZE+shakeX, (y+0.6)*TILE_SIZE+shakeY); ctx.stroke();
+                        }
+                        if (healthPercent < 0.5) {
+                           ctx.beginPath(); ctx.moveTo((x+0.7)*TILE_SIZE+shakeX, (y+0.3)*TILE_SIZE+shakeY); ctx.lineTo((x+0.8)*TILE_SIZE+shakeX, (y+0.7)*TILE_SIZE+shakeY); ctx.stroke();
+                        }
+                    }
+
+                    break;
+                case TILES.BERRY_BUSH:
+                     ctx.fillStyle = '#2d4828'; ctx.beginPath(); ctx.arc((x + 0.5) * TILE_SIZE, (y + 0.6) * TILE_SIZE, TILE_SIZE * 0.4, 0, Math.PI * 2); ctx.fill();
+                     ctx.fillStyle = '#c56183';
+                     ctx.fillRect(x * TILE_SIZE + 20, y * TILE_SIZE + 32, 8, 8); ctx.fillRect(x * TILE_SIZE + 38, y * TILE_SIZE + 28, 8, 8); ctx.fillRect(x * TILE_SIZE + 25, y * TILE_SIZE + 45, 8, 8);
+                    break;
+                case TILES.CAMPFIRE:
+                    const flicker = Math.random();
+                    // Logs
+                    ctx.fillStyle = '#6b4f3a'; 
+                    ctx.beginPath(); ctx.moveTo((x+0.2)*TILE_SIZE, (y+0.8)*TILE_SIZE); ctx.lineTo((x+0.8)*TILE_SIZE, (y+0.8)*TILE_SIZE); ctx.lineTo((x+0.5)*TILE_SIZE, (y+0.7)*TILE_SIZE); ctx.closePath(); ctx.fill();
+                    // Fire
+                    ctx.fillStyle = flicker > 0.66 ? '#ff6a00' : '#ffa500'; ctx.beginPath(); ctx.moveTo((x+0.5)*TILE_SIZE, (y+0.3)*TILE_SIZE); ctx.lineTo((x+0.3)*TILE_SIZE, (y+0.75)*TILE_SIZE); ctx.lineTo((x+0.7)*TILE_SIZE, (y+0.75)*TILE_SIZE); ctx.closePath(); ctx.fill();
+                    ctx.fillStyle = flicker < 0.33 ? '#ffff00' : '#ffd700'; ctx.beginPath(); ctx.moveTo((x+0.5)*TILE_SIZE, (y+0.4)*TILE_SIZE); ctx.lineTo((x+0.4)*TILE_SIZE, (y+0.7)*TILE_SIZE); ctx.lineTo((x+0.6)*TILE_SIZE, (y+0.7)*TILE_SIZE); ctx.closePath(); ctx.fill();
+                    break;
+                case TILES.TENT:
+                    ctx.fillStyle = '#a0522d'; ctx.beginPath(); ctx.moveTo((x+0.1)*TILE_SIZE, (y+0.9)*TILE_SIZE); ctx.lineTo((x+0.5)*TILE_SIZE, (y+0.2)*TILE_SIZE); ctx.lineTo((x+0.9)*TILE_SIZE, (y+0.9)*TILE_SIZE); ctx.closePath(); ctx.fill();
+                    // Tent flap
+                    ctx.fillStyle = '#793d22'; ctx.beginPath(); ctx.moveTo((x+0.5)*TILE_SIZE, (y+0.25)*TILE_SIZE); ctx.lineTo((x+0.7)*TILE_SIZE, (y+0.9)*TILE_SIZE); ctx.lineTo((x+0.5)*TILE_SIZE, (y+0.9)*TILE_SIZE); ctx.closePath(); ctx.fill();
+                    break;
+                case TILES.STUMP: 
+                    ctx.fillStyle = '#6b4f3a'; ctx.fillRect(x*TILE_SIZE+20, y*TILE_SIZE+30, 24, 20); 
+                    ctx.fillStyle = '#ab8f7a'; ctx.beginPath(); ctx.ellipse(x*TILE_SIZE+32, y*TILE_SIZE+30, 14, 6, 0, 0, Math.PI*2); ctx.fill();
+                    break;
+                case TILES.MINED_ROCK: ctx.fillStyle = '#6a6a6a'; ctx.fillRect(x * TILE_SIZE+16, y * TILE_SIZE+32, 32, 16); break;
+                case TILES.EMPTY_BUSH: ctx.fillStyle = '#2d4828'; ctx.beginPath(); ctx.arc((x + 0.5) * TILE_SIZE, (y + 0.6) * TILE_SIZE, TILE_SIZE * 0.4, 0, Math.PI * 2); ctx.fill(); break;
+            }
+        }
+    }
+    
+    // Particle Effects
+    gameState.activeAnimations.forEach(anim => {
+        const progressRatio = anim.progress / anim.maxProgress;
+        ctx.globalAlpha = 1 - progressRatio;
+        for (let i = 0; i < 3; i++) {
+            const particleX = (anim.x + 0.5) * TILE_SIZE + (Math.random() - 0.5) * 40 * (1-progressRatio);
+            const particleY = (anim.y + 0.5) * TILE_SIZE + (Math.random() - 0.5) * 40 * (1-progressRatio);
+            const size = (1 - progressRatio) * 8;
+            if(anim.type === 'chop') {
+                ctx.fillStyle = '#ab8f7a';
+                ctx.fillRect(particleX, particleY, size, size);
+            } else if (anim.type === 'mine') {
+                ctx.fillStyle = '#a0a0a0';
+                 ctx.fillRect(particleX, particleY, size, size);
+            }
+        }
+    });
+    ctx.globalAlpha = 1.0;
+
+
+    // Player Drawing
+    const {x, y, direction, isMoving} = gameState.player;
+    const { walkCycle, toolSwing } = gameState.playerAnimation;
+    const px = x * TILE_SIZE;
+    const py = y * TILE_SIZE;
+
+    let frame;
+    if (toolSwing > 0) {
+        const target = getTileInFront();
+        if (target.x >= 0 && target.x < MAP_SIZE && target.y >= 0 && target.y < MAP_SIZE) {
+            const targetTile = gameState.world[target.y][target.x];
+            if (targetTile === TILES.ROCK && gameState.tools.pickaxe) {
+                frame = `using_pickaxe_${direction}`;
+            } else if (targetTile === TILES.TREE) {
+                // Show axe swing even if using hands
+                frame = `using_axe_${direction}`;
+            } else {
+                 frame = `standing_${direction}`; // Default if interacting with something else (e.g., bush)
+            }
+        } else {
+            frame = `standing_${direction}`;
+        }
+    } else if (isMoving) {
+        const frameNum = Math.floor(walkCycle / Math.PI) + 1;
+        if ((direction === 'left' || direction === 'right')) {
+            frame = `walking_${direction}_1`;
+        } else {
+             frame = `walking_${direction}_${frameNum}`;
+        }
+    } else {
+        frame = `standing_${direction}`;
+    }
+    
+    drawPlayerSprite(px, py, frame);
+
+    gameState.animals.forEach(animal => {
+        const ax = animal.x * TILE_SIZE;
+        const ay = animal.y * TILE_SIZE;
+        // Body
+        ctx.fillStyle = '#7a7a7a';
+        ctx.fillRect(ax + 16, ay + 24, 32, 16);
+        // Head
+        ctx.fillStyle = '#8d8d8d';
+        ctx.fillRect(ax + 40, ay + 20, 12, 12);
+        // Tail
+        ctx.fillRect(ax + 8, ay + 28, 8, 4);
+    });
+
+    if (gameState.isNight) {
+        ctx.fillStyle = 'rgba(10, 10, 40, 0.5)'; ctx.fillRect(gameState.camera.x, gameState.camera.y, canvas.width, canvas.height);
+    }
+    
+    const target = getTileInFront();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(target.x * TILE_SIZE + 2, target.y * TILE_SIZE + 2, TILE_SIZE - 4, TILE_SIZE - 4);
+
+    ctx.restore();
+}
+
+function updateUI() {
+    healthBar.style.width = `${gameState.player.health}%`;
+    hungerBar.style.width = `${gameState.player.hunger}%`;
+    energyBar.style.width = `${gameState.player.energy}%`;
+    const hour = String(gameState.time.hour).padStart(2, '0');
+    const minute = String(gameState.time.minute).padStart(2, '0');
+    timeDisplay.textContent = `Day ${gameState.time.day} - ${hour}:${minute}`;
+    woodCountUI.textContent = gameState.inventory.wood;
+    stoneCountUI.textContent = gameState.inventory.stone;
+    berryCountUI.textContent = gameState.inventory.berries;
+    meatCountUI.textContent = gameState.inventory.meat;
+    let tools = [];
+    if (gameState.tools.axe) tools.push('Axe');
+    if (gameState.tools.pickaxe) tools.push('Pickaxe');
+    toolStatusUI.textContent = tools.length > 0 ? tools.join(', ') : 'None';
+    document.getElementById('craftAxe').disabled = gameState.inventory.wood < 15 || gameState.tools.axe;
+    document.getElementById('craftPickaxe').disabled = gameState.inventory.wood < 20 || gameState.tools.pickaxe;
+    document.getElementById('craftCampfire').disabled = gameState.inventory.wood < 15 || gameState.inventory.stone < 5;
+    document.getElementById('craftTent').disabled = gameState.inventory.wood < 20 || gameState.inventory.stone < 10;
+    document.getElementById('eatBerry').disabled = gameState.inventory.berries <= 0;
+}
+
+
+// --- Game Loop ---
+let lastTime = 0;
+const gameTick = 100; // ms per game logic update
+
+function gameLoop(timestamp) {
+    if (gameState.isGameOver) return;
+    
+    handleInput(); // Handle continuous input
+
+    if (timestamp - lastTime > gameTick) {
+        lastTime = timestamp;
+        manageSpawning();
+        updateTime();
+        updateStats();
+        updateAnimals();
+    }
+    
+    updateAnimations();
+    updateCamera();
+    draw();
+    updateUI();
+    requestAnimationFrame(gameLoop);
+}
+
+// --- Event Listeners and Init ---
+function setupEventListeners() {
+    window.addEventListener('keydown', (e) => {
+        keysPressed[e.key] = true;
+        if(e.key === ' '){
+             e.preventDefault(); // Prevent spacebar from scrolling page
+             interact();
+        }
+    });
+     window.addEventListener('keyup', (e) => {
+        keysPressed[e.key] = false;
+    });
+
+
+    document.getElementById('craftAxe').addEventListener('click', () => {
+        if (gameState.inventory.wood >= 15 && !gameState.tools.axe) {
+            gameState.inventory.wood -= 15;
+            gameState.tools.axe = true;
+            logMessage('You crafted a simple wooden axe!', '#98c379');
+        }
+    });
+
+    document.getElementById('craftPickaxe').addEventListener('click', () => {
+        if (gameState.inventory.wood >= 20 && !gameState.tools.pickaxe) {
+            gameState.inventory.wood -= 20;
+            gameState.tools.pickaxe = true;
+            logMessage('You crafted a crude wooden pickaxe!', '#98c379');
+        }
+    });
+
+    document.getElementById('craftCampfire').addEventListener('click', () => {
+        if (gameState.inventory.wood >= 15 && gameState.inventory.stone >= 5) {
+            const target = getTileInFront();
+            if (target.y < 0 || target.y >= MAP_SIZE || target.x < 0 || target.x >= MAP_SIZE) {
+                 logMessage('Cannot build at the world\'s edge.', '#e06c75');
+                 return;
+            }
+            if (gameState.world[target.y][target.x] === TILES.GRASS) {
+                gameState.inventory.wood -= 15;
+                gameState.inventory.stone -= 5;
+                gameState.world[target.y][target.x] = TILES.CAMPFIRE;
+                gameState.placedObjects[`${target.x},${target.y}`] = { x: target.x, y: target.y, type: TILES.CAMPFIRE };
+                logMessage('You built a warm campfire.', '#e5c07b');
+            } else {
+                logMessage('You can only build on clear grass.', '#e06c75');
+            }
+        }
+    });
+
+    document.getElementById('craftTent').addEventListener('click', () => {
+        if (gameState.inventory.wood >= 20 && gameState.inventory.stone >= 10) {
+            const target = getTileInFront();
+             if (target.y < 0 || target.y >= MAP_SIZE || target.x < 0 || target.x >= MAP_SIZE) {
+                 logMessage('Cannot build at the world\'s edge.', '#e06c75');
+                 return;
+            }
+            if (gameState.world[target.y][target.x] === TILES.GRASS) {
+                gameState.inventory.wood -= 20;
+                gameState.inventory.stone -= 10;
+                gameState.world[target.y][target.x] = TILES.TENT;
+                gameState.placedObjects[`${target.x},${target.y}`] = { x: target.x, y: target.y, type: TILES.TENT };
+                logMessage('You built a tent. Sleep in it at night.', '#a0522d');
+            } else {
+                logMessage('You can only build on clear grass.', '#e06c75');
+            }
+        }
+    });
+
+    document.getElementById('eatBerry').addEventListener('click', () => {
+        if (gameState.inventory.berries > 0) {
+            gameState.inventory.berries--;
+            gameState.player.hunger = Math.min(100, gameState.player.hunger + 10);
+            logMessage("You ate a berry.", "#c56183");
+        }
+    });
+    
+    window.addEventListener('resize', resizeCanvas);
+}
+
+function resizeCanvas() { 
+    const parent = canvas.parentElement; 
+    const size = Math.min(parent.clientWidth, parent.clientHeight); 
+    canvas.style.width = `${size}px`; 
+    canvas.style.height = `${size}px`; 
+}
+
+// Start game
+generateWorld();
+resizeCanvas();
+setupEventListeners();
+requestAnimationFrame(gameLoop);
+
+</script>
+</body>
+</html>
+
