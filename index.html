@@ -75,14 +75,14 @@
     <header class="ui-panel flex-shrink-0">
         <h2 class="text-lg text-yellow-400 mb-2 text-center hidden md:block">INVENTORY</h2>
         <div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-center text-xs">
-            <div class="bg-gray-900 p-2 rounded">🌲W: <span id="woodCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">⛏️S: <span id="stoneCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🍓B: <span id="berryCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🥩R: <span id="rawMeatCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">💎G: <span id="gemCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🌸P: <span id="petalCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🔥C: <span id="cookedMeatCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🗿CS: <span id="carvedStoneCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🌲 WOOD: <span id="woodCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">⛏️ STONE: <span id="stoneCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🍓 BERRY: <span id="berryCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🥩 RAW: <span id="rawMeatCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">💎 GEM: <span id="gemCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🌸 PETAL: <span id="petalCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🔥 COOKED: <span id="cookedMeatCount">0</span></div>
+            <div class="bg-gray-900 p-2 rounded">🗿 CARVED: <span id="carvedStoneCount">0</span></div>
         </div>
     </header>
 
@@ -137,7 +137,7 @@
 
         <!-- Right Panel: Game Canvas -->
         <div class="flex-grow flex items-center justify-center order-2 md:order-2 overflow-hidden">
-            <div class="w-full h-full aspect-square border-4 border-gray-800 rounded-lg shadow-2xl">
+            <div class="w-full h-full border-4 border-gray-800 rounded-lg shadow-2xl">
                 <canvas id="gameCanvas"></canvas>
             </div>
         </div>
@@ -173,7 +173,9 @@
     <!-- Intro Screen -->
     <div id="introScreen" class="absolute inset-0 flex flex-col items-center justify-center intro-screen text-center p-8">
         <h1 class="text-4xl text-yellow-400 mb-4">The Lost Expedition</h1>
-        <p class="text-lg text-white mb-8 max-w-2xl text-center">Your research plane has crashed in an uncharted wilderness. The radio is broken. Looking at your notes, you remember this region is known for strange monoliths that emit a powerful energy. If you can find and reactivate them, the energy surge might be enough to signal for rescue.</p>
+        <div class="max-w-2xl">
+            <p class="text-lg text-white mb-8">Your research plane has crashed in an uncharted wilderness. The radio is broken. Looking at your notes, you remember this region is known for strange monoliths that emit a powerful energy. If you can find and reactivate them, the energy surge might be enough to signal for rescue.</p>
+        </div>
         <button id="startButton" class="craft-button text-2xl py-4 px-8 rounded">Begin Survival</button>
     </div>
 
@@ -221,10 +223,8 @@ const victoryScreen = document.getElementById('victoryScreen');
 // --- Game Configuration ---
 const TILE_SIZE = 64;
 const MAP_SIZE = 110; // Increased map size for a larger world
-const VIEWPORT_TILE_COUNT = 11;
-
-canvas.width = VIEWPORT_TILE_COUNT * TILE_SIZE;
-canvas.height = VIEWPORT_TILE_COUNT * TILE_SIZE;
+let viewportTileCountX = 11;
+let viewportTileCountY = 11;
 
 const TILES = {
     GRASS: 0,
@@ -342,7 +342,7 @@ function generateWorld() {
     gameState.worldObjects = {};
 
     let walker = { x: Math.floor(MAP_SIZE / 2), y: Math.floor(MAP_SIZE / 2) };
-    const landTilesToGenerate = Math.floor(MAP_SIZE * MAP_SIZE * 0.6); // 60% of map is land
+    const landTilesToGenerate = Math.floor(MAP_SIZE * MAP_SIZE * 0.75); // 75% of map is land
     let landGenerated = 0;
 
     // Random walk to carve out land
@@ -1242,9 +1242,9 @@ function draw() {
     ctx.translate(-gameState.camera.x, -gameState.camera.y);
 
     const startX = Math.floor(gameState.camera.x / TILE_SIZE);
-    const endX = startX + VIEWPORT_TILE_COUNT + 1;
+    const endX = startX + viewportTileCountX + 2;
     const startY = Math.floor(gameState.camera.y / TILE_SIZE);
-    const endY = startY + VIEWPORT_TILE_COUNT + 1;
+    const endY = startY + viewportTileCountY + 2;
 
     for (let y = Math.max(0, startY); y < Math.min(MAP_SIZE, endY); y++) {
         for (let x = Math.max(0, startX); x < Math.min(MAP_SIZE, endX); x++) {
@@ -1680,9 +1680,14 @@ function setupEventListeners() {
 
 function resizeCanvas() { 
     const parent = canvas.parentElement; 
-    const size = Math.min(parent.clientWidth, parent.clientHeight); 
-    canvas.style.width = `${size}px`; 
-    canvas.style.height = `${size}px`; 
+    const newWidth = parent.clientWidth;
+    const newHeight = parent.clientHeight;
+    
+    canvas.width = newWidth;
+    canvas.height = newHeight;
+
+    viewportTileCountX = Math.ceil(newWidth / TILE_SIZE);
+    viewportTileCountY = Math.ceil(newHeight / TILE_SIZE);
 }
 
 // Start game
@@ -1694,4 +1699,6 @@ requestAnimationFrame(gameLoop);
 </script>
 </body>
 </html>
+
+
 
