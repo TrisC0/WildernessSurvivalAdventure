@@ -19,6 +19,7 @@ Explore a vast, randomly generated world, gather resources, craft essential tool
 ### Combat & Survival
 - **Combat System**: Defend yourself from aggressive wolves. Craft a sword to fight back more effectively.
 - **Hunting & Cooking**: Hunt wolves for raw meat, then cook it over a campfire for a substantial meal that restores both health and hunger.
+- **Wildlife Hunting**: Hunt rabbits (1 meat, 5 XP), deer (3 meat, 15 XP), and squirrels (1 meat, 3 XP) for food and experience points. Animals will flee when you approach, making hunting a challenge!
 - **Resource Gathering**: Chop down trees, mine rocks, forage for berries, and discover rare items like Ancient Gems.
 
 ### New Features (Latest Update)
@@ -27,6 +28,8 @@ Explore a vast, randomly generated world, gather resources, craft essential tool
 - **Speech Bubble System**: The wizard calls out to you when you're nearby with engaging messages like "Come here, young one!" and "The ancient secrets await!"
 - **Gameplay Message Overlay**: Real-time message display at the bottom of the screen showing your recent actions, combat results, and quest updates with smooth fade effects.
 - **Enhanced UI**: Improved log system that expands to fill available space, better organized crafting tabs, and more intuitive controls.
+- **Huntable Animals**: New wildlife including rabbits, deer, and squirrels that can be hunted for food and XP. Each animal has unique behaviors and provides different rewards.
+- **XP & Leveling System**: Gain experience points by hunting animals and level up to track your progress as a wilderness survivor.
 
 ## How to Play
 
