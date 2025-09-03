@@ -1576,8 +1576,8 @@ function drawWizardSprite(x, y, frame) {
 }
 
 function drawSpeechBubble(x, y, message) {
-    const bubbleWidth = Math.max(120, message.length * 8);
-    const bubbleHeight = 40;
+    const bubbleWidth = Math.max(140, message.length * 9);
+    const bubbleHeight = 50;
     const bubbleX = x + TILE_SIZE / 2 - bubbleWidth / 2;
     const bubbleY = y - bubbleHeight - 20;
     
@@ -1589,7 +1589,7 @@ function drawSpeechBubble(x, y, message) {
     
     // Main bubble
     ctx.beginPath();
-    ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 8);
+    ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 16);
     ctx.fill();
     ctx.stroke();
     
@@ -1614,7 +1614,7 @@ function drawSpeechBubble(x, y, message) {
     let currentLine = '';
     
     words.forEach(word => {
-        if ((currentLine + word).length * 8 > bubbleWidth - 16) {
+        if ((currentLine + word).length * 9 > bubbleWidth - 20) {
             if (currentLine) lines.push(currentLine.trim());
             currentLine = word;
         } else {
@@ -1625,7 +1625,7 @@ function drawSpeechBubble(x, y, message) {
     
     // Draw each line
     lines.forEach((line, index) => {
-        const lineY = bubbleY + bubbleHeight / 2 + (index - (lines.length - 1) / 2) * 16;
+        const lineY = bubbleY + bubbleHeight / 2 + (index - (lines.length - 1) / 2) * 18;
         ctx.fillText(line, bubbleX + bubbleWidth / 2, lineY);
     });
     
