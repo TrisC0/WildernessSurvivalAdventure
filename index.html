@@ -1271,62 +1271,92 @@ function drawPlayerSprite(x, y, frame) {
             [4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[7,10,colors.pantsGrey],
             [4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],
         ],
-        // Diagonal movement frames
-        'standing_up_left': [
+        'walking_left_2': [
             [4,0,colors.hatGreen],[5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],
             [3,1,colors.hatGreen],[4,1,colors.darkHatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.hatGreen],
             [2,2,colors.hatGreen],[3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],
             [2,3,colors.black],[3,3,colors.skin],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.skin],[8,3,colors.black],
             [2,4,colors.black],[3,4,colors.skin],[4,4,colors.black],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.black],[9,4,colors.black],
             [2,5,colors.black],[3,5,colors.darkSkin],[4,5,colors.skin],[5,5,colors.darkSkin],[6,5,colors.darkSkin],[7,5,colors.darkSkin],[8,5,colors.black],
-            [3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],
-            [3,7,colors.black],[4,7,colors.shirtGrey],[5,7,colors.vestBrown],[6,7,colors.vestBrown],[7,7,colors.shirtGrey],[8,7,colors.black],
-            [2,8,colors.black],[3,8,colors.skin],[4,8,colors.shirtGrey],[5,8,colors.shirtGrey],[6,8,colors.shirtGrey],[7,8,colors.shirtGrey],[8,8,colors.shirtGrey],[9,8,colors.skin],[10,8,colors.black],
-            [2,9,colors.black],[3,9,colors.black],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.pantsGrey],[8,9,colors.black],[9,9,colors.black],
-            [3,10,colors.pantsGrey],[4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[7,10,colors.pantsGrey],[8,10,colors.pantsGrey],
-            [3,11,colors.darkPantsGrey],[4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],[8,11,colors.darkPantsGrey],
+            [3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],[9,6,colors.black],
+            [3,7,colors.black],[4,7,colors.shirtGrey],[5,7,colors.vestBrown],[6,7,colors.vestBrown],[7,7,colors.vestBrown],[8,7,colors.shirtGrey],[9,7,colors.skin],[10,7,colors.black],
+            [3,8,colors.black],[4,8,colors.skin],[5,8,colors.shirtGrey],[6,8,colors.shirtGrey],[7,8,colors.shirtGrey],[8,8,colors.shirtGrey],[9,8,colors.skin],[10,8,colors.black],
+            [3,9,colors.black],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.black],[8,9,colors.black],
+            [4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[7,10,colors.pantsGrey],
+            [4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],
+        ],
+        // Diagonal movement frames - player facing diagonally
+        'standing_up_left': [
+            // Hat (angled up-left - showing left side of hat)
+            [2,0,colors.hatGreen],[3,0,colors.hatGreen],[4,0,colors.hatGreen],[5,0,colors.hatGreen],[6,0,colors.hatGreen],
+            [1,1,colors.hatGreen],[2,1,colors.darkHatGreen],[3,1,colors.darkHatGreen],[4,1,colors.darkHatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.hatGreen],
+            [1,2,colors.hatGreen],[2,2,colors.hatGreen],[3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],
+            [1,3,colors.black],[2,3,colors.skin],[3,3,colors.skin],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.black],
+            [1,4,colors.black],[2,4,colors.skin],[3,4,colors.black],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.black],
+            [2,5,colors.black],[3,5,colors.darkSkin],[4,5,colors.skin],[5,5,colors.darkSkin],[6,5,colors.darkSkin],[7,5,colors.black],
+            // Body (showing left side prominently)
+            [2,6,colors.black],[3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],
+            [1,7,colors.black],[2,7,colors.shirtGrey],[3,7,colors.vestBrown],[4,7,colors.vestBrown],[5,7,colors.shirtGrey],[6,7,colors.black],
+            [1,8,colors.black],[2,8,colors.skin],[3,8,colors.shirtGrey],[4,8,colors.shirtGrey],[5,8,colors.shirtGrey],[6,8,colors.skin],[7,8,colors.black],
+            [1,9,colors.black],[2,9,colors.black],[3,9,colors.pantsGrey],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.black],[7,9,colors.black],
+            [2,10,colors.pantsGrey],[3,10,colors.pantsGrey],[4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],
+            [2,11,colors.darkPantsGrey],[3,11,colors.darkPantsGrey],[4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],
         ],
         'standing_up_right': [
-            [4,0,colors.hatGreen],[5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],
-            [3,1,colors.hatGreen],[4,1,colors.darkHatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.hatGreen],
-            [2,2,colors.hatGreen],[3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],
-            [2,3,colors.black],[3,3,colors.skin],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.skin],[8,3,colors.black],
-            [2,4,colors.black],[3,4,colors.skin],[4,4,colors.black],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.black],[9,4,colors.black],
-            [2,5,colors.black],[3,5,colors.darkSkin],[4,5,colors.skin],[5,5,colors.darkSkin],[6,5,colors.darkSkin],[7,5,colors.darkSkin],[8,5,colors.black],
-            [3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],
-            [3,7,colors.black],[4,7,colors.shirtGrey],[5,7,colors.vestBrown],[6,7,colors.vestBrown],[7,7,colors.shirtGrey],[8,7,colors.black],
-            [2,8,colors.black],[3,8,colors.skin],[4,8,colors.shirtGrey],[5,8,colors.shirtGrey],[6,8,colors.shirtGrey],[7,8,colors.shirtGrey],[8,8,colors.shirtGrey],[9,8,colors.skin],[10,8,colors.black],
-            [2,9,colors.black],[3,9,colors.black],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.pantsGrey],[8,9,colors.black],[9,9,colors.black],
-            [3,10,colors.pantsGrey],[4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[7,10,colors.pantsGrey],[8,10,colors.pantsGrey],
-            [3,11,colors.darkPantsGrey],[4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],[8,11,colors.darkPantsGrey],
+            // Hat (angled up-right - showing right side of hat)
+            [6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+            [5,1,colors.hatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+            [6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+            [6,3,colors.black],[7,3,colors.skin],[8,3,colors.skin],[9,3,colors.skin],[10,3,colors.skin],[11,3,colors.skin],[12,3,colors.black],
+            [6,4,colors.black],[7,4,colors.skin],[8,4,colors.black],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+            [6,5,colors.black],[7,5,colors.darkSkin],[8,5,colors.skin],[9,5,colors.darkSkin],[10,5,colors.darkSkin],[11,5,colors.black],
+            // Body (showing right side prominently)
+            [6,6,colors.black],[7,6,colors.black],[8,6,colors.black],[9,6,colors.black],[10,6,colors.black],
+            [7,7,colors.black],[8,7,colors.shirtGrey],[9,7,colors.vestBrown],[10,7,colors.vestBrown],[11,7,colors.shirtGrey],[12,7,colors.black],
+            [7,8,colors.black],[8,8,colors.skin],[9,8,colors.shirtGrey],[10,8,colors.shirtGrey],[11,8,colors.shirtGrey],[12,8,colors.skin],[13,8,colors.black],
+            [7,9,colors.black],[8,9,colors.black],[9,9,colors.pantsGrey],[10,9,colors.pantsGrey],[11,9,colors.pantsGrey],[12,9,colors.black],[13,9,colors.black],
+            [8,10,colors.pantsGrey],[9,10,colors.pantsGrey],[10,10,colors.pantsGrey],[11,10,colors.pantsGrey],[12,10,colors.pantsGrey],
+            [8,11,colors.darkPantsGrey],[9,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],[12,11,colors.darkPantsGrey],
         ],
         'standing_down_left': [
-            [5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
-            [4,1,colors.hatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
-            [3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
-            [3,3,colors.black],[4,3,colors.black],[5,3,colors.black],[6,3,colors.black],[7,3,colors.black],[8,3,colors.black],[9,3,colors.black],[10,3,colors.black],[11,3,colors.black],[12,3,colors.black],
-            [3,4,colors.black],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
-            [2,5,colors.black],[3,5,colors.black],[4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],[10,5,colors.black],[11,5,colors.black],[12,5,colors.black],[13,5,colors.black],
-            [2,6,colors.black],[3,6,colors.backpackBrown],[4,6,colors.backpackBrown],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],[9,6,colors.backpackBrown],[10,6,colors.backpackBrown],[11,6,colors.backpackBrown],[12,6,colors.backpackBrown],[13,6,colors.black],
-            [2,7,colors.black],[3,7,colors.backpackBrown],[4,7,colors.darkBackpackBrown],[5,7,colors.darkBackpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],[9,7,colors.darkBackpackBrown],[10,7,colors.darkBackpackBrown],[11,7,colors.darkBackpackBrown],[12,7,colors.darkBackpackBrown],[13,7,colors.black],
-            [2,8,colors.black],[3,8,colors.backpackBrown],[4,8,colors.darkBackpackBrown],[5,8,colors.backpackBrown],[6,8,colors.backpackBrown],[7,8,colors.backpackBrown],[8,8,colors.backpackBrown],[9,8,colors.backpackBrown],[10,8,colors.backpackBrown],[11,8,colors.backpackBrown],[12,8,colors.darkBackpackBrown],[13,8,colors.black],
-            [3,9,colors.black],[4,9,colors.black],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.black],[8,9,colors.black],[9,9,colors.pantsGrey],[10,9,colors.pantsGrey],[11,9,colors.black],[12,9,colors.black],
-            [4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[10,10,colors.pantsGrey],[11,10,colors.pantsGrey],
-            [4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],
+            // Hat (angled down-left - showing left side of hat)
+            [2,0,colors.hatGreen],[3,0,colors.hatGreen],[4,0,colors.hatGreen],[5,0,colors.hatGreen],[6,0,colors.hatGreen],
+            [1,1,colors.hatGreen],[2,1,colors.darkHatGreen],[3,1,colors.darkHatGreen],[4,1,colors.darkHatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.hatGreen],
+            [1,2,colors.hatGreen],[2,2,colors.hatGreen],[3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],
+            [1,3,colors.black],[2,3,colors.black],[3,3,colors.black],[4,3,colors.black],[5,3,colors.black],[6,3,colors.black],[7,3,colors.black],
+            [1,4,colors.black],[2,4,colors.skin],[3,4,colors.skin],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.black],
+            [1,5,colors.black],[2,5,colors.black],[3,5,colors.black],[4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],
+            // Backpack (showing left side prominently)
+            [1,6,colors.black],[2,6,colors.backpackBrown],[3,6,colors.backpackBrown],[4,6,colors.backpackBrown],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],
+            [1,7,colors.black],[2,7,colors.backpackBrown],[3,7,colors.darkBackpackBrown],[4,7,colors.darkBackpackBrown],[5,7,colors.darkBackpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],
+            [2,8,colors.black],[3,8,colors.backpackBrown],[4,8,colors.darkBackpackBrown],[5,8,colors.backpackBrown],[6,8,colors.backpackBrown],[7,8,colors.backpackBrown],[8,8,colors.darkBackpackBrown],
+            [2,9,colors.black],[3,9,colors.black],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.black],[7,9,colors.black],[8,9,colors.pantsGrey],[9,9,colors.pantsGrey],
+            [3,10,colors.pantsGrey],[4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[8,10,colors.pantsGrey],[9,10,colors.pantsGrey],
+            [3,11,colors.darkPantsGrey],[4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[8,11,colors.darkPantsGrey],[9,11,colors.darkPantsGrey],
         ],
         'standing_down_right': [
-            [5,0,colors.hatGreen],[6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
-            [4,1,colors.hatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
-            [3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
-            [3,3,colors.black],[4,3,colors.black],[5,3,colors.black],[6,3,colors.black],[7,3,colors.black],[8,3,colors.black],[9,3,colors.black],[10,3,colors.black],[11,3,colors.black],[12,3,colors.black],
-            [3,4,colors.black],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
-            [2,5,colors.black],[3,5,colors.black],[4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],[10,5,colors.black],[11,5,colors.black],[12,5,colors.black],[13,5,colors.black],
-            [2,6,colors.black],[3,6,colors.backpackBrown],[4,6,colors.backpackBrown],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],[9,6,colors.backpackBrown],[10,6,colors.backpackBrown],[11,6,colors.backpackBrown],[12,6,colors.backpackBrown],[13,6,colors.black],
-            [2,7,colors.black],[3,7,colors.backpackBrown],[4,7,colors.darkBackpackBrown],[5,7,colors.darkBackpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],[9,7,colors.darkBackpackBrown],[10,7,colors.darkBackpackBrown],[11,7,colors.darkBackpackBrown],[12,7,colors.darkBackpackBrown],[13,7,colors.black],
-            [2,8,colors.black],[3,8,colors.backpackBrown],[4,8,colors.darkBackpackBrown],[5,8,colors.backpackBrown],[6,8,colors.backpackBrown],[7,8,colors.backpackBrown],[8,8,colors.backpackBrown],[9,8,colors.backpackBrown],[10,8,colors.backpackBrown],[11,8,colors.backpackBrown],[12,8,colors.darkBackpackBrown],[13,8,colors.black],
-            [3,9,colors.black],[4,9,colors.black],[5,9,colors.pantsGrey],[6,9,colors.pantsGrey],[7,9,colors.black],[8,9,colors.black],[9,9,colors.pantsGrey],[10,9,colors.pantsGrey],[11,9,colors.black],[12,9,colors.black],
-            [4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],[10,10,colors.pantsGrey],[11,10,colors.pantsGrey],
-            [4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],
+            // Hat (angled down-right - showing right side of hat)
+            [6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+            [5,1,colors.hatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+            [6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+            [6,3,colors.black],[7,3,colors.black],[8,3,colors.black],[9,3,colors.black],[10,3,colors.black],[11,3,colors.black],[12,3,colors.black],
+            [5,4,colors.black],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+            [4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],[10,5,colors.black],[11,5,colors.black],[12,5,colors.black],
+            // Backpack (showing right side prominently)
+            [4,6,colors.black],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],[9,6,colors.backpackBrown],[10,6,colors.backpackBrown],[11,6,colors.backpackBrown],[12,6,colors.black],
+            [4,7,colors.black],[5,7,colors.backpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],[9,7,colors.darkBackpackBrown],[10,7,colors.darkBackpackBrown],[11,7,colors.darkBackpackBrown],[12,7,colors.black],
+            [5,8,colors.black],[6,8,colors.backpackBrown],[7,8,colors.darkBackpackBrown],[8,8,colors.backpackBrown],[9,8,colors.backpackBrown],[10,8,colors.backpackBrown],[11,8,colors.darkBackpackBrown],[12,8,colors.black],
+            [5,9,colors.black],[6,9,colors.black],[7,9,colors.pantsGrey],[8,9,colors.pantsGrey],[10,9,colors.black],[11,9,colors.pantsGrey],[12,9,colors.pantsGrey],[13,9,colors.black],
+            [6,10,colors.pantsGrey],[7,10,colors.pantsGrey],[8,10,colors.pantsGrey],[11,10,colors.pantsGrey],[12,10,colors.pantsGrey],
+            [6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],[8,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],[12,11,colors.darkPantsGrey],
+            [4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],[10,5,colors.black],[11,5,colors.black],[12,5,colors.black],
+            // Backpack (showing right side prominently)
+            [4,6,colors.black],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],[9,6,colors.backpackBrown],[10,6,colors.backpackBrown],[11,6,colors.backpackBrown],[12,6,colors.black],
+            [4,7,colors.black],[5,7,colors.backpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],[9,7,colors.darkBackpackBrown],[10,7,colors.darkBackpackBrown],[11,7,colors.darkBackpackBrown],[12,7,colors.black],
+            [5,8,colors.black],[6,8,colors.backpackBrown],[7,8,colors.darkBackpackBrown],[8,8,colors.backpackBrown],[9,8,colors.backpackBrown],[10,8,colors.backpackBrown],[11,8,colors.darkBackpackBrown],[12,8,colors.black],
+            [5,9,colors.black],[6,9,colors.black],[7,9,colors.pantsGrey],[8,9,colors.pantsGrey],[10,9,colors.black],[11,9,colors.pantsGrey],[12,9,colors.pantsGrey],[13,9,colors.black],
+            [6,10,colors.pantsGrey],[7,10,colors.pantsGrey],[8,10,colors.pantsGrey],[11,10,colors.pantsGrey],[12,10,colors.pantsGrey],
+            [6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],[8,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],[12,11,colors.darkPantsGrey],
         ],
     };
 
@@ -1394,6 +1424,71 @@ function drawPlayerSprite(x, y, frame) {
             [11,7,colors.skin],[10,8,colors.swordHilt],[11,8,colors.skin],[12,8,colors.black],
             [9,7,colors.swordHilt],[8,6,colors.swordBlade],[7,5,colors.swordBlade],[6,4,colors.swordBlade],
         ],
+        // Diagonal movement frames - player facing diagonally
+        'standing_up_left': [
+            // Hat (angled up-left - showing left side of hat)
+            [2,0,colors.hatGreen],[3,0,colors.hatGreen],[4,0,colors.hatGreen],[5,0,colors.hatGreen],[6,0,colors.hatGreen],
+            [1,1,colors.hatGreen],[2,1,colors.darkHatGreen],[3,1,colors.darkHatGreen],[4,1,colors.darkHatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.hatGreen],
+            [1,2,colors.hatGreen],[2,2,colors.hatGreen],[3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],
+            [1,3,colors.black],[2,3,colors.skin],[3,3,colors.skin],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.black],
+            [1,4,colors.black],[2,4,colors.skin],[3,4,colors.black],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.black],
+            [2,5,colors.black],[3,5,colors.darkSkin],[4,5,colors.skin],[5,5,colors.darkSkin],[6,5,colors.darkSkin],[7,5,colors.black],
+            // Body (showing left side prominently)
+            [2,6,colors.black],[3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],
+            [1,7,colors.black],[2,7,colors.shirtGrey],[3,7,colors.vestBrown],[4,7,colors.vestBrown],[5,7,colors.shirtGrey],[6,7,colors.black],
+            [1,8,colors.black],[2,8,colors.skin],[3,8,colors.shirtGrey],[4,8,colors.shirtGrey],[5,8,colors.shirtGrey],[6,8,colors.skin],[7,8,colors.black],
+            [1,9,colors.black],[2,9,colors.black],[3,9,colors.pantsGrey],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.black],[7,9,colors.black],
+            [2,10,colors.pantsGrey],[3,10,colors.pantsGrey],[4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[6,10,colors.pantsGrey],
+            [2,11,colors.darkPantsGrey],[3,11,colors.darkPantsGrey],[4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[6,11,colors.darkPantsGrey],
+        ],
+        'standing_up_right': [
+            // Hat (angled up-right - showing right side of hat)
+            [6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+            [5,1,colors.hatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+            [6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+            [6,3,colors.black],[7,3,colors.skin],[8,3,colors.skin],[9,3,colors.skin],[10,3,colors.skin],[11,3,colors.skin],[12,3,colors.black],
+            [6,4,colors.black],[7,4,colors.skin],[8,4,colors.black],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+            [6,5,colors.black],[7,5,colors.darkSkin],[8,5,colors.skin],[9,5,colors.darkSkin],[10,5,colors.darkSkin],[11,5,colors.black],
+            // Body (showing right side prominently)
+            [6,6,colors.black],[7,6,colors.black],[8,6,colors.black],[9,6,colors.black],[10,6,colors.black],
+            [7,7,colors.black],[8,7,colors.shirtGrey],[9,7,colors.vestBrown],[10,7,colors.vestBrown],[11,7,colors.shirtGrey],[12,7,colors.black],
+            [7,8,colors.black],[8,8,colors.skin],[9,8,colors.shirtGrey],[10,8,colors.shirtGrey],[11,8,colors.shirtGrey],[12,8,colors.skin],[13,8,colors.black],
+            [7,9,colors.black],[8,9,colors.black],[9,9,colors.pantsGrey],[10,9,colors.pantsGrey],[11,9,colors.pantsGrey],[12,9,colors.black],[13,9,colors.black],
+            [8,10,colors.pantsGrey],[9,10,colors.pantsGrey],[10,10,colors.pantsGrey],[11,10,colors.pantsGrey],[12,10,colors.pantsGrey],
+            [8,11,colors.darkPantsGrey],[9,11,colors.darkPantsGrey],[10,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],[12,11,colors.darkPantsGrey],
+        ],
+        'standing_down_left': [
+            // Hat (angled down-left - showing left side of hat)
+            [2,0,colors.hatGreen],[3,0,colors.hatGreen],[4,0,colors.hatGreen],[5,0,colors.hatGreen],[6,0,colors.hatGreen],
+            [1,1,colors.hatGreen],[2,1,colors.darkHatGreen],[3,1,colors.darkHatGreen],[4,1,colors.darkHatGreen],[5,1,colors.darkHatGreen],[6,1,colors.darkHatGreen],[7,1,colors.hatGreen],
+            [1,2,colors.hatGreen],[2,2,colors.hatGreen],[3,2,colors.hatGreen],[4,2,colors.hatGreen],[5,2,colors.hatGreen],[6,2,colors.hatGreen],[7,2,colors.hatGreen],
+            [1,3,colors.black],[2,3,colors.black],[3,3,colors.black],[4,3,colors.black],[5,3,colors.black],[6,3,colors.black],[7,3,colors.black],
+            [1,4,colors.black],[2,4,colors.skin],[3,4,colors.skin],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.black],
+            [1,5,colors.black],[2,5,colors.black],[3,5,colors.black],[4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],
+            // Backpack (showing left side prominently)
+            [1,6,colors.black],[2,6,colors.backpackBrown],[3,6,colors.backpackBrown],[4,6,colors.backpackBrown],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],
+            [1,7,colors.black],[2,7,colors.backpackBrown],[3,7,colors.darkBackpackBrown],[4,7,colors.darkBackpackBrown],[5,7,colors.darkBackpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],
+            [2,8,colors.black],[3,8,colors.backpackBrown],[4,8,colors.darkBackpackBrown],[5,8,colors.backpackBrown],[6,8,colors.backpackBrown],[7,8,colors.backpackBrown],[8,8,colors.darkBackpackBrown],
+            [2,9,colors.black],[3,9,colors.black],[4,9,colors.pantsGrey],[5,9,colors.pantsGrey],[6,9,colors.black],[7,9,colors.black],[8,9,colors.pantsGrey],[9,9,colors.pantsGrey],
+            [3,10,colors.pantsGrey],[4,10,colors.pantsGrey],[5,10,colors.pantsGrey],[8,10,colors.pantsGrey],[9,10,colors.pantsGrey],
+            [3,11,colors.darkPantsGrey],[4,11,colors.darkPantsGrey],[5,11,colors.darkPantsGrey],[8,11,colors.darkPantsGrey],[9,11,colors.darkPantsGrey],
+        ],
+        'standing_down_right': [
+            // Hat (angled down-right - showing right side of hat)
+            [6,0,colors.hatGreen],[7,0,colors.hatGreen],[8,0,colors.hatGreen],[9,0,colors.hatGreen],[10,0,colors.hatGreen],
+            [5,1,colors.hatGreen],[6,1,colors.darkHatGreen],[7,1,colors.darkHatGreen],[8,1,colors.darkHatGreen],[9,1,colors.darkHatGreen],[10,1,colors.darkHatGreen],[11,1,colors.hatGreen],
+            [6,2,colors.hatGreen],[7,2,colors.hatGreen],[8,2,colors.hatGreen],[9,2,colors.hatGreen],[10,2,colors.hatGreen],[11,2,colors.hatGreen],[12,2,colors.hatGreen],
+            [6,3,colors.black],[7,3,colors.black],[8,3,colors.black],[9,3,colors.black],[10,3,colors.black],[11,3,colors.black],[12,3,colors.black],
+            [5,4,colors.black],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+            [4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.black],[10,5,colors.black],[11,5,colors.black],[12,5,colors.black],
+            // Backpack (showing right side prominently)
+            [4,6,colors.black],[5,6,colors.backpackBrown],[6,6,colors.backpackBrown],[7,6,colors.backpackBrown],[8,6,colors.backpackBrown],[9,6,colors.backpackBrown],[10,6,colors.backpackBrown],[11,6,colors.backpackBrown],[12,6,colors.black],
+            [4,7,colors.black],[5,7,colors.backpackBrown],[6,7,colors.darkBackpackBrown],[7,7,colors.darkBackpackBrown],[8,7,colors.darkBackpackBrown],[9,7,colors.darkBackpackBrown],[10,7,colors.darkBackpackBrown],[11,7,colors.darkBackpackBrown],[12,7,colors.black],
+            [5,8,colors.black],[6,8,colors.backpackBrown],[7,8,colors.darkBackpackBrown],[8,8,colors.backpackBrown],[9,8,colors.backpackBrown],[10,8,colors.backpackBrown],[11,8,colors.darkBackpackBrown],[12,8,colors.black],
+            [5,9,colors.black],[6,9,colors.black],[7,9,colors.pantsGrey],[8,9,colors.pantsGrey],[10,9,colors.black],[11,9,colors.pantsGrey],[12,9,colors.pantsGrey],[13,9,colors.black],
+            [6,10,colors.pantsGrey],[7,10,colors.pantsGrey],[8,10,colors.pantsGrey],[11,10,colors.pantsGrey],[12,10,colors.pantsGrey],
+            [6,11,colors.darkPantsGrey],[7,11,colors.darkPantsGrey],[8,11,colors.darkPantsGrey],[11,11,colors.darkPantsGrey],[12,11,colors.darkPantsGrey],
+        ],
     };
     
     let pixels;
@@ -1404,11 +1499,14 @@ function drawPlayerSprite(x, y, frame) {
     } else if (frame in spriteData) {
         currentFrameData = spriteData[frame];
     } else {
+        // Debug: log what frame was requested and what's available
+        console.log('Player sprite frame not found:', frame);
+        console.log('Available frames:', Object.keys(spriteData));
         currentFrameData = spriteData['standing_down']; // Fallback
     }
     
-    // Create right-facing sprites by mirroring left-facing ones
-    if (frame.includes('right')) {
+    // Create right-facing sprites by mirroring left-facing ones (but not for diagonal sprites)
+    if (frame.includes('right') && !frame.includes('up_right') && !frame.includes('down_right')) {
         const leftFrameName = frame.replace('right', 'left');
         let sourceFrame;
         if (leftFrameName in toolFrames) {
@@ -1664,117 +1762,6 @@ function drawWizardSprite(x, y, frame) {
             [11,9,colors.staffBrown],[12,9,colors.darkStaffBrown],
             [11,10,colors.staffBrown],[12,10,colors.darkStaffBrown],
             [11,11,colors.staffBrown],[12,11,colors.darkStaffBrown],
-        ],
-        // Diagonal movement frames
-        'standing_up_left': [
-            // Pointy hat
-            [4,0,colors.hatGrey],[5,0,colors.hatGrey],[6,0,colors.hatGrey],[7,0,colors.hatGrey],[8,0,colors.hatGrey],
-            [3,1,colors.hatGrey],[4,1,colors.darkHatGrey],[5,1,colors.darkHatGrey],[6,1,colors.darkHatGrey],[7,1,colors.darkHatGrey],[8,1,colors.darkHatGrey],[9,1,colors.hatGrey],
-            [2,2,colors.hatGrey],[3,2,colors.hatGrey],[4,2,colors.hatGrey],[5,2,colors.hatGrey],[6,2,colors.hatGrey],[7,2,colors.hatGrey],[8,2,colors.hatGrey],[9,2,colors.hatGrey],
-            [2,3,colors.hatGrey],[3,3,colors.hatGrey],[4,3,colors.hatGrey],[5,3,colors.hatGrey],[6,3,colors.hatGrey],[7,3,colors.hatGrey],[8,3,colors.hatGrey],[9,3,colors.hatGrey],
-            [2,4,colors.black],[3,4,colors.skin],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.black],
-            [2,5,colors.black],[3,5,colors.skin],[4,5,colors.black],[5,5,colors.skin],[6,5,colors.skin],[7,5,colors.skin],[8,5,colors.black],[9,5,colors.black],
-            [2,6,colors.black],[3,6,colors.darkSkin],[4,6,colors.skin],[5,6,colors.darkSkin],[6,6,colors.darkSkin],[7,6,colors.darkSkin],[8,6,colors.black],
-            [3,7,colors.black],[4,7,colors.black],[5,7,colors.black],[6,7,colors.black],[7,7,colors.black],[8,7,colors.black],
-            [2,8,colors.black],[3,8,colors.robeGrey],[4,8,colors.robeGrey],[5,8,colors.robeGrey],[6,8,colors.robeGrey],[7,8,colors.robeGrey],[8,8,colors.black],
-            [2,9,colors.black],[3,9,colors.robeGrey],[4,9,colors.robeGrey],[5,9,colors.robeGrey],[6,9,colors.robeGrey],[7,9,colors.robeGrey],[8,9,colors.black],
-            [3,10,colors.robeGrey],[4,10,colors.robeGrey],[5,10,colors.robeGrey],[6,10,colors.robeGrey],[7,10,colors.robeGrey],
-            [3,11,colors.darkRobeGrey],[4,11,colors.darkRobeGrey],[5,11,colors.darkRobeGrey],[6,11,colors.darkRobeGrey],[7,11,colors.darkRobeGrey],
-            // Long grey beard
-            [1,6,colors.beardGrey],[2,6,colors.beardGrey],[9,6,colors.beardGrey],
-            [0,7,colors.beardGrey],[1,7,colors.darkBeardGrey],[2,7,colors.darkBeardGrey],[9,7,colors.darkBeardGrey],[10,7,colors.beardGrey],
-            [0,8,colors.beardGrey],[1,8,colors.darkBeardGrey],[9,8,colors.darkBeardGrey],[10,8,colors.beardGrey],
-            [0,9,colors.beardGrey],[1,9,colors.darkBeardGrey],[9,9,colors.darkBeardGrey],[10,9,colors.beardGrey],
-            [0,10,colors.beardGrey],[1,10,colors.darkBeardGrey],[9,10,colors.darkBeardGrey],[10,10,colors.beardGrey],
-            [0,11,colors.beardGrey],[1,11,colors.darkBeardGrey],[9,11,colors.darkBeardGrey],[10,11,colors.beardGrey],
-            // Wood staff
-            [11,8,colors.staffBrown],[12,8,colors.darkStaffBrown],
-            [11,9,colors.staffBrown],[12,9,colors.darkStaffBrown],
-            [11,10,colors.staffBrown],[12,10,colors.darkStaffBrown],
-            [11,11,colors.staffBrown],[12,11,colors.darkStaffBrown],
-        ],
-        'standing_up_right': [
-            // Pointy hat
-            [4,0,colors.hatGrey],[5,0,colors.hatGrey],[6,0,colors.hatGrey],[7,0,colors.hatGrey],[8,0,colors.hatGrey],
-            [3,1,colors.hatGrey],[4,1,colors.darkHatGrey],[5,1,colors.darkHatGrey],[6,1,colors.darkHatGrey],[7,1,colors.darkHatGrey],[8,1,colors.darkHatGrey],[9,1,colors.hatGrey],
-            [2,2,colors.hatGrey],[3,2,colors.hatGrey],[4,2,colors.hatGrey],[5,2,colors.hatGrey],[6,2,colors.hatGrey],[7,2,colors.hatGrey],[8,2,colors.hatGrey],[9,2,colors.hatGrey],
-            [2,3,colors.hatGrey],[3,3,colors.hatGrey],[4,3,colors.hatGrey],[5,3,colors.hatGrey],[6,3,colors.hatGrey],[7,3,colors.hatGrey],[8,3,colors.hatGrey],[9,3,colors.hatGrey],
-            [2,4,colors.black],[3,4,colors.skin],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.black],
-            [2,5,colors.black],[3,5,colors.skin],[4,5,colors.black],[5,5,colors.skin],[6,5,colors.skin],[7,5,colors.skin],[8,5,colors.black],[9,5,colors.black],
-            [2,6,colors.black],[3,6,colors.darkSkin],[4,6,colors.skin],[5,6,colors.darkSkin],[6,6,colors.darkSkin],[7,6,colors.darkSkin],[8,6,colors.black],
-            [3,7,colors.black],[4,7,colors.black],[5,7,colors.black],[6,7,colors.black],[7,7,colors.black],[8,7,colors.black],
-            [2,8,colors.black],[3,8,colors.robeGrey],[4,8,colors.robeGrey],[5,8,colors.robeGrey],[6,8,colors.robeGrey],[7,8,colors.robeGrey],[8,8,colors.black],
-            [2,9,colors.black],[3,9,colors.robeGrey],[4,9,colors.robeGrey],[5,9,colors.robeGrey],[6,9,colors.robeGrey],[7,9,colors.robeGrey],[8,9,colors.black],
-            [3,10,colors.robeGrey],[4,10,colors.robeGrey],[5,10,colors.robeGrey],[6,10,colors.robeGrey],[7,10,colors.robeGrey],
-            [3,11,colors.darkRobeGrey],[4,11,colors.darkRobeGrey],[5,11,colors.darkRobeGrey],[6,11,colors.darkRobeGrey],[7,11,colors.darkRobeGrey],
-            // Long grey beard
-            [1,6,colors.beardGrey],[2,6,colors.beardGrey],[9,6,colors.beardGrey],
-            [0,7,colors.beardGrey],[1,7,colors.darkBeardGrey],[2,7,colors.darkBeardGrey],[9,7,colors.darkBeardGrey],[10,7,colors.beardGrey],
-            [0,8,colors.beardGrey],[1,8,colors.darkBeardGrey],[9,8,colors.darkBeardGrey],[10,8,colors.beardGrey],
-            [0,9,colors.beardGrey],[1,9,colors.darkBeardGrey],[9,9,colors.darkBeardGrey],[10,9,colors.beardGrey],
-            [0,10,colors.beardGrey],[1,10,colors.darkBeardGrey],[9,10,colors.darkBeardGrey],[10,10,colors.beardGrey],
-            [0,11,colors.beardGrey],[1,11,colors.darkBeardGrey],[9,11,colors.darkBeardGrey],[10,11,colors.beardGrey],
-            // Wood staff
-            [11,8,colors.staffBrown],[12,8,colors.darkStaffBrown],
-            [11,9,colors.staffBrown],[12,9,colors.darkStaffBrown],
-            [11,10,colors.staffBrown],[12,10,colors.darkStaffBrown],
-            [11,11,colors.staffBrown],[12,11,colors.darkStaffBrown],
-        ],
-        'standing_down_left': [
-            // Pointy hat
-            [6,0,colors.hatGrey],[7,0,colors.hatGrey],[8,0,colors.hatGrey],[9,0,colors.hatGrey],
-            [5,1,colors.hatGrey],[6,1,colors.darkHatGrey],[7,1,colors.darkHatGrey],[8,1,colors.darkHatGrey],[9,1,colors.darkHatGrey],[10,1,colors.hatGrey],
-            [4,2,colors.hatGrey],[5,2,colors.hatGrey],[6,2,colors.hatGrey],[7,2,colors.hatGrey],[8,2,colors.hatGrey],[9,2,colors.hatGrey],[10,2,colors.hatGrey],[11,2,colors.hatGrey],
-            [3,3,colors.hatGrey],[4,3,colors.hatGrey],[5,3,colors.hatGrey],[6,3,colors.hatGrey],[7,3,colors.hatGrey],[8,3,colors.hatGrey],[9,3,colors.hatGrey],[10,3,colors.hatGrey],[11,3,colors.hatGrey],[12,3,colors.hatGrey],
-            [3,4,colors.black],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
-            [3,5,colors.black],[4,5,colors.skin],[5,5,colors.black],[6,5,colors.skin],[7,5,colors.skin],[8,5,colors.skin],[9,5,colors.black],[10,5,colors.skin],[11,5,colors.skin],[12,5,colors.black],
-            [4,6,colors.darkSkin],[5,6,colors.skin],[6,6,colors.darkSkin],[7,6,colors.darkSkin],[8,6,colors.darkSkin],[9,6,colors.darkSkin],[10,6,colors.skin],[11,6,colors.darkSkin],
-            // Grey robe
-            [3,7,colors.black],[4,7,colors.black],[5,7,colors.black],[6,7,colors.black],[7,7,colors.black],[8,7,colors.black],[9,7,colors.black],[10,7,colors.black],[11,7,colors.black],[12,7,colors.black],
-            [2,8,colors.black],[3,8,colors.robeGrey],[4,8,colors.robeGrey],[5,8,colors.robeGrey],[6,8,colors.robeGrey],[7,8,colors.robeGrey],[8,8,colors.robeGrey],[9,8,colors.robeGrey],[10,8,colors.robeGrey],[11,8,colors.robeGrey],[12,8,colors.robeGrey],[13,8,colors.black],
-            [2,9,colors.black],[3,9,colors.robeGrey],[4,9,colors.robeGrey],[5,9,colors.robeGrey],[6,9,colors.robeGrey],[7,9,colors.robeGrey],[8,9,colors.robeGrey],[9,9,colors.robeGrey],[10,9,colors.robeGrey],[11,9,colors.robeGrey],[12,9,colors.robeGrey],[13,9,colors.black],
-            [3,10,colors.robeGrey],[4,10,colors.robeGrey],[5,10,colors.robeGrey],[6,10,colors.robeGrey],[7,10,colors.robeGrey],[8,10,colors.robeGrey],[9,10,colors.robeGrey],[10,10,colors.robeGrey],[11,10,colors.robeGrey],
-            [3,11,colors.darkRobeGrey],[4,11,colors.darkRobeGrey],[5,11,colors.darkRobeGrey],[6,11,colors.darkRobeGrey],[7,11,colors.darkRobeGrey],[8,11,colors.darkRobeGrey],[9,11,colors.darkRobeGrey],[10,11,colors.darkRobeGrey],[11,11,colors.darkRobeGrey],
-            // Long grey beard
-            [2,6,colors.beardGrey],[3,6,colors.beardGrey],[12,6,colors.beardGrey],[13,6,colors.beardGrey],
-            [1,7,colors.beardGrey],[2,7,colors.darkBeardGrey],[3,7,colors.darkBeardGrey],[12,7,colors.darkBeardGrey],[13,7,colors.darkBeardGrey],[14,7,colors.beardGrey],
-            [1,8,colors.beardGrey],[2,8,colors.darkBeardGrey],[13,8,colors.darkBeardGrey],[14,8,colors.beardGrey],
-            [1,9,colors.beardGrey],[2,9,colors.darkBeardGrey],[13,9,colors.darkBeardGrey],[14,9,colors.beardGrey],
-            [1,10,colors.beardGrey],[2,10,colors.darkBeardGrey],[13,10,colors.darkBeardGrey],[14,10,colors.beardGrey],
-            [1,11,colors.beardGrey],[2,11,colors.darkBeardGrey],[13,11,colors.darkBeardGrey],[14,11,colors.beardGrey],
-            // Wood staff
-            [0,8,colors.staffBrown],[1,8,colors.darkStaffBrown],
-            [0,9,colors.staffBrown],[1,9,colors.darkStaffBrown],
-            [0,10,colors.staffBrown],[1,10,colors.darkStaffBrown],
-            [0,11,colors.staffBrown],[1,11,colors.darkStaffBrown],
-        ],
-        'standing_down_right': [
-            // Pointy hat
-            [6,0,colors.hatGrey],[7,0,colors.hatGrey],[8,0,colors.hatGrey],[9,0,colors.hatGrey],
-            [5,1,colors.hatGrey],[6,1,colors.darkHatGrey],[7,1,colors.darkHatGrey],[8,1,colors.darkHatGrey],[9,1,colors.darkHatGrey],[10,1,colors.hatGrey],
-            [4,2,colors.hatGrey],[5,2,colors.hatGrey],[6,2,colors.hatGrey],[7,2,colors.hatGrey],[8,2,colors.hatGrey],[9,2,colors.hatGrey],[10,2,colors.hatGrey],[11,2,colors.hatGrey],
-            [3,3,colors.hatGrey],[4,3,colors.hatGrey],[5,3,colors.hatGrey],[6,3,colors.hatGrey],[7,3,colors.hatGrey],[8,3,colors.hatGrey],[9,3,colors.hatGrey],[10,3,colors.hatGrey],[11,3,colors.hatGrey],[12,3,colors.hatGrey],
-            [3,4,colors.black],[4,4,colors.skin],[5,4,colors.skin],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.skin],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
-            [3,5,colors.black],[4,5,colors.skin],[5,5,colors.black],[6,5,colors.skin],[7,5,colors.skin],[8,5,colors.skin],[9,5,colors.black],[10,5,colors.skin],[11,5,colors.skin],[12,5,colors.black],
-            [4,6,colors.darkSkin],[5,6,colors.skin],[6,6,colors.darkSkin],[7,6,colors.darkSkin],[8,6,colors.darkSkin],[9,6,colors.darkSkin],[10,6,colors.skin],[11,6,colors.darkSkin],
-            // Grey robe
-            [3,7,colors.black],[4,7,colors.black],[5,7,colors.black],[6,7,colors.black],[7,7,colors.black],[8,7,colors.black],[9,7,colors.black],[10,7,colors.black],[11,7,colors.black],[12,7,colors.black],
-            [2,8,colors.black],[3,8,colors.robeGrey],[4,8,colors.robeGrey],[5,8,colors.robeGrey],[6,8,colors.robeGrey],[7,8,colors.robeGrey],[8,8,colors.robeGrey],[9,8,colors.robeGrey],[10,8,colors.robeGrey],[11,8,colors.robeGrey],[12,8,colors.robeGrey],[13,8,colors.black],
-            [2,9,colors.black],[3,9,colors.robeGrey],[4,9,colors.robeGrey],[5,9,colors.robeGrey],[6,9,colors.robeGrey],[7,9,colors.robeGrey],[8,9,colors.robeGrey],[9,9,colors.robeGrey],[10,9,colors.robeGrey],[11,9,colors.robeGrey],[12,9,colors.robeGrey],[13,9,colors.black],
-            [3,10,colors.robeGrey],[4,10,colors.robeGrey],[5,10,colors.robeGrey],[6,10,colors.robeGrey],[7,10,colors.robeGrey],[8,10,colors.robeGrey],[9,10,colors.robeGrey],[10,10,colors.robeGrey],[11,10,colors.robeGrey],
-            [3,11,colors.darkRobeGrey],[4,11,colors.darkRobeGrey],[5,11,colors.darkRobeGrey],[6,11,colors.darkRobeGrey],[7,11,colors.darkRobeGrey],[8,11,colors.darkRobeGrey],[9,11,colors.darkRobeGrey],[10,11,colors.darkRobeGrey],[11,11,colors.darkRobeGrey],
-            // Long grey beard
-            [2,6,colors.beardGrey],[3,6,colors.beardGrey],[12,6,colors.beardGrey],[13,6,colors.beardGrey],
-            [1,7,colors.beardGrey],[2,7,colors.darkBeardGrey],[3,7,colors.darkBeardGrey],[12,7,colors.darkBeardGrey],[13,7,colors.darkBeardGrey],[14,7,colors.beardGrey],
-            [1,8,colors.beardGrey],[2,8,colors.darkBeardGrey],[13,8,colors.darkBeardGrey],[14,8,colors.beardGrey],
-            [1,9,colors.beardGrey],[2,9,colors.darkBeardGrey],[13,9,colors.darkBeardGrey],[14,9,colors.beardGrey],
-            [1,10,colors.beardGrey],[2,10,colors.darkBeardGrey],[13,10,colors.darkBeardGrey],[14,10,colors.beardGrey],
-            [1,11,colors.beardGrey],[2,11,colors.darkBeardGrey],[13,11,colors.darkBeardGrey],[14,11,colors.beardGrey],
-            // Wood staff
-            [0,8,colors.staffBrown],[1,8,colors.darkStaffBrown],
-            [0,9,colors.staffBrown],[1,9,colors.darkStaffBrown],
-            [0,10,colors.staffBrown],[1,10,colors.darkStaffBrown],
-            [0,11,colors.staffBrown],[1,11,colors.darkStaffBrown],
         ],
     };
     
