@@ -62,7 +62,7 @@ This game is self-contained in the `index.html` file. Simply download it and ope
 
 ### UI Elements
 - **Inventory Panel**: Top bar showing all collected resources
-- **Actions Panel**: Left sidebar with crafting and basic action tabs
+- **Actions Panel**: Left sidebar with crafting and food action tabs
 - **Mini Map**: Interactive map showing world overview and NPC locations
 - **Message Log**: Scrollable log of all game events
 - **Gameplay Messages**: Real-time overlay showing recent actions
