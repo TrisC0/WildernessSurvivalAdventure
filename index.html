@@ -182,7 +182,7 @@
     <footer class="ui-panel flex-shrink-0">
          <div class="flex flex-col md:flex-row justify-between items-center gap-4">
             <!-- Stats -->
-            <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-4 gap-3">
                 <div>
                     <span class="text-sm">❤️ HEALTH</span>
                     <div class="stat-bar-bg h-4"><div id="healthBar" class="stat-bar bg-red-500" style="width: 100%;"></div></div>
@@ -194,6 +194,10 @@
                 <div>
                     <span class="text-sm">⚡ ENERGY</span>
                     <div class="stat-bar-bg h-4"><div id="energyBar" class="stat-bar bg-blue-500" style="width: 100%;"></div></div>
+                </div>
+                <div>
+                    <span class="text-sm">⭐ LEVEL <span id="levelDisplay">1</span></span>
+                    <div class="text-xs text-green-400">XP: <span id="xpDisplay">0</span></div>
                 </div>
             </div>
             <!-- Time -->
@@ -255,6 +259,8 @@ if (!ctx.roundRect) {
 const healthBar = document.getElementById('healthBar');
 const hungerBar = document.getElementById('hungerBar');
 const energyBar = document.getElementById('energyBar');
+const xpDisplay = document.getElementById('xpDisplay');
+const levelDisplay = document.getElementById('levelDisplay');
 const timeDisplay = document.getElementById('timeDisplay');
 const woodCountUI = document.getElementById('woodCount');
 const stoneCountUI = document.getElementById('stoneCount');
@@ -301,6 +307,9 @@ const TILES = {
     MONOLITH_ACTIVATED: 12,
     MOUNTAIN: 13,
     WIZARD: 14,
+    RABBIT: 15,
+    DEER: 16,
+    SQUIRREL: 17,
 };
 
 const TILE_COLORS = {
@@ -319,6 +328,9 @@ const TILE_COLORS = {
     [TILES.MONOLITH_ACTIVATED]: '#f6e05e',
     [TILES.MOUNTAIN]: '#6b7280',
     [TILES.WIZARD]: '#808080',
+    [TILES.RABBIT]: '#d4a574',
+    [TILES.DEER]: '#8b4513',
+    [TILES.SQUIRREL]: '#a0522d',
 };
 
 
@@ -349,6 +361,8 @@ let gameState = {
         petals: 0,
         carvedStone: 0,
     },
+    xp: 0,
+    level: 1,
     tools: {
         axe: false,
         pickaxe: false,
@@ -380,6 +394,11 @@ let gameState = {
             "Seek my counsel, traveler!",
             "The monoliths call to you!"
         ],
+    },
+    newAnimals: {
+        rabbits: [],
+        deer: [],
+        squirrels: [],
     },
     time: {
         day: 1,
@@ -1555,6 +1574,325 @@ function drawWizardSprite(x, y, frame) {
             [11,9,colors.staffBrown],[12,9,colors.darkStaffBrown],
             [11,10,colors.staffBrown],[12,10,colors.darkStaffBrown],
             [11,11,colors.staffBrown],[12,11,colors.darkStaffBrown],
+        ],
+    };
+    
+    let pixels;
+    if (frame in spriteData) {
+        pixels = spriteData[frame];
+    } else {
+        pixels = spriteData['standing_down'];
+    }
+
+    if (frame.includes('right')) {
+        const leftFrame = frame.replace('right', 'left');
+        pixels = spriteData[leftFrame].map(([px, py, color]) => [SPRITE_WIDTH - 1 - px, py, color]);
+    }
+
+    pixels.forEach(([px, py, color]) => p(px, py, color));
+
+    ctx.restore();
+}
+
+function drawRabbitSprite(x, y, frame) {
+    const PIXEL_SIZE = 3;
+    const SPRITE_WIDTH = 12;
+    const SPRITE_HEIGHT = 12;
+    const SPRITE_OFFSET_X = TILE_SIZE / 2 - (SPRITE_WIDTH * PIXEL_SIZE) / 2;
+    const SPRITE_OFFSET_Y = 15;
+
+    const colors = {
+        fur: '#d4a574',
+        darkFur: '#b8860b',
+        lightFur: '#f4e4bc',
+        pink: '#ffb6c1',
+        black: '#212121',
+        white: '#ffffff',
+    };
+
+    ctx.save();
+    ctx.translate(x + SPRITE_OFFSET_X, y + SPRITE_OFFSET_Y);
+
+    const p = (px, py, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * PIXEL_SIZE, py * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    };
+
+    const spriteData = {
+        'standing_down': [
+            // Ears
+            [4,0,colors.fur],[5,0,colors.fur],[6,0,colors.fur],[7,0,colors.fur],
+            [3,1,colors.fur],[4,1,colors.darkFur],[5,1,colors.darkFur],[6,1,colors.darkFur],[7,1,colors.darkFur],[8,1,colors.fur],
+            [2,2,colors.fur],[3,2,colors.fur],[4,2,colors.fur],[5,2,colors.fur],[6,2,colors.fur],[7,2,colors.fur],[8,2,colors.fur],[9,2,colors.fur],
+            // Face
+            [3,3,colors.fur],[4,3,colors.lightFur],[5,3,colors.lightFur],[6,3,colors.lightFur],[7,3,colors.lightFur],[8,3,colors.fur],
+            [3,4,colors.fur],[4,4,colors.lightFur],[5,4,colors.pink],[6,4,colors.pink],[7,4,colors.lightFur],[8,4,colors.fur],
+            [3,5,colors.fur],[4,5,colors.lightFur],[5,5,colors.black],[6,5,colors.black],[7,5,colors.lightFur],[8,5,colors.fur],
+            // Body
+            [2,6,colors.fur],[3,6,colors.fur],[4,6,colors.fur],[5,6,colors.fur],[6,6,colors.fur],[7,6,colors.fur],[8,6,colors.fur],[9,6,colors.fur],
+            [2,7,colors.fur],[3,7,colors.darkFur],[4,7,colors.darkFur],[5,7,colors.darkFur],[6,7,colors.darkFur],[7,7,colors.darkFur],[8,7,colors.darkFur],[9,7,colors.fur],
+            [2,8,colors.fur],[3,8,colors.fur],[4,8,colors.fur],[5,8,colors.fur],[6,8,colors.fur],[7,8,colors.fur],[8,8,colors.fur],[9,8,colors.fur],
+            // Legs
+            [3,9,colors.darkFur],[4,9,colors.darkFur],[7,9,colors.darkFur],[8,9,colors.darkFur],
+            [3,10,colors.darkFur],[4,10,colors.darkFur],[7,10,colors.darkFur],[8,10,colors.darkFur],
+            [3,11,colors.darkFur],[4,11,colors.darkFur],[7,11,colors.darkFur],[8,11,colors.darkFur],
+        ],
+        'standing_up': [
+            // Ears
+            [4,0,colors.fur],[5,0,colors.fur],[6,0,colors.fur],[7,0,colors.fur],
+            [3,1,colors.fur],[4,1,colors.darkFur],[5,1,colors.darkFur],[6,1,colors.darkFur],[7,1,colors.darkFur],[8,1,colors.fur],
+            [2,2,colors.fur],[3,2,colors.fur],[4,2,colors.fur],[5,2,colors.fur],[6,2,colors.fur],[7,2,colors.fur],[8,2,colors.fur],[9,2,colors.fur],
+            // Face
+            [3,3,colors.fur],[4,3,colors.lightFur],[5,3,colors.lightFur],[6,3,colors.lightFur],[7,3,colors.lightFur],[8,3,colors.fur],
+            [3,4,colors.fur],[4,4,colors.lightFur],[5,4,colors.pink],[6,4,colors.pink],[7,4,colors.lightFur],[8,4,colors.fur],
+            [3,5,colors.fur],[4,5,colors.lightFur],[5,5,colors.black],[6,5,colors.black],[7,5,colors.lightFur],[8,5,colors.fur],
+            // Body
+            [2,6,colors.fur],[3,6,colors.fur],[4,6,colors.fur],[5,6,colors.fur],[6,6,colors.fur],[7,6,colors.fur],[8,6,colors.fur],[9,6,colors.fur],
+            [2,7,colors.fur],[3,7,colors.darkFur],[4,7,colors.darkFur],[5,7,colors.darkFur],[6,7,colors.darkFur],[7,7,colors.darkFur],[8,7,colors.darkFur],[9,7,colors.fur],
+            [2,8,colors.fur],[3,8,colors.fur],[4,8,colors.fur],[5,8,colors.fur],[6,8,colors.fur],[7,8,colors.fur],[8,8,colors.fur],[9,8,colors.fur],
+            // Legs
+            [3,9,colors.darkFur],[4,9,colors.darkFur],[7,9,colors.darkFur],[8,9,colors.darkFur],
+            [3,10,colors.darkFur],[4,10,colors.darkFur],[7,10,colors.darkFur],[8,10,colors.darkFur],
+            [3,11,colors.darkFur],[4,11,colors.darkFur],[7,11,colors.darkFur],[8,11,colors.darkFur],
+        ],
+        'standing_left': [
+            // Ears
+            [3,0,colors.fur],[4,0,colors.fur],[5,0,colors.fur],[6,0,colors.fur],
+            [2,1,colors.fur],[3,1,colors.darkFur],[4,1,colors.darkFur],[5,1,colors.darkFur],[6,1,colors.darkFur],[7,1,colors.fur],
+            [1,2,colors.fur],[2,2,colors.fur],[3,2,colors.fur],[4,2,colors.fur],[5,2,colors.fur],[6,2,colors.fur],[7,2,colors.fur],[8,2,colors.fur],
+            // Face
+            [2,3,colors.fur],[3,3,colors.lightFur],[4,3,colors.lightFur],[5,3,colors.lightFur],[6,3,colors.lightFur],[7,3,colors.fur],
+            [2,4,colors.fur],[3,4,colors.lightFur],[4,4,colors.pink],[5,4,colors.pink],[6,4,colors.lightFur],[7,4,colors.fur],
+            [2,5,colors.fur],[3,5,colors.lightFur],[4,5,colors.black],[5,5,colors.black],[6,5,colors.lightFur],[7,5,colors.fur],
+            // Body
+            [1,6,colors.fur],[2,6,colors.fur],[3,6,colors.fur],[4,6,colors.fur],[5,6,colors.fur],[6,6,colors.fur],[7,6,colors.fur],[8,6,colors.fur],
+            [1,7,colors.fur],[2,7,colors.darkFur],[3,7,colors.darkFur],[4,7,colors.darkFur],[5,7,colors.darkFur],[6,7,colors.darkFur],[7,7,colors.darkFur],[8,7,colors.fur],
+            [1,8,colors.fur],[2,8,colors.fur],[3,8,colors.fur],[4,8,colors.fur],[5,8,colors.fur],[6,8,colors.fur],[7,8,colors.fur],[8,8,colors.fur],
+            // Legs
+            [2,9,colors.darkFur],[3,9,colors.darkFur],[6,9,colors.darkFur],[7,9,colors.darkFur],
+            [2,10,colors.darkFur],[3,10,colors.darkFur],[6,10,colors.darkFur],[7,10,colors.darkFur],
+            [2,11,colors.darkFur],[3,11,colors.darkFur],[6,11,colors.darkFur],[7,11,colors.darkFur],
+        ],
+    };
+    
+    let pixels;
+    if (frame in spriteData) {
+        pixels = spriteData[frame];
+    } else {
+        pixels = spriteData['standing_down'];
+    }
+
+    if (frame.includes('right')) {
+        const leftFrame = frame.replace('right', 'left');
+        pixels = spriteData[leftFrame].map(([px, py, color]) => [SPRITE_WIDTH - 1 - px, py, color]);
+    }
+
+    pixels.forEach(([px, py, color]) => p(px, py, color));
+
+    ctx.restore();
+}
+
+function drawDeerSprite(x, y, frame) {
+    const PIXEL_SIZE = 4;
+    const SPRITE_WIDTH = 16;
+    const SPRITE_HEIGHT = 16;
+    const SPRITE_OFFSET_X = TILE_SIZE / 2 - (SPRITE_WIDTH * PIXEL_SIZE) / 2;
+    const SPRITE_OFFSET_Y = 10;
+
+    const colors = {
+        fur: '#8b4513',
+        darkFur: '#654321',
+        lightFur: '#a0522d',
+        antlers: '#8b7355',
+        darkAntlers: '#654321',
+        black: '#212121',
+        white: '#ffffff',
+        pink: '#ffb6c1',
+    };
+
+    ctx.save();
+    ctx.translate(x + SPRITE_OFFSET_X, y + SPRITE_OFFSET_Y);
+
+    const p = (px, py, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * PIXEL_SIZE, py * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    };
+
+    const spriteData = {
+        'standing_down': [
+            // Antlers
+            [4,0,colors.antlers],[5,0,colors.antlers],[6,0,colors.antlers],[7,0,colors.antlers],[8,0,colors.antlers],[9,0,colors.antlers],
+            [3,1,colors.antlers],[4,1,colors.darkAntlers],[5,1,colors.darkAntlers],[6,1,colors.antlers],[7,1,colors.antlers],[8,1,colors.darkAntlers],[9,1,colors.darkAntlers],[10,1,colors.antlers],
+            [2,2,colors.antlers],[3,2,colors.antlers],[4,2,colors.antlers],[5,2,colors.antlers],[6,2,colors.antlers],[7,2,colors.antlers],[8,2,colors.antlers],[9,2,colors.antlers],[10,2,colors.antlers],[11,2,colors.antlers],
+            // Head
+            [3,3,colors.fur],[4,3,colors.lightFur],[5,3,colors.lightFur],[6,3,colors.lightFur],[7,3,colors.lightFur],[8,3,colors.lightFur],[9,3,colors.lightFur],[10,3,colors.fur],
+            [3,4,colors.fur],[4,4,colors.lightFur],[5,4,colors.pink],[6,4,colors.pink],[7,4,colors.pink],[8,4,colors.pink],[9,4,colors.lightFur],[10,4,colors.fur],
+            [3,5,colors.fur],[4,5,colors.lightFur],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.lightFur],[10,5,colors.fur],
+            // Neck
+            [4,6,colors.fur],[5,6,colors.fur],[6,6,colors.fur],[7,6,colors.fur],[8,6,colors.fur],
+            [4,7,colors.darkFur],[5,7,colors.darkFur],[6,7,colors.darkFur],[7,7,colors.darkFur],[8,7,colors.darkFur],
+            // Body
+            [2,8,colors.fur],[3,8,colors.fur],[4,8,colors.fur],[5,8,colors.fur],[6,8,colors.fur],[7,8,colors.fur],[8,8,colors.fur],[9,8,colors.fur],[10,8,colors.fur],[11,8,colors.fur],
+            [2,9,colors.fur],[3,9,colors.darkFur],[4,9,colors.darkFur],[5,9,colors.darkFur],[6,9,colors.darkFur],[7,9,colors.darkFur],[8,9,colors.darkFur],[9,9,colors.darkFur],[10,9,colors.darkFur],[11,9,colors.fur],
+            [2,10,colors.fur],[3,10,colors.fur],[4,10,colors.fur],[5,10,colors.fur],[6,10,colors.fur],[7,10,colors.fur],[8,10,colors.fur],[9,10,colors.fur],[10,10,colors.fur],[11,10,colors.fur],
+            // Legs
+            [2,11,colors.darkFur],[3,11,colors.darkFur],[4,11,colors.darkFur],[5,11,colors.darkFur],[6,11,colors.darkFur],[7,11,colors.darkFur],[8,11,colors.darkFur],[9,11,colors.darkFur],[10,11,colors.darkFur],[11,11,colors.darkFur],
+            [2,12,colors.darkFur],[3,12,colors.darkFur],[4,12,colors.darkFur],[5,12,colors.darkFur],[6,12,colors.darkFur],[7,12,colors.darkFur],[8,12,colors.darkFur],[9,12,colors.darkFur],[10,12,colors.darkFur],[11,12,colors.darkFur],
+            [2,13,colors.darkFur],[3,13,colors.darkFur],[4,13,colors.darkFur],[5,13,colors.darkFur],[6,13,colors.darkFur],[7,13,colors.darkFur],[8,13,colors.darkFur],[9,13,colors.darkFur],[10,13,colors.darkFur],[11,13,colors.darkFur],
+        ],
+        'standing_up': [
+            // Antlers
+            [4,0,colors.antlers],[5,0,colors.antlers],[6,0,colors.antlers],[7,0,colors.antlers],[8,0,colors.antlers],[9,0,colors.antlers],
+            [3,1,colors.antlers],[4,1,colors.darkAntlers],[5,1,colors.darkAntlers],[6,1,colors.antlers],[7,1,colors.antlers],[8,1,colors.darkAntlers],[9,1,colors.darkAntlers],[10,1,colors.antlers],
+            [2,2,colors.antlers],[3,2,colors.antlers],[4,2,colors.antlers],[5,2,colors.antlers],[6,2,colors.antlers],[7,2,colors.antlers],[8,2,colors.antlers],[9,2,colors.antlers],[10,2,colors.antlers],[11,2,colors.antlers],
+            // Head
+            [3,3,colors.fur],[4,3,colors.lightFur],[5,3,colors.lightFur],[6,3,colors.lightFur],[7,3,colors.lightFur],[8,3,colors.lightFur],[9,3,colors.lightFur],[10,3,colors.fur],
+            [3,4,colors.fur],[4,4,colors.lightFur],[5,4,colors.pink],[6,4,colors.pink],[7,4,colors.pink],[8,4,colors.pink],[9,4,colors.lightFur],[10,4,colors.fur],
+            [3,5,colors.fur],[4,5,colors.lightFur],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.black],[9,5,colors.lightFur],[10,5,colors.fur],
+            // Neck
+            [4,6,colors.fur],[5,6,colors.fur],[6,6,colors.fur],[7,6,colors.fur],[8,6,colors.fur],
+            [4,7,colors.darkFur],[5,7,colors.darkFur],[6,7,colors.darkFur],[7,7,colors.darkFur],[8,7,colors.darkFur],
+            // Body
+            [2,8,colors.fur],[3,8,colors.fur],[4,8,colors.fur],[5,8,colors.fur],[6,8,colors.fur],[7,8,colors.fur],[8,8,colors.fur],[9,8,colors.fur],[10,8,colors.fur],[11,8,colors.fur],
+            [2,9,colors.fur],[3,9,colors.darkFur],[4,9,colors.darkFur],[5,9,colors.darkFur],[6,9,colors.darkFur],[7,9,colors.darkFur],[8,9,colors.darkFur],[9,9,colors.darkFur],[10,9,colors.darkFur],[11,9,colors.fur],
+            [2,10,colors.fur],[3,10,colors.fur],[4,10,colors.fur],[5,10,colors.fur],[6,10,colors.fur],[7,10,colors.fur],[8,10,colors.fur],[9,10,colors.fur],[10,10,colors.fur],[11,10,colors.fur],
+            // Legs
+            [2,11,colors.darkFur],[3,11,colors.darkFur],[4,11,colors.darkFur],[5,11,colors.darkFur],[6,11,colors.darkFur],[7,11,colors.darkFur],[8,11,colors.darkFur],[9,11,colors.darkFur],[10,11,colors.darkFur],[11,11,colors.darkFur],
+            [2,12,colors.darkFur],[3,12,colors.darkFur],[4,12,colors.darkFur],[5,12,colors.darkFur],[6,12,colors.darkFur],[7,12,colors.darkFur],[8,12,colors.darkFur],[9,12,colors.darkFur],[10,12,colors.darkFur],[11,12,colors.darkFur],
+            [2,13,colors.darkFur],[3,13,colors.darkFur],[4,13,colors.darkFur],[5,13,colors.darkFur],[6,13,colors.darkFur],[7,13,colors.darkFur],[8,13,colors.darkFur],[9,13,colors.darkFur],[10,13,colors.darkFur],[11,13,colors.darkFur],
+        ],
+        'standing_left': [
+            // Antlers
+            [3,0,colors.antlers],[4,0,colors.antlers],[5,0,colors.antlers],[6,0,colors.antlers],[7,0,colors.antlers],[8,0,colors.antlers],
+            [2,1,colors.antlers],[3,1,colors.darkAntlers],[4,1,colors.darkAntlers],[5,1,colors.antlers],[6,1,colors.antlers],[7,1,colors.darkAntlers],[8,1,colors.darkAntlers],[9,1,colors.antlers],
+            [1,2,colors.antlers],[2,2,colors.antlers],[3,2,colors.antlers],[4,2,colors.antlers],[5,2,colors.antlers],[6,2,colors.antlers],[7,2,colors.antlers],[8,2,colors.antlers],[9,2,colors.antlers],[10,2,colors.antlers],
+            // Head
+            [2,3,colors.fur],[3,3,colors.lightFur],[4,3,colors.lightFur],[5,3,colors.lightFur],[6,3,colors.lightFur],[7,3,colors.lightFur],[8,3,colors.lightFur],[9,3,colors.fur],
+            [2,4,colors.fur],[3,4,colors.lightFur],[4,4,colors.pink],[5,4,colors.pink],[6,4,colors.pink],[7,4,colors.pink],[8,4,colors.lightFur],[9,4,colors.fur],
+            [2,5,colors.fur],[3,5,colors.lightFur],[4,5,colors.black],[5,5,colors.black],[6,5,colors.black],[7,5,colors.black],[8,5,colors.lightFur],[9,5,colors.fur],
+            // Neck
+            [3,6,colors.fur],[4,6,colors.fur],[5,6,colors.fur],[6,6,colors.fur],[7,6,colors.fur],
+            [3,7,colors.darkFur],[4,7,colors.darkFur],[5,7,colors.darkFur],[6,7,colors.darkFur],[7,7,colors.darkFur],
+            // Body
+            [1,8,colors.fur],[2,8,colors.fur],[3,8,colors.fur],[4,8,colors.fur],[5,8,colors.fur],[6,8,colors.fur],[7,8,colors.fur],[8,8,colors.fur],[9,8,colors.fur],[10,8,colors.fur],
+            [1,9,colors.fur],[2,9,colors.darkFur],[3,9,colors.darkFur],[4,9,colors.darkFur],[5,9,colors.darkFur],[6,9,colors.darkFur],[7,9,colors.darkFur],[8,9,colors.darkFur],[9,9,colors.darkFur],[10,9,colors.fur],
+            [1,10,colors.fur],[2,10,colors.fur],[3,10,colors.fur],[4,10,colors.fur],[5,10,colors.fur],[6,10,colors.fur],[7,10,colors.fur],[8,10,colors.fur],[9,10,colors.fur],[10,10,colors.fur],
+            // Legs
+            [1,11,colors.darkFur],[2,11,colors.darkFur],[3,11,colors.darkFur],[4,11,colors.darkFur],[5,11,colors.darkFur],[6,11,colors.darkFur],[7,11,colors.darkFur],[8,11,colors.darkFur],[9,11,colors.darkFur],[10,11,colors.darkFur],
+            [1,12,colors.darkFur],[2,12,colors.darkFur],[3,12,colors.darkFur],[4,12,colors.darkFur],[5,12,colors.darkFur],[6,12,colors.darkFur],[7,12,colors.darkFur],[8,12,colors.darkFur],[9,12,colors.darkFur],[10,12,colors.darkFur],
+            [1,13,colors.darkFur],[2,13,colors.darkFur],[3,13,colors.darkFur],[4,13,colors.darkFur],[5,13,colors.darkFur],[6,13,colors.darkFur],[7,13,colors.darkFur],[8,13,colors.darkFur],[9,13,colors.darkFur],[10,13,colors.darkFur],
+        ],
+    };
+    
+    let pixels;
+    if (frame in spriteData) {
+        pixels = spriteData[frame];
+    } else {
+        pixels = spriteData['standing_down'];
+    }
+
+    if (frame.includes('right')) {
+        const leftFrame = frame.replace('right', 'left');
+        pixels = spriteData[leftFrame].map(([px, py, color]) => [SPRITE_WIDTH - 1 - px, py, color]);
+    }
+
+    pixels.forEach(([px, py, color]) => p(px, py, color));
+
+    ctx.restore();
+}
+
+function drawSquirrelSprite(x, y, frame) {
+    const PIXEL_SIZE = 3;
+    const SPRITE_WIDTH = 12;
+    const SPRITE_HEIGHT = 12;
+    const SPRITE_OFFSET_X = TILE_SIZE / 2 - (SPRITE_WIDTH * PIXEL_SIZE) / 2;
+    const SPRITE_OFFSET_Y = 15;
+
+    const colors = {
+        fur: '#a0522d',
+        darkFur: '#8b4513',
+        lightFur: '#cd853f',
+        tail: '#8b7355',
+        darkTail: '#654321',
+        black: '#212121',
+        white: '#ffffff',
+        pink: '#ffb6c1',
+    };
+
+    ctx.save();
+    ctx.translate(x + SPRITE_OFFSET_X, y + SPRITE_OFFSET_Y);
+
+    const p = (px, py, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * PIXEL_SIZE, py * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    };
+
+    const spriteData = {
+        'standing_down': [
+            // Ears
+            [4,0,colors.fur],[5,0,colors.fur],[6,0,colors.fur],[7,0,colors.fur],
+            [3,1,colors.fur],[4,1,colors.darkFur],[5,1,colors.darkFur],[6,1,colors.darkFur],[7,1,colors.darkFur],[8,1,colors.fur],
+            [2,2,colors.fur],[3,2,colors.fur],[4,2,colors.fur],[5,2,colors.fur],[6,2,colors.fur],[7,2,colors.fur],[8,2,colors.fur],[9,2,colors.fur],
+            // Face
+            [3,3,colors.fur],[4,3,colors.lightFur],[5,3,colors.lightFur],[6,3,colors.lightFur],[7,3,colors.lightFur],[8,3,colors.fur],
+            [3,4,colors.fur],[4,4,colors.lightFur],[5,4,colors.pink],[6,4,colors.pink],[7,4,colors.lightFur],[8,4,colors.fur],
+            [3,5,colors.fur],[4,5,colors.lightFur],[5,5,colors.black],[6,5,colors.black],[7,5,colors.lightFur],[8,5,colors.fur],
+            // Body
+            [2,6,colors.fur],[3,6,colors.fur],[4,6,colors.fur],[5,6,colors.fur],[6,6,colors.fur],[7,6,colors.fur],[8,6,colors.fur],[9,6,colors.fur],
+            [2,7,colors.fur],[3,7,colors.darkFur],[4,7,colors.darkFur],[5,7,colors.darkFur],[6,7,colors.darkFur],[7,7,colors.darkFur],[8,7,colors.darkFur],[9,7,colors.fur],
+            [2,8,colors.fur],[3,8,colors.fur],[4,8,colors.fur],[5,8,colors.fur],[6,8,colors.fur],[7,8,colors.fur],[8,8,colors.fur],[9,8,colors.fur],
+            // Tail
+            [0,6,colors.tail],[1,6,colors.darkTail],[2,6,colors.darkTail],
+            [0,7,colors.tail],[1,7,colors.darkTail],[2,7,colors.darkTail],
+            [0,8,colors.tail],[1,8,colors.darkTail],[2,8,colors.darkTail],
+            // Legs
+            [3,9,colors.darkFur],[4,9,colors.darkFur],[7,9,colors.darkFur],[8,9,colors.darkFur],
+            [3,10,colors.darkFur],[4,10,colors.darkFur],[7,10,colors.darkFur],[8,10,colors.darkFur],
+            [3,11,colors.darkFur],[4,11,colors.darkFur],[7,11,colors.darkFur],[8,11,colors.darkFur],
+        ],
+        'standing_up': [
+            // Ears
+            [4,0,colors.fur],[5,0,colors.fur],[6,0,colors.fur],[7,0,colors.fur],
+            [3,1,colors.fur],[4,1,colors.darkFur],[5,1,colors.darkFur],[6,1,colors.darkFur],[7,1,colors.darkFur],[8,1,colors.fur],
+            [2,2,colors.fur],[3,2,colors.fur],[4,2,colors.fur],[5,2,colors.fur],[6,2,colors.fur],[7,2,colors.fur],[8,2,colors.fur],[9,2,colors.fur],
+            // Face
+            [3,3,colors.fur],[4,3,colors.lightFur],[5,3,colors.lightFur],[6,3,colors.lightFur],[7,3,colors.lightFur],[8,3,colors.fur],
+            [3,4,colors.fur],[4,4,colors.lightFur],[5,4,colors.pink],[6,4,colors.pink],[7,4,colors.lightFur],[8,4,colors.fur],
+            [3,5,colors.fur],[4,5,colors.lightFur],[5,5,colors.black],[6,5,colors.black],[7,5,colors.lightFur],[8,5,colors.fur],
+            // Body
+            [2,6,colors.fur],[3,6,colors.fur],[4,6,colors.fur],[5,6,colors.fur],[6,6,colors.fur],[7,6,colors.fur],[8,6,colors.fur],[9,6,colors.fur],
+            [2,7,colors.fur],[3,7,colors.darkFur],[4,7,colors.darkFur],[5,7,colors.darkFur],[6,7,colors.darkFur],[7,7,colors.darkFur],[8,7,colors.darkFur],[9,7,colors.fur],
+            [2,8,colors.fur],[3,8,colors.fur],[4,8,colors.fur],[5,8,colors.fur],[6,8,colors.fur],[7,8,colors.fur],[8,8,colors.fur],[9,8,colors.fur],
+            // Tail
+            [0,6,colors.tail],[1,6,colors.darkTail],[2,6,colors.darkTail],
+            [0,7,colors.tail],[1,7,colors.darkTail],[2,7,colors.darkTail],
+            [0,8,colors.tail],[1,8,colors.darkTail],[2,8,colors.darkTail],
+            // Legs
+            [3,9,colors.darkFur],[4,9,colors.darkFur],[7,9,colors.darkFur],[8,9,colors.darkFur],
+            [3,10,colors.darkFur],[4,10,colors.darkFur],[7,10,colors.darkFur],[8,10,colors.darkFur],
+            [3,11,colors.darkFur],[4,11,colors.darkFur],[7,11,colors.darkFur],[8,11,colors.darkFur],
+        ],
+        'standing_left': [
+            // Ears
+            [3,0,colors.fur],[4,0,colors.fur],[5,0,colors.fur],[6,0,colors.fur],
+            [2,1,colors.fur],[3,1,colors.darkFur],[4,1,colors.darkFur],[5,1,colors.darkFur],[6,1,colors.darkFur],[7,1,colors.fur],
+            [1,2,colors.fur],[2,2,colors.fur],[3,2,colors.fur],[4,2,colors.fur],[5,2,colors.fur],[6,2,colors.fur],[7,2,colors.fur],[8,2,colors.fur],
+            // Face
+            [2,3,colors.fur],[3,3,colors.lightFur],[4,3,colors.lightFur],[5,3,colors.lightFur],[6,3,colors.lightFur],[7,3,colors.fur],
+            [2,4,colors.fur],[3,4,colors.lightFur],[4,4,colors.pink],[5,4,colors.pink],[6,4,colors.lightFur],[7,4,colors.fur],
+            [2,5,colors.fur],[3,5,colors.lightFur],[4,5,colors.black],[5,5,colors.black],[6,5,colors.lightFur],[7,5,colors.fur],
+            // Body
+            [1,6,colors.fur],[2,6,colors.fur],[3,6,colors.fur],[4,6,colors.fur],[5,6,colors.fur],[6,6,colors.fur],[7,6,colors.fur],[8,6,colors.fur],
+            [1,7,colors.fur],[2,7,colors.darkFur],[3,7,colors.darkFur],[4,7,colors.darkFur],[5,7,colors.darkFur],[6,7,colors.darkFur],[7,7,colors.darkFur],[8,7,colors.fur],
+            [1,8,colors.fur],[2,8,colors.fur],[3,8,colors.fur],[4,8,colors.fur],[5,8,colors.fur],[6,8,colors.fur],[7,8,colors.fur],[8,8,colors.fur],
+            // Tail
+            [9,6,colors.tail],[10,6,colors.darkTail],[11,6,colors.darkTail],
+            [9,7,colors.tail],[10,7,colors.darkTail],[11,7,colors.darkTail],
+            [9,8,colors.tail],[10,8,colors.darkTail],[11,8,colors.darkTail],
+            // Legs
+            [2,9,colors.darkFur],[3,9,colors.darkFur],[6,9,colors.darkFur],[7,9,colors.darkFur],
+            [2,10,colors.darkFur],[3,10,colors.darkFur],[6,10,colors.darkFur],[7,10,colors.darkFur],
+            [2,11,colors.darkFur],[3,11,colors.darkFur],[6,11,colors.darkFur],[7,11,colors.darkFur],
         ],
     };
     
