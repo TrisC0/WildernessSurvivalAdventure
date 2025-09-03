@@ -234,6 +234,23 @@ const ctx = canvas.getContext('2d');
 const miniMap = document.getElementById('miniMap');
 const miniMapCtx = miniMap.getContext('2d');
 
+// Polyfill for roundRect if not available
+if (!ctx.roundRect) {
+    ctx.roundRect = function(x, y, width, height, radius) {
+        this.beginPath();
+        this.moveTo(x + radius, y);
+        this.lineTo(x + width - radius, y);
+        this.quadraticCurveTo(x + width, y, x + width, y + radius);
+        this.lineTo(x + width, y + height - radius);
+        this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+        this.lineTo(x + radius, y + height);
+        this.quadraticCurveTo(x, y + height, x, y + height - radius);
+        this.lineTo(x, y + radius);
+        this.quadraticCurveTo(x, y, x + radius, y);
+        this.closePath();
+    };
+}
+
 // UI Elements
 const healthBar = document.getElementById('healthBar');
 const hungerBar = document.getElementById('hungerBar');
@@ -350,6 +367,19 @@ let gameState = {
         isMoving: false,
         walkCycle: 0,
         lastInteraction: 0,
+        speechBubble: {
+            visible: false,
+            message: '',
+            timer: 0,
+            maxTimer: 180, // 3 seconds at 60fps
+        },
+        calloutMessages: [
+            "Come here, young one!",
+            "I have wisdom to share!",
+            "The ancient secrets await!",
+            "Seek my counsel, traveler!",
+            "The monoliths call to you!"
+        ],
     },
     time: {
         day: 1,
@@ -388,6 +418,35 @@ function logMessage(message, color = '#e0e0e0') {
     }
     
     updateGameplayMessages();
+}
+
+function checkWizardCallout() {
+    if (gameState.wizard.x <= 0 || gameState.wizard.y <= 0) return;
+    
+    const distToPlayer = Math.sqrt(
+        Math.pow(gameState.player.x - gameState.wizard.x, 2) + 
+        Math.pow(gameState.player.y - gameState.wizard.y, 2)
+    );
+    
+    // If player is within 6 tiles and speech bubble isn't visible
+    if (distToPlayer <= 6 && !gameState.wizard.speechBubble.visible) {
+        // Random chance to call out (about 1 in 300 frames = every 5 seconds)
+        if (Math.random() < 0.003) {
+            gameState.wizard.speechBubble.visible = true;
+            gameState.wizard.speechBubble.message = gameState.wizard.calloutMessages[
+                Math.floor(Math.random() * gameState.wizard.calloutMessages.length)
+            ];
+            gameState.wizard.speechBubble.timer = gameState.wizard.speechBubble.maxTimer;
+        }
+    }
+    
+    // Update speech bubble timer
+    if (gameState.wizard.speechBubble.visible) {
+        gameState.wizard.speechBubble.timer--;
+        if (gameState.wizard.speechBubble.timer <= 0) {
+            gameState.wizard.speechBubble.visible = false;
+        }
+    }
 }
 
 function updateGameplayMessages() {
@@ -1516,6 +1575,63 @@ function drawWizardSprite(x, y, frame) {
     ctx.restore();
 }
 
+function drawSpeechBubble(x, y, message) {
+    const bubbleWidth = Math.max(120, message.length * 8);
+    const bubbleHeight = 40;
+    const bubbleX = x + TILE_SIZE / 2 - bubbleWidth / 2;
+    const bubbleY = y - bubbleHeight - 20;
+    
+    // Draw speech bubble background
+    ctx.save();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.strokeStyle = '#333';
+    ctx.lineWidth = 2;
+    
+    // Main bubble
+    ctx.beginPath();
+    ctx.roundRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight, 8);
+    ctx.fill();
+    ctx.stroke();
+    
+    // Speech bubble tail pointing down to wizard
+    ctx.beginPath();
+    ctx.moveTo(bubbleX + bubbleWidth / 2 - 8, bubbleY + bubbleHeight);
+    ctx.lineTo(bubbleX + bubbleWidth / 2, bubbleY + bubbleHeight + 8);
+    ctx.lineTo(bubbleX + bubbleWidth / 2 + 8, bubbleY + bubbleHeight);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
+    // Draw text
+    ctx.fillStyle = '#333';
+    ctx.font = '12px "Press Start 2P", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // Split long messages into multiple lines
+    const words = message.split(' ');
+    const lines = [];
+    let currentLine = '';
+    
+    words.forEach(word => {
+        if ((currentLine + word).length * 8 > bubbleWidth - 16) {
+            if (currentLine) lines.push(currentLine.trim());
+            currentLine = word;
+        } else {
+            currentLine += (currentLine ? ' ' : '') + word;
+        }
+    });
+    if (currentLine) lines.push(currentLine.trim());
+    
+    // Draw each line
+    lines.forEach((line, index) => {
+        const lineY = bubbleY + bubbleHeight / 2 + (index - (lines.length - 1) / 2) * 16;
+        ctx.fillText(line, bubbleX + bubbleWidth / 2, lineY);
+    });
+    
+    ctx.restore();
+}
+
 function drawMiniMap() {
     const miniMapSize = 200;
     const scale = miniMapSize / MAP_SIZE;
@@ -1834,6 +1950,11 @@ function draw() {
         const wx = gameState.wizard.x * TILE_SIZE;
         const wy = gameState.wizard.y * TILE_SIZE;
         drawWizardSprite(wx, wy, `standing_${gameState.wizard.direction}`);
+        
+        // Draw speech bubble if visible
+        if (gameState.wizard.speechBubble.visible) {
+            drawSpeechBubble(wx, wy, gameState.wizard.speechBubble.message);
+        }
     }
 
     if (gameState.isNight) {
@@ -1912,6 +2033,7 @@ function gameLoop(timestamp) {
         updateCamera();
         updateUI();
         updateGameplayMessages();
+        checkWizardCallout();
     }
     
     draw();
