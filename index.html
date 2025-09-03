@@ -68,6 +68,17 @@
         .hidden-tab {
             display: none;
         }
+        
+        /* Gameplay message overlay styling */
+        #gameplayMessages div {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(2px);
+            transition: opacity 0.3s ease-out, background-color 0.3s ease-out;
+        }
     </style>
 </head>
 <body class="bg-black text-white flex flex-col h-screen p-2 md:p-4 gap-2 md:gap-4">
@@ -151,9 +162,17 @@
         </aside>
 
         <!-- Right Panel: Game Canvas -->
-        <div class="flex-grow flex items-center justify-center order-2 md:order-2 overflow-hidden">
+        <div class="flex-grow flex items-center justify-center order-2 md:order-2 overflow-hidden relative">
             <div class="w-full h-full border-4 border-gray-800 rounded-lg shadow-2xl">
                 <canvas id="gameCanvas"></canvas>
+            </div>
+            
+            <!-- Gameplay Message Overlay -->
+            <div id="gameplayMessages" class="absolute bottom-4 left-4 right-4 pointer-events-none">
+                <div id="message1" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
+                <div id="message2" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
+                <div id="message3" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
+                <div id="message4" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
             </div>
         </div>
 
@@ -236,6 +255,12 @@ const startButton = document.getElementById('startButton');
 const gameOverScreen = document.getElementById('gameOverScreen');
 const gameOverReason = document.getElementById('gameOverReason');
 const victoryScreen = document.getElementById('victoryScreen');
+
+// Gameplay message overlay elements
+const gameplayMessage1 = document.getElementById('message1');
+const gameplayMessage2 = document.getElementById('message2');
+const gameplayMessage3 = document.getElementById('message3');
+const gameplayMessage4 = document.getElementById('message4');
 
 // --- Game Configuration ---
 const TILE_SIZE = 64;
@@ -341,6 +366,7 @@ let gameState = {
     placedObjects: {}, 
     worldObjects: {}, 
     activeAnimations: [],
+    gameplayMessages: [],
 };
 
 // --- Game Logic ---
@@ -351,6 +377,66 @@ function logMessage(message, color = '#e0e0e0') {
     p.style.color = color;
     messageLog.appendChild(p);
     messageLog.scrollTop = messageLog.scrollHeight;
+    
+    // Add to gameplay messages
+    const timestamp = Date.now();
+    gameState.gameplayMessages.push({ message, color, timestamp });
+    
+    // Keep only the last 10 messages
+    if (gameState.gameplayMessages.length > 10) {
+        gameState.gameplayMessages.shift();
+    }
+    
+    updateGameplayMessages();
+}
+
+function updateGameplayMessages() {
+    const messages = gameState.gameplayMessages;
+    const now = Date.now();
+    
+    // Get the 4 most recent messages
+    const recentMessages = messages.slice(-4);
+    
+    // Update message elements (oldest at top, newest at bottom)
+    const messageElements = [gameplayMessage1, gameplayMessage2, gameplayMessage3, gameplayMessage4];
+    
+    messageElements.forEach((element, index) => {
+        if (index < recentMessages.length) {
+            // Reverse the order so newest messages appear at bottom
+            const msg = recentMessages[recentMessages.length - 1 - index];
+            const age = now - msg.timestamp;
+            
+            // Set message content and color
+            element.textContent = msg.message;
+            element.style.color = msg.color;
+            
+            // Calculate opacity based on age and position
+            let opacity = 1.0;
+            if (index === 0) { // 1st message (oldest visible - at top)
+                opacity = Math.max(0.1, 1.0 - (age / 3000)); // Fade out over 3 seconds, minimum 10%
+            } else if (index === 1) { // 2nd message
+                opacity = Math.max(0.3, 1.0 - (age / 5000)); // Fade out over 5 seconds, minimum 30%
+            } else if (index === 2) { // 3rd message
+                opacity = Math.max(0.6, 1.0 - (age / 7000)); // Fade out over 7 seconds, minimum 60%
+            } else { // 4th message (newest - at bottom)
+                opacity = 1.0; // Always fully visible
+            }
+            
+            element.style.opacity = opacity;
+            
+            // Also fade the background for older messages
+            if (index === 0) { // Oldest message (at top)
+                element.style.backgroundColor = `rgba(0, 0, 0, ${0.7 * opacity})`;
+            } else if (index === 1) { // 2nd message
+                element.style.backgroundColor = `rgba(0, 0, 0, ${0.7 * opacity})`;
+            } else {
+                element.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+            }
+        } else {
+            element.style.opacity = 0;
+            element.style.backgroundColor = 'rgba(0, 0, 0, 0)';
+        }
+    });
 }
 
 function updateQuestLog() {
@@ -1825,6 +1911,7 @@ function gameLoop(timestamp) {
         updateAnimations();
         updateCamera();
         updateUI();
+        updateGameplayMessages();
     }
     
     draw();
