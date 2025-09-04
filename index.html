@@ -140,19 +140,6 @@
                 </div>
             </div>
 
-            <!-- Mini Map -->
-            <div class="mb-4">
-                <h2 class="text-lg text-yellow-400 mb-2 text-center">MINI MAP</h2>
-                <div class="bg-gray-900 p-2 rounded">
-                    <canvas id="miniMap" class="w-full border border-gray-600 rounded"></canvas>
-                    <div class="text-xs text-center mt-2 text-gray-400">
-                        <span class="inline-block w-3 h-3 bg-green-500 mr-2"></span>You
-                        <span class="inline-block w-3 h-3 bg-blue-500 mx-2"></span>Wizard
-                        <span class="inline-block w-3 h-3 bg-red-500 mx-2"></span>Wolves
-                        <span class="inline-block w-3 h-3 bg-yellow-500 mx-2"></span>Monoliths
-                    </div>
-                </div>
-            </div>
 
             <!-- Message Log -->
             <div class="flex-grow flex flex-col">
@@ -167,12 +154,59 @@
                 <canvas id="gameCanvas"></canvas>
             </div>
             
+            <!-- Mini Map Overlay -->
+            <div id="miniMapOverlay" class="absolute top-4 -right-96 bg-gray-900 bg-opacity-90 p-2 rounded-l border border-gray-600 border-r-0 transition-all duration-300">
+                <div class="relative">
+                    <canvas id="miniMap" class="block"></canvas>
+                    <div id="miniMapIndicator" class="absolute top-1 left-1 text-red-500 font-bold text-xs bg-black bg-opacity-50 px-1 rounded">(M)</div>
+                </div>
+                <div id="miniMapLegend" class="text-xs text-center mt-2 text-gray-400">
+                    <span class="inline-block w-3 h-3 bg-green-500 mr-2"></span>You
+                    <span class="inline-block w-3 h-3 bg-blue-500 mx-2"></span>Wizard
+                    <span class="inline-block w-3 h-3 bg-red-500 mx-2"></span>Animals
+                    <span class="inline-block w-3 h-3 bg-yellow-500 mx-2"></span>Monoliths
+                </div>
+                <div id="miniMapInstructions" class="text-xs text-center mt-1 text-gray-500">
+                    Press M for fullscreen
+                </div>
+            </div>
+            
             <!-- Gameplay Message Overlay -->
             <div id="gameplayMessages" class="absolute bottom-4 left-4 right-4 pointer-events-none">
                 <div id="message1" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
                 <div id="message2" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
                 <div id="message3" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
                 <div id="message4" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
+            </div>
+            
+            <!-- Level Up Cards Overlay -->
+            <div id="levelUpOverlay" class="absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+                <div class="bg-gray-900 p-6 rounded-lg border border-gray-600 max-w-4xl w-full mx-4">
+                    <h2 class="text-2xl font-bold text-center text-yellow-400 mb-6">🎉 LEVEL UP! Choose Your Enhancement 🎉</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div id="card1" class="level-up-card bg-gray-800 p-4 rounded-lg border border-gray-600 cursor-pointer hover:border-yellow-400 transition-all duration-200">
+                            <div class="text-center">
+                                <div id="card1-icon" class="text-4xl mb-2">💪</div>
+                                <h3 id="card1-title" class="text-lg font-bold text-white mb-2">Strength</h3>
+                                <p id="card1-description" class="text-gray-300 text-sm">+2 Damage</p>
+                            </div>
+                        </div>
+                        <div id="card2" class="level-up-card bg-gray-800 p-4 rounded-lg border border-gray-600 cursor-pointer hover:border-yellow-400 transition-all duration-200">
+                            <div class="text-center">
+                                <div id="card2-icon" class="text-4xl mb-2">❤️</div>
+                                <h3 id="card2-title" class="text-lg font-bold text-white mb-2">Vitality</h3>
+                                <p id="card2-description" class="text-gray-300 text-sm">+20 Max Health</p>
+                            </div>
+                        </div>
+                        <div id="card3" class="level-up-card bg-gray-800 p-4 rounded-lg border border-gray-600 cursor-pointer hover:border-yellow-400 transition-all duration-200">
+                            <div class="text-center">
+                                <div id="card3-icon" class="text-4xl mb-2">⚡</div>
+                                <h3 id="card3-title" class="text-lg font-bold text-white mb-2">Endurance</h3>
+                                <p id="card3-description" class="text-gray-300 text-sm">+20 Max Energy</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -197,7 +231,8 @@
                 </div>
                 <div>
                     <span class="text-sm">⭐ LEVEL <span id="levelDisplay">1</span></span>
-                    <div class="text-xs text-green-400">XP: <span id="xpDisplay">0</span></div>
+                    <div class="text-xs text-green-400 mb-1">XP: <span id="xpDisplay">0</span></div>
+                    <div class="stat-bar-bg h-2"><div id="xpBar" class="stat-bar bg-green-500" style="width: 0%;"></div></div>
                 </div>
             </div>
             <!-- Time -->
@@ -259,6 +294,7 @@ if (!ctx.roundRect) {
 const healthBar = document.getElementById('healthBar');
 const hungerBar = document.getElementById('hungerBar');
 const energyBar = document.getElementById('energyBar');
+const xpBar = document.getElementById('xpBar');
 const xpDisplay = document.getElementById('xpDisplay');
 const levelDisplay = document.getElementById('levelDisplay');
 const timeDisplay = document.getElementById('timeDisplay');
@@ -416,6 +452,16 @@ let gameState = {
     worldObjects: {}, 
     activeAnimations: [],
     gameplayMessages: [],
+    miniMapFullscreen: false,
+    levelUpCards: {
+        visible: false,
+        cards: [],
+    },
+    playerModifiers: {
+        healthBonus: 0,
+        energyBonus: 0,
+        strengthBonus: 0,
+    },
 };
 
 // --- Game Logic ---
@@ -444,9 +490,66 @@ function checkLevelUp() {
     if (gameState.xp >= xpNeeded) {
         gameState.level++;
         gameState.xp -= xpNeeded;
-        logMessage(`🎉 LEVEL UP! You are now level ${gameState.level}!`, '#fbbf24');
+        showLevelUpCards();
         updateUI();
     }
+}
+
+function showLevelUpCards() {
+    gameState.levelUpCards.visible = true;
+    gameState.paused = true; // Pause the game during card selection
+    
+    // Generate three random cards
+    const cardTypes = [
+        { type: 'strength', icon: '💪', title: 'Strength', description: '+2 Damage', bonus: 2 },
+        { type: 'vitality', icon: '❤️', title: 'Vitality', description: '+20 Max Health', bonus: 20 },
+        { type: 'endurance', icon: '⚡', title: 'Endurance', description: '+20 Max Energy', bonus: 20 },
+    ];
+    
+    // Shuffle and pick 3 cards
+    const shuffled = cardTypes.sort(() => Math.random() - 0.5);
+    gameState.levelUpCards.cards = shuffled.slice(0, 3);
+    
+    // Update card display
+    for (let i = 0; i < 3; i++) {
+        const card = gameState.levelUpCards.cards[i];
+        document.getElementById(`card${i+1}-icon`).textContent = card.icon;
+        document.getElementById(`card${i+1}-title`).textContent = card.title;
+        document.getElementById(`card${i+1}-description`).textContent = card.description;
+    }
+    
+    // Show overlay
+    document.getElementById('levelUpOverlay').classList.remove('hidden');
+}
+
+function selectLevelUpCard(cardIndex) {
+    const selectedCard = gameState.levelUpCards.cards[cardIndex];
+    
+    // Apply the bonus
+    switch (selectedCard.type) {
+        case 'strength':
+            gameState.playerModifiers.strengthBonus += selectedCard.bonus;
+            logMessage(`You chose Strength! +${selectedCard.bonus} damage bonus.`, '#fbbf24');
+            break;
+        case 'vitality':
+            gameState.playerModifiers.healthBonus += selectedCard.bonus;
+            gameState.player.health += selectedCard.bonus; // Also heal the player
+            logMessage(`You chose Vitality! +${selectedCard.bonus} max health.`, '#fbbf24');
+            break;
+        case 'endurance':
+            gameState.playerModifiers.energyBonus += selectedCard.bonus;
+            gameState.player.energy += selectedCard.bonus; // Also restore energy
+            logMessage(`You chose Endurance! +${selectedCard.bonus} max energy.`, '#fbbf24');
+            break;
+    }
+    
+    // Hide overlay and resume game
+    document.getElementById('levelUpOverlay').classList.add('hidden');
+    gameState.levelUpCards.visible = false;
+    gameState.paused = false;
+    
+    logMessage(`🎉 You are now level ${gameState.level}!`, '#fbbf24');
+    updateUI();
 }
 
 function checkWizardCallout() {
@@ -653,15 +756,27 @@ function interact() {
     // Combat
     const animal = gameState.animals.find(a => a.x === target.x && a.y === target.y);
     if (animal) {
-        const damage = gameState.tools.sword ? 5 : 2;
+        const baseDamage = gameState.tools.sword ? 5 : 2;
+        const damage = baseDamage + gameState.playerModifiers.strengthBonus;
         animal.hp -= damage;
         animal.lastHitTimer = 30;
-        logMessage(`You hit the wolf for ${damage} damage!`, '#e06c75');
+        logMessage(`You hit the ${animal.type} for ${damage} damage!`, '#e06c75');
         
         if (animal.hp <= 0) {
-            logMessage(`You defeated the wolf! You find 2 Raw Meat.`, '#98c379');
-            gameState.inventory.rawMeat += 2;
+            let meatReward, xpReward;
+            if (animal.type === 'squirrel') {
+                meatReward = 1;
+                xpReward = 3;
+                logMessage(`You defeated the squirrel! You find ${meatReward} Raw Meat and gain ${xpReward} XP.`, '#98c379');
+            } else {
+                meatReward = 2;
+                xpReward = 5;
+                logMessage(`You defeated the wolf! You find ${meatReward} Raw Meat and gain ${xpReward} XP.`, '#98c379');
+            }
+            gameState.inventory.rawMeat += meatReward;
+            gameState.xp += xpReward;
             gameState.animals = gameState.animals.filter(a => a !== animal);
+            checkLevelUp();
         }
         gameState.playerAnimation.toolSwing = 15;
         return;
@@ -687,7 +802,9 @@ function interact() {
                 gameState.inventory.wood += 5;
                 gameState.world[target.y][target.x] = TILES.STUMP;
                 delete gameState.worldObjects[targetKey];
-                logMessage(`You felled the tree and got 5 wood.`, '#98c379');
+                gameState.xp += 1; // XP for chopping down a tree
+                logMessage(`You felled the tree and got 5 wood. (+1 XP)`, '#98c379');
+                checkLevelUp();
             } else {
                 logMessage(`You chop at the tree. (${tree.health}/10)`, '#e5c07b');
             }
@@ -710,13 +827,16 @@ function interact() {
                     gameState.inventory.stone += 5;
                     gameState.world[target.y][target.x] = TILES.MINED_ROCK;
                     delete gameState.worldObjects[targetKey];
-                    logMessage(`You broke the rock and got 5 stone.`, '#98c379');
+                    gameState.xp += 2; // XP for successful mining
+                    logMessage(`You broke the rock and got 5 stone. (+2 XP)`, '#98c379');
                     if (Math.random() < 0.1) { // 10% chance for a gem
                         gameState.inventory.gems++;
-                        logMessage(`You found a rare gem!`, '#61afef');
+                        gameState.xp += 5; // Bonus XP for finding a gem
+                        logMessage(`You found a rare gem! (+5 XP)`, '#61afef');
                     }
+                    checkLevelUp();
                 } else {
-                    logMessage(`You strike the rock. (${rock.health}/15)`, '#c7c7c7');
+                    logMessage(`You strike the rock. (${rock.health}/15)`, '#c7c07b');
                 }
             } else {
                 logMessage("You need a pickaxe to mine this.", '#e06c75');
@@ -779,11 +899,17 @@ function interact() {
                 const randomMessage = messages[Math.floor(Math.random() * messages.length)];
                 logMessage(randomMessage, '#a188d9');
                 
+                // Give XP for seeking wisdom
+                gameState.xp += 1;
+                logMessage("You gain wisdom from the ancient wizard. (+1 XP)", '#a188d9');
+                
                 // Give a small reward
                 if (Math.random() < 0.3) {
                     gameState.inventory.gems++;
-                    logMessage("The wizard gifts you a precious gem!", '#61afef');
+                    gameState.xp += 3; // Bonus XP for receiving a gift
+                    logMessage("The wizard gifts you a precious gem! (+3 XP)", '#61afef');
                 }
+                checkLevelUp();
             }
             break;
         }
@@ -834,7 +960,10 @@ function handleInput() {
     if (player.isMoving) {
         if (newX >= 0 && newX < MAP_SIZE && newY >= 0 && newY < MAP_SIZE) {
             const targetTile = gameState.world[newY][newX];
-            if (targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN) {
+            // Check if there's an animal at the target position
+            const animalAtTarget = gameState.animals.find(a => a.x === newX && a.y === newY);
+            
+            if (targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN && !animalAtTarget) {
                 player.x = newX;
                 player.y = newY;
                 player.moveCooldown = 5; // Add a short delay between steps
@@ -870,7 +999,7 @@ function gameOver(reason) {
 }
 
 function spawnAnimals(count) {
-    const maxAnimals = 10;
+    const maxAnimals = 15; // Increased to accommodate squirrels
     const currentAnimalCount = gameState.animals.length;
     if (currentAnimalCount >= maxAnimals) return;
 
@@ -882,17 +1011,32 @@ function spawnAnimals(count) {
             x = Math.floor(Math.random() * MAP_SIZE);
             y = Math.floor(Math.random() * MAP_SIZE);
         } while (gameState.world[y][x] !== TILES.GRASS || (Math.abs(x-gameState.player.x) < 10 && Math.abs(y-gameState.player.y) < 10)); 
+        
+        // Randomly choose animal type
+        const animalTypes = ['wolf', 'squirrel'];
+        const type = animalTypes[Math.floor(Math.random() * animalTypes.length)];
+        
+        // Set different stats based on animal type
+        let hp, maxHp;
+        if (type === 'squirrel') {
+            hp = 3;
+            maxHp = 3;
+        } else {
+            hp = 10;
+            maxHp = 10;
+        }
+        
         gameState.animals.push({
             x, 
             y, 
-            type: 'wolf',
+            type: type,
             state: 'wander',
             wanderTarget: { x: null, y: null },
             direction: 'down',
             isMoving: false,
             walkCycle: 0,
-            hp: 10,
-            maxHp: 10,
+            hp: hp,
+            maxHp: maxHp,
             lastHitTimer: 0,
         });
     }
@@ -926,6 +1070,13 @@ function updateAnimals() {
         // State logic
         if (nearFire) {
             animal.state = 'flee';
+        } else if (animal.type === 'squirrel') {
+            // Squirrels flee from player
+            if (distToPlayer <= 6) {
+                animal.state = 'flee';
+            } else {
+                animal.state = 'wander';
+            }
         } else if (distToPlayer <= 4 || animal.hp < animal.maxHp) {
             animal.state = 'hunt';
         } else if (distToPlayer > 5) { 
@@ -941,10 +1092,17 @@ function updateAnimals() {
                 if (animal.y < player.y) moveY = 1; else if (animal.y > player.y) moveY = -1;
                 break;
             case 'flee':
-                const fire = Object.values(gameState.placedObjects).find(o => o.type === TILES.CAMPFIRE);
-                if (fire) {
-                     if (animal.x < fire.x) moveX = -1; if (animal.x > fire.x) moveX = 1;
-                     if (animal.y < fire.y) moveY = -1; if (animal.y > fire.y) moveY = 1;
+                if (animal.type === 'squirrel') {
+                    // Squirrels flee from player
+                    if (animal.x < player.x) moveX = -1; else if (animal.x > player.x) moveX = 1;
+                    if (animal.y < player.y) moveY = -1; else if (animal.y > player.y) moveY = 1;
+                } else {
+                    // Wolves flee from campfire
+                    const fire = Object.values(gameState.placedObjects).find(o => o.type === TILES.CAMPFIRE);
+                    if (fire) {
+                         if (animal.x < fire.x) moveX = -1; if (animal.x > fire.x) moveX = 1;
+                         if (animal.y < fire.y) moveY = -1; if (animal.y > fire.y) moveY = 1;
+                    }
                 }
                 break;
             case 'wander':
@@ -961,8 +1119,12 @@ function updateAnimals() {
         const newAnimalX = animal.x + moveX;
         const newAnimalY = animal.y + moveY;
         const targetTile = gameState.world[newAnimalY] ? gameState.world[newAnimalY][newAnimalX] : TILES.MOUNTAIN;
+        
+        // Check if there's another animal or the player at the target position
+        const animalAtTarget = gameState.animals.find(a => a !== animal && a.x === newAnimalX && a.y === newAnimalY);
+        const playerAtTarget = (player.x === newAnimalX && player.y === newAnimalY);
 
-        if (targetTile !== undefined && targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN) {
+        if (targetTile !== undefined && targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN && !animalAtTarget && !playerAtTarget) {
             animal.x = newAnimalX;
             animal.y = newAnimalY;
         }
@@ -1997,11 +2159,11 @@ function drawSquirrelSprite(x, y, frame) {
     const SPRITE_OFFSET_Y = 15;
 
     const colors = {
-        fur: '#a0522d',
-        darkFur: '#8b4513',
-        lightFur: '#cd853f',
-        tail: '#8b7355',
-        darkTail: '#654321',
+        fur: '#a1a1a1',
+        darkFur: '#6b6b6b',
+        lightFur: '#d3d3d3',
+        tail: '#8b8b8b',
+        darkTail: '#5a5a5a',
         black: '#212121',
         white: '#ffffff',
         pink: '#ffb6c1',
@@ -2158,8 +2320,34 @@ function drawSpeechBubble(x, y, message) {
     ctx.restore();
 }
 
+function toggleMiniMapFullscreen() {
+    gameState.miniMapFullscreen = !gameState.miniMapFullscreen;
+    updateMiniMapOverlay();
+}
+
+function updateMiniMapOverlay() {
+    const overlay = document.getElementById('miniMapOverlay');
+    const legend = document.getElementById('miniMapLegend');
+    const instructions = document.getElementById('miniMapInstructions');
+    const indicator = document.getElementById('miniMapIndicator');
+    
+    if (gameState.miniMapFullscreen) {
+        // Fullscreen mode
+        overlay.className = 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-95 p-4 rounded border border-gray-600 transition-all duration-300 z-50';
+        legend.className = 'text-sm text-center mt-3 text-gray-300';
+        instructions.textContent = 'Press M to minimize';
+        indicator.style.display = 'none'; // Hide indicator in fullscreen
+    } else {
+        // Peeking mode - just showing from the side
+        overlay.className = 'absolute top-4 -right-96 bg-gray-900 bg-opacity-90 p-2 rounded-l border border-gray-600 border-r-0 transition-all duration-300';
+        legend.className = 'text-xs text-center mt-2 text-gray-400';
+        instructions.textContent = 'Press M for fullscreen';
+        indicator.style.display = 'block'; // Show indicator when peeking
+    }
+}
+
 function drawMiniMap() {
-    const miniMapSize = 200;
+    const miniMapSize = gameState.miniMapFullscreen ? 400 : 120;
     const scale = miniMapSize / MAP_SIZE;
     
     // Set canvas size
@@ -2444,7 +2632,7 @@ function draw() {
     drawPlayerSprite(px, py, frame);
 
     gameState.animals.forEach(animal => {
-        const { x, y, direction, isMoving, walkCycle } = animal;
+        const { x, y, direction, isMoving, walkCycle, type } = animal;
         const ax = x * TILE_SIZE;
         const ay = y * TILE_SIZE;
 
@@ -2460,7 +2648,12 @@ function draw() {
             frame = `standing_${direction}`;
         }
         
-        drawAnimalSprite(ax, ay, frame);
+        // Use different sprite functions based on animal type
+        if (type === 'squirrel') {
+            drawSquirrelSprite(ax, ay, frame);
+        } else {
+            drawAnimalSprite(ax, ay, frame);
+        }
         
         if(animal.lastHitTimer > 0) {
             const healthPercentage = animal.hp / animal.maxHp;
@@ -2499,9 +2692,24 @@ function draw() {
 }
 
 function updateUI() {
-    healthBar.style.width = `${gameState.player.health}%`;
+    // Calculate max values with modifiers
+    const maxHealth = 100 + gameState.playerModifiers.healthBonus;
+    const maxEnergy = 100 + gameState.playerModifiers.energyBonus;
+    
+    // Update bars with modified max values
+    healthBar.style.width = `${(gameState.player.health / maxHealth) * 100}%`;
     hungerBar.style.width = `${gameState.player.hunger}%`;
-    energyBar.style.width = `${gameState.player.energy}%`;
+    energyBar.style.width = `${(gameState.player.energy / maxEnergy) * 100}%`;
+    
+    // Update level and XP display
+    levelDisplay.textContent = gameState.level;
+    xpDisplay.textContent = gameState.xp;
+    
+    // Update XP bar
+    const xpNeeded = gameState.level * 25;
+    const xpProgress = (gameState.xp / xpNeeded) * 100;
+    xpBar.style.width = `${Math.min(100, xpProgress)}%`;
+    
     const hour = String(gameState.time.hour).padStart(2, '0');
     const minute = String(gameState.time.minute).padStart(2, '0');
     timeDisplay.textContent = `Day ${gameState.time.day} - ${hour}:${minute}`;
@@ -2599,11 +2807,33 @@ function setupEventListeners() {
              e.preventDefault(); 
              interact();
         }
+        if(e.key === 'm' || e.key === 'M'){
+             e.preventDefault();
+             toggleMiniMapFullscreen();
+        }
     });
      window.addEventListener('keyup', (e) => {
         keysPressed[e.key] = false;
     });
 
+    // Level-up card event listeners
+    document.getElementById('card1').addEventListener('click', () => {
+        if (gameState.levelUpCards.visible) {
+            selectLevelUpCard(0);
+        }
+    });
+    
+    document.getElementById('card2').addEventListener('click', () => {
+        if (gameState.levelUpCards.visible) {
+            selectLevelUpCard(1);
+        }
+    });
+    
+    document.getElementById('card3').addEventListener('click', () => {
+        if (gameState.levelUpCards.visible) {
+            selectLevelUpCard(2);
+        }
+    });
 
     document.getElementById('craftAxe').addEventListener('click', () => {
         if (gameState.inventory.wood >= 15 && !gameState.tools.axe) {
@@ -2708,7 +2938,7 @@ function setupEventListeners() {
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        const miniMapSize = 200;
+        const miniMapSize = gameState.miniMapFullscreen ? 400 : 120;
         const scale = miniMapSize / MAP_SIZE;
         
         const worldX = Math.floor(x / scale);
@@ -2744,6 +2974,7 @@ function resizeCanvas() {
 generateWorld();
 resizeCanvas();
 setupEventListeners();
+updateMiniMapOverlay(); // Initialize minimap overlay styling
 requestAnimationFrame(gameLoop);
 
 </script>
