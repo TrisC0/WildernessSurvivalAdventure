@@ -96,6 +96,21 @@
             <div class="bg-gray-900 p-2 rounded">🔥 COOKED: <span id="cookedMeatCount">0</span></div>
             <div class="bg-gray-900 p-2 rounded">🗿 CARVED: <span id="carvedStoneCount">0</span></div>
         </div>
+        <div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-center text-xs mt-2">
+            <div class="bg-gray-800 p-2 rounded">🦌 FUR: <span id="furCount">0</span></div>
+            <div class="bg-gray-800 p-2 rounded">🦴 BONE: <span id="boneCount">0</span></div>
+            <div class="bg-gray-800 p-2 rounded">🌿 HERBS: <span id="herbsCount">0</span></div>
+            <div class="bg-gray-800 p-2 rounded">🐾 CLAW: <span id="clawCount">0</span></div>
+            <div class="bg-gray-800 p-2 rounded">🦷 FANG: <span id="fangCount">0</span></div>
+            <div class="bg-gray-800 p-2 rounded">🧵 LEATHER: <span id="leatherCount">0</span></div>
+            <div class="bg-gray-800 p-2 rounded">⚡ ORE: <span id="oreCount">0</span></div>
+            <div class="bg-gray-800 p-2 rounded">🧪 POTION: <span id="potionCount">0</span></div>
+        </div>
+        <div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-center text-xs mt-2">
+            <div class="bg-gray-800 p-2 rounded">🐻 HIDE: <span id="hideCount">0</span></div>
+            <div class="bg-gray-800 p-2 rounded">💊 ELIXIR: <span id="elixirCount">0</span></div>
+            <div class="bg-gray-800 p-2 rounded">💎 CRYSTAL: <span id="crystalCount">0</span></div>
+        </div>
     </header>
 
     <!-- Main Content -->
@@ -151,7 +166,7 @@
         <!-- Right Panel: Game Canvas -->
         <div class="flex-grow flex items-center justify-center order-2 md:order-2 overflow-hidden relative">
             <div class="w-full h-full border-4 border-gray-800 rounded-lg shadow-2xl">
-                <canvas id="gameCanvas"></canvas>
+                <canvas id="gameCanvas" tabindex="0"></canvas>
             </div>
             
             <!-- Mini Map Overlay -->
@@ -307,6 +322,18 @@ const gemCountUI = document.getElementById('gemCount');
 const petalCountUI = document.getElementById('petalCount');
 const carvedStoneCountUI = document.getElementById('carvedStoneCount');
 const toolStatusUI = document.getElementById('toolStatus');
+// Loot item UI elements
+const furCountUI = document.getElementById('furCount');
+const boneCountUI = document.getElementById('boneCount');
+const herbsCountUI = document.getElementById('herbsCount');
+const clawCountUI = document.getElementById('clawCount');
+const fangCountUI = document.getElementById('fangCount');
+const leatherCountUI = document.getElementById('leatherCount');
+const oreCountUI = document.getElementById('oreCount');
+const potionCountUI = document.getElementById('potionCount');
+const hideCountUI = document.getElementById('hideCount');
+const elixirCountUI = document.getElementById('elixirCount');
+const crystalCountUI = document.getElementById('crystalCount');
 const messageLog = document.getElementById('messageLog');
 const questLog = document.getElementById('questLog');
 const introScreen = document.getElementById('introScreen');
@@ -396,6 +423,18 @@ let gameState = {
         gems: 0,
         petals: 0,
         carvedStone: 0,
+        // Loot items
+        fur: 0,
+        bone: 0,
+        herbs: 0,
+        claw: 0,
+        fang: 0,
+        leather: 0,
+        ore: 0,
+        potion: 0,
+        hide: 0,
+        elixir: 0,
+        crystal: 0,
     },
     xp: 0,
     level: 1,
@@ -461,6 +500,33 @@ let gameState = {
         healthBonus: 0,
         energyBonus: 0,
         strengthBonus: 0,
+    },
+    // Loot system
+    lootItems: {
+        // Common items (squirrels, rabbits)
+        common: [
+            { name: 'Small Fur', type: 'fur', amount: 1, description: 'Soft animal fur' },
+            { name: 'Bone Fragment', type: 'bone', amount: 1, description: 'Small bone piece' },
+            { name: 'Wild Herbs', type: 'herbs', amount: 2, description: 'Medicinal herbs' },
+            { name: 'Sharp Claw', type: 'claw', amount: 1, description: 'Sharp animal claw' }
+        ],
+        // Uncommon items (wolves)
+        uncommon: [
+            { name: 'Wolf Fur', type: 'fur', amount: 2, description: 'Thick wolf fur' },
+            { name: 'Wolf Fang', type: 'fang', amount: 1, description: 'Sharp wolf fang' },
+            { name: 'Leather Strip', type: 'leather', amount: 1, description: 'Tough leather' },
+            { name: 'Iron Ore', type: 'ore', amount: 1, description: 'Raw iron ore' },
+            { name: 'Healing Potion', type: 'potion', amount: 1, description: 'Restores health' }
+        ],
+        // Rare items (bears)
+        rare: [
+            { name: 'Bear Hide', type: 'hide', amount: 1, description: 'Thick bear hide' },
+            { name: 'Bear Claw', type: 'claw', amount: 2, description: 'Massive bear claw' },
+            { name: 'Ancient Gem', type: 'gem', amount: 1, description: 'Mystical gem' },
+            { name: 'Iron Sword', type: 'weapon', amount: 1, description: 'Sharp iron blade' },
+            { name: 'Health Elixir', type: 'elixir', amount: 1, description: 'Powerful healing' },
+            { name: 'Magic Crystal', type: 'crystal', amount: 1, description: 'Glowing crystal' }
+        ]
     },
 };
 
@@ -768,6 +834,14 @@ function interact() {
                 meatReward = 1;
                 xpReward = 3;
                 logMessage(`You defeated the squirrel! You find ${meatReward} Raw Meat and gain ${xpReward} XP.`, '#98c379');
+            } else if (animal.type === 'rabbit') {
+                meatReward = 1;
+                xpReward = 2;
+                logMessage(`You defeated the rabbit! You find ${meatReward} Raw Meat and gain ${xpReward} XP.`, '#98c379');
+            } else if (animal.type === 'bear') {
+                meatReward = 5;
+                xpReward = 10;
+                logMessage(`You defeated the bear! You find ${meatReward} Raw Meat and gain ${xpReward} XP.`, '#98c379');
             } else {
                 meatReward = 2;
                 xpReward = 5;
@@ -775,6 +849,10 @@ function interact() {
             }
             gameState.inventory.rawMeat += meatReward;
             gameState.xp += xpReward;
+            
+            // Drop loot based on animal type
+            dropLoot(animal.type);
+            
             gameState.animals = gameState.animals.filter(a => a !== animal);
             checkLevelUp();
         }
@@ -998,47 +1076,154 @@ function gameOver(reason) {
     gameOverScreen.classList.add('flex');
 }
 
+function getRandomAnimalType() {
+    // Weighted random selection: squirrels and rabbits common, wolves uncommon, bears rare
+    const random = Math.random();
+    if (random < 0.4) return 'squirrel';      // 40% chance - common
+    if (random < 0.7) return 'rabbit';        // 30% chance - common  
+    if (random < 0.9) return 'wolf';          // 20% chance - uncommon
+    return 'bear';                            // 10% chance - rare
+}
+
 function spawnAnimals(count) {
-    const maxAnimals = 15; // Increased to accommodate squirrels
-    const currentAnimalCount = gameState.animals.length;
-    if (currentAnimalCount >= maxAnimals) return;
+    try {
+        const maxAnimals = 12; // Further reduced to prevent crashes
+        const currentAnimalCount = gameState.animals.length;
+        if (currentAnimalCount >= maxAnimals) return;
 
-    const numToSpawn = Math.min(count, maxAnimals - currentAnimalCount);
+        const numToSpawn = Math.min(count, maxAnimals - currentAnimalCount);
 
-    for (let i = 0; i < numToSpawn; i++) {
-        let x, y;
-        do {
-            x = Math.floor(Math.random() * MAP_SIZE);
-            y = Math.floor(Math.random() * MAP_SIZE);
-        } while (gameState.world[y][x] !== TILES.GRASS || (Math.abs(x-gameState.player.x) < 10 && Math.abs(y-gameState.player.y) < 10)); 
-        
-        // Randomly choose animal type
-        const animalTypes = ['wolf', 'squirrel'];
-        const type = animalTypes[Math.floor(Math.random() * animalTypes.length)];
-        
-        // Set different stats based on animal type
-        let hp, maxHp;
-        if (type === 'squirrel') {
-            hp = 3;
-            maxHp = 3;
-        } else {
-            hp = 10;
-            maxHp = 10;
+        for (let i = 0; i < numToSpawn; i++) {
+            let x, y;
+            let attempts = 0;
+            do {
+                x = Math.floor(Math.random() * MAP_SIZE);
+                y = Math.floor(Math.random() * MAP_SIZE);
+                attempts++;
+                if (attempts > 50) break; // Prevent infinite loop
+            } while (gameState.world[y][x] !== TILES.GRASS || (Math.abs(x-gameState.player.x) < 10 && Math.abs(y-gameState.player.y) < 10)); 
+            
+            if (attempts > 50) continue; // Skip this spawn if we can't find a valid location
+            
+            // Use weighted random selection for animal type
+            const type = getRandomAnimalType();
+            
+            // Set different stats based on animal type
+            let hp, maxHp;
+            if (type === 'squirrel') {
+                hp = 3;
+                maxHp = 3;
+            } else if (type === 'rabbit') {
+                hp = 2;
+                maxHp = 2;
+            } else if (type === 'bear') {
+                hp = 20;
+                maxHp = 20;
+            } else {
+                hp = 10;
+                maxHp = 10;
+            }
+            
+            gameState.animals.push({
+                x, 
+                y, 
+                type: type,
+                state: 'wander',
+                wanderTarget: { x: null, y: null },
+                direction: 'down',
+                isMoving: false,
+                walkCycle: 0,
+                hp: hp,
+                maxHp: maxHp,
+                lastHitTimer: 0,
+            });
+        }
+    } catch (error) {
+        console.error("Error in spawnAnimals:", error);
+    }
+}
+
+function spawnInitialAnimals() {
+    try {
+        // Spawn 2-4 random animals at the beginning of the game (reduced to prevent crashes)
+        const initialCount = 2 + Math.floor(Math.random() * 3); // 2-4 animals
+        spawnAnimals(initialCount);
+        logMessage(`The wilderness stirs with ${initialCount} creatures...`, '#e5c07b');
+    } catch (error) {
+        console.error("Error in spawnInitialAnimals:", error);
+        logMessage("The wilderness remains quiet...", '#e5c07b');
+    }
+}
+
+function dropLoot(animalType) {
+    try {
+        // Safety checks
+        if (!animalType || !gameState.lootItems) {
+            return;
         }
         
-        gameState.animals.push({
-            x, 
-            y, 
-            type: type,
-            state: 'wander',
-            wanderTarget: { x: null, y: null },
-            direction: 'down',
-            isMoving: false,
-            walkCycle: 0,
-            hp: hp,
-            maxHp: maxHp,
-            lastHitTimer: 0,
-        });
+        let lootTier, dropChance;
+        
+        // Determine loot tier and drop chance based on animal type
+        switch (animalType) {
+            case 'squirrel':
+            case 'rabbit':
+                lootTier = 'common';
+                dropChance = 0.3; // 30% chance
+                break;
+            case 'wolf':
+                lootTier = 'uncommon';
+                dropChance = 0.4; // 40% chance
+                break;
+            case 'bear':
+                lootTier = 'rare';
+                dropChance = 0.6; // 60% chance
+                break;
+            default:
+                return; // No loot for unknown types
+        }
+        
+        // Check if loot pool exists
+        if (!gameState.lootItems[lootTier] || !Array.isArray(gameState.lootItems[lootTier])) {
+            console.warn(`Loot pool '${lootTier}' not found or invalid`);
+            return;
+        }
+        
+        // Check if loot drops
+        if (Math.random() < dropChance) {
+            const lootPool = gameState.lootItems[lootTier];
+            const randomItem = lootPool[Math.floor(Math.random() * lootPool.length)];
+            
+            // Safety check for random item
+            if (!randomItem || !randomItem.type) {
+                console.warn("Invalid loot item generated");
+                return;
+            }
+            
+            // Add item to inventory
+            if (gameState.inventory && gameState.inventory.hasOwnProperty(randomItem.type)) {
+                gameState.inventory[randomItem.type] += randomItem.amount || 1;
+                logMessage(`You found ${randomItem.name}! (${randomItem.description})`, '#61afef');
+                
+                // Special effects for certain items
+                if (randomItem.type === 'potion') {
+                    const maxHealth = 100 + (gameState.playerModifiers?.healthBonus || 0);
+                    gameState.player.health = Math.min(maxHealth, gameState.player.health + 20);
+                    logMessage("The healing potion restores your health!", '#98c379');
+                } else if (randomItem.type === 'elixir') {
+                    const maxHealth = 100 + (gameState.playerModifiers?.healthBonus || 0);
+                    gameState.player.health = Math.min(maxHealth, gameState.player.health + 50);
+                    logMessage("The health elixir greatly restores your health!", '#98c379');
+                } else if (randomItem.type === 'weapon') {
+                    if (gameState.tools) {
+                        gameState.tools.sword = true;
+                        logMessage("You found an iron sword! Your combat prowess increases!", '#fbbf24');
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error("Error in dropLoot:", error);
     }
 }
 
@@ -1055,10 +1240,11 @@ function isNearCampfire(x, y) {
 }
 
 function updateAnimals() {
-    const { player } = gameState;
-    const playerSafe = isNearCampfire(player.x, player.y);
+    try {
+        const { player } = gameState;
+        const playerSafe = isNearCampfire(player.x, player.y);
 
-    gameState.animals.forEach(animal => {
+        gameState.animals.forEach(animal => {
         const oldX = animal.x;
         const oldY = animal.y;
         
@@ -1070,10 +1256,17 @@ function updateAnimals() {
         // State logic
         if (nearFire) {
             animal.state = 'flee';
-        } else if (animal.type === 'squirrel') {
-            // Squirrels flee from player
+        } else if (animal.type === 'squirrel' || animal.type === 'rabbit') {
+            // Squirrels and rabbits flee from player
             if (distToPlayer <= 6) {
                 animal.state = 'flee';
+            } else {
+                animal.state = 'wander';
+            }
+        } else if (animal.type === 'bear') {
+            // Bears are aggressive and hunt from further away
+            if (distToPlayer <= 8 || animal.hp < animal.maxHp) {
+                animal.state = 'hunt';
             } else {
                 animal.state = 'wander';
             }
@@ -1092,12 +1285,12 @@ function updateAnimals() {
                 if (animal.y < player.y) moveY = 1; else if (animal.y > player.y) moveY = -1;
                 break;
             case 'flee':
-                if (animal.type === 'squirrel') {
-                    // Squirrels flee from player
+                if (animal.type === 'squirrel' || animal.type === 'rabbit') {
+                    // Squirrels and rabbits flee from player
                     if (animal.x < player.x) moveX = -1; else if (animal.x > player.x) moveX = 1;
                     if (animal.y < player.y) moveY = -1; else if (animal.y > player.y) moveY = 1;
                 } else {
-                    // Wolves flee from campfire
+                    // Wolves and bears flee from campfire
                     const fire = Object.values(gameState.placedObjects).find(o => o.type === TILES.CAMPFIRE);
                     if (fire) {
                          if (animal.x < fire.x) moveX = -1; if (animal.x > fire.x) moveX = 1;
@@ -1156,6 +1349,9 @@ function updateAnimals() {
             }
         }
     });
+    } catch (error) {
+        console.error("Error in updateAnimals:", error);
+    }
 }
 
 function sleep() {
@@ -1174,16 +1370,21 @@ let timeTickCounter = 0;
 const timeSpeed = 3; 
 
 function manageSpawning() {
-    gameState.time.animalSpawnTimer--;
-    if (gameState.time.animalSpawnTimer <= 0) {
-        if (gameState.isNight) {
-            logMessage("You hear a howl in the distance...", "#c7c7c7");
-            spawnAnimals(3);
-            gameState.time.animalSpawnTimer = 100 + Math.random() * 100;
-        } else {
-            spawnAnimals(1);
-            gameState.time.animalSpawnTimer = 300 + Math.random() * 200;
+    try {
+        gameState.time.animalSpawnTimer--;
+        if (gameState.time.animalSpawnTimer <= 0) {
+            if (gameState.isNight) {
+                logMessage("You hear a howl in the distance...", "#c7c7c7");
+                spawnAnimals(2); // Further reduced to prevent crashes
+                gameState.time.animalSpawnTimer = 150 + Math.random() * 100; // Slower: 150-250 ticks
+            } else {
+                spawnAnimals(1); // Further reduced to prevent crashes
+                gameState.time.animalSpawnTimer = 300 + Math.random() * 200; // Slower: 300-500 ticks
+            }
         }
+    } catch (error) {
+        console.error("Error in manageSpawning:", error);
+        gameState.time.animalSpawnTimer = 200; // Reset timer on error
     }
 }
 
@@ -1211,7 +1412,7 @@ function updateTime() {
 
     if (gameState.isNight && !wasNight) {
         logMessage("Night is falling. The wilderness grows restless...", '#e06c75');
-        spawnAnimals(4);
+        spawnAnimals(4); // Reduced to prevent crashes
         // Spawn Moonpetals
         for(let i = 0; i < 5; i++) {
             let x, y;
@@ -2263,6 +2464,67 @@ function drawSquirrelSprite(x, y, frame) {
     ctx.restore();
 }
 
+function drawBearSprite(x, y, frame) {
+    const PIXEL_SIZE = 4;
+    const SPRITE_WIDTH = 16;
+    const SPRITE_HEIGHT = 16;
+    const SPRITE_OFFSET_X = TILE_SIZE / 2 - (SPRITE_WIDTH * PIXEL_SIZE) / 2;
+    const SPRITE_OFFSET_Y = 8;
+
+    const colors = {
+        brown: '#8b4513',
+        darkBrown: '#654321',
+        lightBrown: '#a0522d',
+        black: '#212121',
+        white: '#ffffff',
+        nose: '#2a2a2a'
+    };
+
+    ctx.save();
+    ctx.translate(x + SPRITE_OFFSET_X, y + SPRITE_OFFSET_Y);
+
+    const p = (px, py, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * PIXEL_SIZE, py * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    };
+
+    const spriteData = {
+        'standing_down': [
+            // Head
+            [5, 2, colors.brown], [6, 2, colors.brown], [7, 2, colors.brown], [8, 2, colors.brown], [9, 2, colors.brown], [10, 2, colors.brown],
+            [4, 3, colors.brown], [5, 3, colors.darkBrown], [6, 3, colors.darkBrown], [7, 3, colors.darkBrown], [8, 3, colors.darkBrown], [9, 3, colors.darkBrown], [10, 3, colors.darkBrown], [11, 3, colors.brown],
+            [4, 4, colors.brown], [5, 4, colors.darkBrown], [6, 4, colors.black], [7, 4, colors.nose], [8, 4, colors.nose], [9, 4, colors.black], [10, 4, colors.darkBrown], [11, 4, colors.brown],
+            [4, 5, colors.brown], [5, 5, colors.darkBrown], [6, 5, colors.black], [7, 5, colors.black], [8, 5, colors.black], [9, 5, colors.black], [10, 5, colors.darkBrown], [11, 5, colors.brown],
+            [3, 6, colors.brown], [4, 6, colors.darkBrown], [5, 6, colors.darkBrown], [6, 6, colors.darkBrown], [7, 6, colors.darkBrown], [8, 6, colors.darkBrown], [9, 6, colors.darkBrown], [10, 6, colors.darkBrown], [11, 6, colors.darkBrown], [12, 6, colors.brown],
+            // Body
+            [2, 7, colors.brown], [3, 7, colors.darkBrown], [4, 7, colors.darkBrown], [5, 7, colors.darkBrown], [6, 7, colors.darkBrown], [7, 7, colors.darkBrown], [8, 7, colors.darkBrown], [9, 7, colors.darkBrown], [10, 7, colors.darkBrown], [11, 7, colors.darkBrown], [12, 7, colors.darkBrown], [13, 7, colors.brown],
+            [2, 8, colors.brown], [3, 8, colors.darkBrown], [4, 8, colors.darkBrown], [5, 8, colors.darkBrown], [6, 8, colors.darkBrown], [7, 8, colors.darkBrown], [8, 8, colors.darkBrown], [9, 8, colors.darkBrown], [10, 8, colors.darkBrown], [11, 8, colors.darkBrown], [12, 8, colors.darkBrown], [13, 8, colors.brown],
+            [2, 9, colors.brown], [3, 9, colors.darkBrown], [4, 9, colors.darkBrown], [5, 9, colors.darkBrown], [6, 9, colors.darkBrown], [7, 9, colors.darkBrown], [8, 9, colors.darkBrown], [9, 9, colors.darkBrown], [10, 9, colors.darkBrown], [11, 9, colors.darkBrown], [12, 9, colors.darkBrown], [13, 9, colors.brown],
+            [3, 10, colors.brown], [4, 10, colors.darkBrown], [5, 10, colors.darkBrown], [6, 10, colors.darkBrown], [7, 10, colors.darkBrown], [8, 10, colors.darkBrown], [9, 10, colors.darkBrown], [10, 10, colors.darkBrown], [11, 10, colors.darkBrown], [12, 10, colors.brown],
+            // Legs
+            [4, 11, colors.darkBrown], [5, 11, colors.darkBrown], [6, 11, colors.darkBrown], [7, 11, colors.darkBrown], [8, 11, colors.darkBrown], [9, 11, colors.darkBrown], [10, 11, colors.darkBrown], [11, 11, colors.darkBrown],
+            [4, 12, colors.darkBrown], [5, 12, colors.darkBrown], [6, 12, colors.darkBrown], [7, 12, colors.darkBrown], [8, 12, colors.darkBrown], [9, 12, colors.darkBrown], [10, 12, colors.darkBrown], [11, 12, colors.darkBrown],
+            [4, 13, colors.darkBrown], [5, 13, colors.darkBrown], [6, 13, colors.darkBrown], [7, 13, colors.darkBrown], [8, 13, colors.darkBrown], [9, 13, colors.darkBrown], [10, 13, colors.darkBrown], [11, 13, colors.darkBrown],
+        ],
+    };
+    
+    let pixels;
+    if (frame in spriteData) {
+        pixels = spriteData[frame];
+    } else {
+        pixels = spriteData['standing_down'];
+    }
+
+    if (frame.includes('right')) {
+        const leftFrame = frame.replace('right', 'left');
+        pixels = spriteData[leftFrame].map(([px, py, color]) => [SPRITE_WIDTH - 1 - px, py, color]);
+    }
+
+    pixels.forEach(([px, py, color]) => p(px, py, color));
+
+    ctx.restore();
+}
+
 function drawSpeechBubble(x, y, message) {
     const bubbleWidth = Math.max(140, message.length * 9);
     const bubbleHeight = 50;
@@ -2323,6 +2585,13 @@ function drawSpeechBubble(x, y, message) {
 function toggleMiniMapFullscreen() {
     gameState.miniMapFullscreen = !gameState.miniMapFullscreen;
     updateMiniMapOverlay();
+    
+    // Ensure game canvas maintains focus for keyboard events after a brief delay
+    setTimeout(() => {
+        if (canvas) {
+            canvas.focus();
+        }
+    }, 50);
 }
 
 function updateMiniMapOverlay() {
@@ -2334,12 +2603,16 @@ function updateMiniMapOverlay() {
     if (gameState.miniMapFullscreen) {
         // Fullscreen mode
         overlay.className = 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-95 p-4 rounded border border-gray-600 transition-all duration-300 z-50';
+        overlay.style.pointerEvents = 'none'; // Don't capture mouse events
+        overlay.tabIndex = -1; // Don't capture focus
         legend.className = 'text-sm text-center mt-3 text-gray-300';
         instructions.textContent = 'Press M to minimize';
         indicator.style.display = 'none'; // Hide indicator in fullscreen
     } else {
         // Peeking mode - just showing from the side
         overlay.className = 'absolute top-4 -right-96 bg-gray-900 bg-opacity-90 p-2 rounded-l border border-gray-600 border-r-0 transition-all duration-300';
+        overlay.style.pointerEvents = 'auto'; // Allow mouse events for minimap clicking
+        overlay.tabIndex = -1; // Don't capture focus
         legend.className = 'text-xs text-center mt-2 text-gray-400';
         instructions.textContent = 'Press M for fullscreen';
         indicator.style.display = 'block'; // Show indicator when peeking
@@ -2651,6 +2924,10 @@ function draw() {
         // Use different sprite functions based on animal type
         if (type === 'squirrel') {
             drawSquirrelSprite(ax, ay, frame);
+        } else if (type === 'rabbit') {
+            drawRabbitSprite(ax, ay, frame);
+        } else if (type === 'bear') {
+            drawBearSprite(ax, ay, frame);
         } else {
             drawAnimalSprite(ax, ay, frame);
         }
@@ -2721,6 +2998,18 @@ function updateUI() {
     gemCountUI.textContent = gameState.inventory.gems;
     petalCountUI.textContent = gameState.inventory.petals;
     carvedStoneCountUI.textContent = gameState.inventory.carvedStone;
+    // Update loot item counts (with error handling)
+    if (furCountUI) furCountUI.textContent = gameState.inventory.fur;
+    if (boneCountUI) boneCountUI.textContent = gameState.inventory.bone;
+    if (herbsCountUI) herbsCountUI.textContent = gameState.inventory.herbs;
+    if (clawCountUI) clawCountUI.textContent = gameState.inventory.claw;
+    if (fangCountUI) fangCountUI.textContent = gameState.inventory.fang;
+    if (leatherCountUI) leatherCountUI.textContent = gameState.inventory.leather;
+    if (oreCountUI) oreCountUI.textContent = gameState.inventory.ore;
+    if (potionCountUI) potionCountUI.textContent = gameState.inventory.potion;
+    if (hideCountUI) hideCountUI.textContent = gameState.inventory.hide;
+    if (elixirCountUI) elixirCountUI.textContent = gameState.inventory.elixir;
+    if (crystalCountUI) crystalCountUI.textContent = gameState.inventory.crystal;
     let tools = [];
     if (gameState.tools.axe) tools.push('Axe');
     if (gameState.tools.pickaxe) tools.push('Pickaxe');
@@ -2747,31 +3036,37 @@ let lastTime = 0;
 const gameTick = 100;
 
 function gameLoop(timestamp) {
-    if (gameState.isGameOver) return;
-    
-    if (!gameState.paused) {
-        if (gameState.player.moveCooldown > 0) {
-            gameState.player.moveCooldown--;
-        }
-        handleInput();
+    try {
+        if (gameState.isGameOver) return;
+        
+        if (!gameState.paused) {
+            if (gameState.player.moveCooldown > 0) {
+                gameState.player.moveCooldown--;
+            }
+            handleInput();
 
-        if (timestamp - lastTime > gameTick) {
-            lastTime = timestamp;
-            manageSpawning();
-            updateTime();
-            updateStats();
-            updateAnimals();
+            if (timestamp - lastTime > gameTick) {
+                lastTime = timestamp;
+                manageSpawning();
+                updateTime();
+                updateStats();
+                updateAnimals();
+            }
+            
+            updateAnimations();
+            updateCamera();
+            updateUI();
+            updateGameplayMessages();
+            checkWizardCallout();
         }
         
-        updateAnimations();
-        updateCamera();
-        updateUI();
-        updateGameplayMessages();
-        checkWizardCallout();
+        draw();
+        requestAnimationFrame(gameLoop);
+    } catch (error) {
+        console.error("Error in gameLoop:", error);
+        // Try to continue the game loop
+        setTimeout(() => requestAnimationFrame(gameLoop), 100);
     }
-    
-    draw();
-    requestAnimationFrame(gameLoop);
 }
 
 // --- Event Listeners and Init ---
@@ -2932,6 +3227,16 @@ function setupEventListeners() {
     
     window.addEventListener('resize', resizeCanvas);
     
+    // Ensure canvas regains focus when clicked
+    canvas.addEventListener('click', () => {
+        canvas.focus();
+    });
+    
+    // Ensure canvas maintains focus when window regains focus
+    window.addEventListener('focus', () => {
+        canvas.focus();
+    });
+    
     // Mini map click functionality
     miniMap.addEventListener('click', (e) => {
         const rect = miniMap.getBoundingClientRect();
@@ -2970,12 +3275,30 @@ function resizeCanvas() {
     viewportTileCountY = Math.ceil(newHeight / TILE_SIZE);
 }
 
-// Start game
-generateWorld();
-resizeCanvas();
-setupEventListeners();
-updateMiniMapOverlay(); // Initialize minimap overlay styling
-requestAnimationFrame(gameLoop);
+// Initialize game when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        // Generate world and spawn initial animals
+        generateWorld();
+        spawnInitialAnimals(); // Spawn initial animals at game start
+        
+        // Setup game systems
+        resizeCanvas();
+        setupEventListeners();
+        updateMiniMapOverlay(); // Initialize minimap overlay styling
+        
+        // Start the game loop first
+        requestAnimationFrame(gameLoop);
+        
+        // Ensure canvas has focus for keyboard events after everything is set up
+        setTimeout(() => {
+            canvas.focus();
+        }, 100);
+    } catch (error) {
+        console.error("Error during game initialization:", error);
+        alert("Game failed to initialize. Please refresh the page.");
+    }
+});
 
 </script>
 </body>
