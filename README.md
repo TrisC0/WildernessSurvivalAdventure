@@ -52,10 +52,12 @@ Explore a vast, randomly generated world, gather resources, craft essential tool
 1. **Gather Resources**: Your first priority is to gather wood by facing a tree and pressing the spacebar.
 2. **Crafting**: Use the Actions Panel on the left to navigate to the "Craft" tab.
 3. **Essential Tools**: Craft a Wooden Axe and Wooden Pickaxe to gather resources more efficiently.
-4. **Defense**: Craft a Wooden Sword to defend yourself from wolves.
+4. **Defense**: Craft a Wooden Sword to defend yourself from wolves and bears.
 5. **Survival Setup**: Build a Campfire before nightfall (20:00) to keep aggressive animals at bay. You can also cook meat on it.
 6. **Rest**: Build a Tent to sleep through the dangerous nights and restore health and energy.
 7. **Find the Wizard**: Look for the wizard NPC (blue dot on mini map) who can provide quest hints and gifts.
+8. **Level Up**: Gain XP from all activities and choose stat bonuses when you level up to become stronger.
+9. **Hunt for Loot**: Defeat animals to collect valuable items like healing potions, weapons, and crafting materials.
 
 ### Objective
 Your main goal is to find and activate the three monoliths. Each monolith requires a specific offering:
@@ -74,23 +76,33 @@ This game is self-contained in the `index.html` file. Simply download it and ope
 ## Game Features Overview
 
 ### UI Elements
-- **Inventory Panel**: Top bar showing all collected resources
+- **Inventory Panel**: Top bar showing all collected resources including loot items (fur, bone, herbs, claws, fangs, leather, ore, potions, hide, elixirs, crystals)
 - **Actions Panel**: Left sidebar with crafting and food action tabs
-- **Mini Map**: Interactive map showing world overview and NPC locations
+- **Mini Map**: Interactive map showing world overview and NPC locations with peek/fullscreen toggle
 - **Message Log**: Scrollable log of all game events
 - **Gameplay Messages**: Real-time overlay showing recent actions
-- **Stats Panel**: Bottom bar displaying health, hunger, and energy bars
+- **Stats Panel**: Bottom bar displaying health, hunger, energy bars, XP progress bar, and current level
+- **Level-Up Overlay**: Fullscreen card selection when leveling up to choose stat bonuses
 
 ### World Features
 - **Procedural Generation**: Unique world layout every game
 - **Dynamic Weather**: Day/night cycle affecting gameplay
 - **Resource Spawning**: Trees, rocks, and berries regenerate over time
-- **Animal AI**: Wolves with realistic hunting and fleeing behaviors
+- **Advanced Animal AI**: Multiple animal types with unique behaviors:
+  - **Squirrels & Rabbits**: Flee from player, provide common loot
+  - **Wolves**: Hunt player but flee from campfires, provide uncommon loot
+  - **Brown Bears**: Aggressive hunters, provide rare loot
 - **Interactive NPCs**: Wizard with quest guidance and rewards
+- **Collision System**: Animals and player cannot occupy the same tile or pass through each other
 
 ### Technical Features
-- **Pixel Art Graphics**: Retro-style visual design
-- **Smooth Animations**: Character movement and tool usage animations
+- **Pixel Art Graphics**: Retro-style visual design with 8-directional movement and diagonal sprites
+- **Smooth Animations**: Character movement, tool usage, and animal behavior animations
 - **Responsive Design**: Works on desktop and mobile devices
-- **Performance Optimized**: Efficient rendering and game loop
+- **Performance Optimized**: Efficient rendering and game loop with comprehensive error handling
 - **Cross-Platform**: Runs in any modern web browser
+- **Advanced Systems**: 
+  - Weighted random animal spawning with initial population
+  - Comprehensive loot drop system with tiered rewards
+  - Dynamic stat modification system for character progression
+  - Robust collision detection and focus management
