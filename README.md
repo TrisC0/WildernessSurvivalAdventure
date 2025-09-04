@@ -17,26 +17,36 @@ Explore a vast, randomly generated world, gather resources, craft essential tool
 - **Engaging Storyline**: Embark on a quest to find and activate three mysterious monoliths by providing them with rare offerings. Your survival depends on it!
 
 ### Combat & Survival
-- **Combat System**: Defend yourself from aggressive wolves. Craft a sword to fight back more effectively.
-- **Hunting & Cooking**: Hunt wolves for raw meat, then cook it over a campfire for a substantial meal that restores both health and hunger.
-- **Wildlife Hunting**: Hunt rabbits (1 meat, 5 XP), deer (3 meat, 15 XP), and squirrels (1 meat, 3 XP) for food and experience points. Animals will flee when you approach, making hunting a challenge!
-- **Resource Gathering**: Chop down trees, mine rocks, forage for berries, and discover rare items like Ancient Gems.
+- **Combat System**: Defend yourself from aggressive wolves and bears. Craft a sword to fight back more effectively.
+- **Hunting & Cooking**: Hunt various animals for raw meat, then cook it over a campfire for a substantial meal that restores both health and hunger.
+- **Diverse Wildlife**: Hunt rabbits (1 meat, 2 XP), squirrels (1 meat, 3 XP), wolves (2 meat, 5 XP), and brown bears (5 meat, 10 XP) for food and experience points. Each animal has unique behaviors and drop rates.
+- **Loot Drop System**: Animals have a chance to drop valuable items when defeated:
+  - **Common Animals** (Squirrels, Rabbits): 30% chance for Small Fur, Bone Fragment, Wild Herbs, Sharp Claw
+  - **Uncommon Animals** (Wolves): 40% chance for Wolf Fur, Wolf Fang, Leather Strip, Iron Ore, Healing Potion
+  - **Rare Animals** (Bears): 60% chance for Bear Hide, Bear Claw, Ancient Gem, Iron Sword, Health Elixir, Magic Crystal
+- **Resource Gathering**: Chop down trees, mine rocks, forage for berries, and discover rare items like Ancient Gems. Gain XP for all activities!
 
 ### New Features (Latest Update)
 - **Interactive Wizard NPC**: A mysterious wizard appears on the map who provides quest hints and occasionally gifts you precious gems. Interact with them using the spacebar when standing in front of them.
-- **Mini Map System**: A comprehensive 200x200 pixel mini map showing your location, the wizard, wolves, monoliths, and terrain. Click anywhere on the mini map to navigate quickly.
+- **Advanced Mini Map System**: A comprehensive mini map that peeks from the right side of the screen with a red "(M)" indicator. Press M to toggle fullscreen mode for detailed navigation. Click anywhere on the mini map to quickly move the camera to that location.
 - **Speech Bubble System**: The wizard calls out to you when you're nearby with engaging messages like "Come here, young one!" and "The ancient secrets await!"
 - **Gameplay Message Overlay**: Real-time message display at the bottom of the screen showing your recent actions, combat results, and quest updates with smooth fade effects.
 - **Enhanced UI**: Improved log system that expands to fill available space, better organized crafting tabs, and more intuitive controls.
-- **Huntable Animals**: New wildlife including rabbits, deer, and squirrels that can be hunted for food and XP. Each animal has unique behaviors and provides different rewards.
-- **XP & Leveling System**: Gain experience points by hunting animals and level up to track your progress as a wilderness survivor.
+- **Advanced Leveling System**: Gain experience points from all activities (hunting, mining, chopping trees, wizard interaction) and level up to unlock stat bonuses:
+  - **Level-Up Cards**: When you level up, choose from three random cards offering permanent stat boosts
+  - **Strength Bonus**: Increases combat damage
+  - **Vitality Bonus**: Increases maximum health
+  - **Endurance Bonus**: Increases maximum energy
+- **XP Progress Bar**: Visual progress bar showing your advancement toward the next level
+- **Comprehensive Loot System**: Animals drop valuable items based on their rarity, including weapons, healing items, and crafting materials
 
 ## How to Play
 
 ### Controls
-- **Movement**: Use the WASD or Arrow Keys to move your character.
+- **Movement**: Use the WASD or Arrow Keys to move your character in 8 directions (including diagonals).
 - **Interact / Attack**: Press the Spacebar to interact with the object you are facing (e.g., chop a tree, mine a rock, pick a flower, attack an animal, or speak with the wizard).
 - **Mini Map Navigation**: Click anywhere on the mini map to quickly move the camera to that location.
+- **Mini Map Toggle**: Press M to toggle the mini map between peek mode and fullscreen mode.
 
 ### Getting Started
 1. **Gather Resources**: Your first priority is to gather wood by facing a tree and pressing the spacebar.
