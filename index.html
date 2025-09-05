@@ -83,35 +83,6 @@
 </head>
 <body class="bg-black text-white flex flex-col h-screen p-2 md:p-4 gap-2 md:gap-4">
 
-    <!-- Top Bar: Inventory -->
-    <header class="ui-panel flex-shrink-0">
-        <h2 class="text-lg text-yellow-400 mb-2 text-center hidden md:block">INVENTORY</h2>
-        <div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-center text-xs">
-            <div class="bg-gray-900 p-2 rounded">🌲 WOOD: <span id="woodCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">⛏️ STONE: <span id="stoneCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🍓 BERRY: <span id="berryCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🥩 MEAT: <span id="rawMeatCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">💎 GEM: <span id="gemCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🌸 PETAL: <span id="petalCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🔥 COOKED: <span id="cookedMeatCount">0</span></div>
-            <div class="bg-gray-900 p-2 rounded">🗿 CARVED: <span id="carvedStoneCount">0</span></div>
-        </div>
-        <div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-center text-xs mt-2">
-            <div class="bg-gray-800 p-2 rounded">🦌 FUR: <span id="furCount">0</span></div>
-            <div class="bg-gray-800 p-2 rounded">🦴 BONE: <span id="boneCount">0</span></div>
-            <div class="bg-gray-800 p-2 rounded">🌿 HERBS: <span id="herbsCount">0</span></div>
-            <div class="bg-gray-800 p-2 rounded">🐾 CLAW: <span id="clawCount">0</span></div>
-            <div class="bg-gray-800 p-2 rounded">🦷 FANG: <span id="fangCount">0</span></div>
-            <div class="bg-gray-800 p-2 rounded">🧵 LEATHER: <span id="leatherCount">0</span></div>
-            <div class="bg-gray-800 p-2 rounded">⚡ ORE: <span id="oreCount">0</span></div>
-            <div class="bg-gray-800 p-2 rounded">🧪 POTION: <span id="potionCount">0</span></div>
-        </div>
-        <div class="grid grid-cols-4 md:grid-cols-8 gap-2 text-center text-xs mt-2">
-            <div class="bg-gray-800 p-2 rounded">🐻 HIDE: <span id="hideCount">0</span></div>
-            <div class="bg-gray-800 p-2 rounded">💊 ELIXIR: <span id="elixirCount">0</span></div>
-            <div class="bg-gray-800 p-2 rounded">💎 CRYSTAL: <span id="crystalCount">0</span></div>
-        </div>
-    </header>
 
     <!-- Main Content -->
     <main class="flex-grow flex flex-col md:flex-row gap-2 md:gap-4 overflow-hidden">
@@ -155,11 +126,12 @@
                 </div>
             </div>
 
-
-            <!-- Message Log -->
-            <div class="flex-grow flex flex-col">
-                <h2 class="text-lg text-yellow-400 mb-2 text-center">LOG</h2>
-                <div id="messageLog" class="message-log bg-gray-900 p-2 rounded flex-grow"></div>
+            <!-- Backpack Section -->
+            <div class="mb-4">
+                <h2 class="text-lg text-yellow-400 mb-2 text-center">INVENTORY</h2>
+                <button id="backpackButton" class="w-full craft-button p-3 rounded text-sm font-mono">
+                    🎒 Open Backpack
+                </button>
             </div>
         </aside>
 
@@ -192,6 +164,13 @@
                 <div id="message2" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
                 <div id="message3" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
                 <div id="message4" class="text-white text-sm mb-1 opacity-0 transition-opacity duration-500 font-mono"></div>
+            </div>
+            
+            <!-- Chat History Button -->
+            <div class="absolute bottom-4 left-4 pointer-events-auto">
+                <button id="chatHistoryButton" class="bg-gray-800 hover:bg-gray-700 text-white text-xs px-3 py-1 rounded border border-gray-600 transition-colors duration-200 font-mono">
+                    [Chat History]
+                </button>
             </div>
             
             <!-- Level Up Cards Overlay -->
@@ -281,6 +260,34 @@
         <button onclick="window.location.reload()" class="craft-button text-2xl py-4 px-8 rounded">Play Again</button>
     </div>
 
+    <!-- Chat History Modal -->
+    <div id="chatHistoryModal" class="hidden absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-gray-900 p-6 rounded-lg border border-gray-600 max-w-4xl w-full mx-4 max-h-96 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-yellow-400">Chat History</h2>
+                <button id="closeChatHistory" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="chatHistoryContent" class="flex-grow overflow-y-auto bg-gray-800 p-4 rounded border border-gray-600 font-mono text-sm text-gray-300">
+                <!-- Chat messages will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Backpack Modal -->
+    <div id="backpackModal" class="hidden absolute inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+        <div class="bg-gray-900 p-6 rounded-lg border border-gray-600 max-w-4xl w-full mx-4 max-h-96 flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold text-yellow-400">🎒 Backpack</h2>
+                <button id="closeBackpack" class="text-gray-400 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div id="backpackContent" class="flex-grow overflow-y-auto bg-gray-800 p-4 rounded border border-gray-600">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <!-- Inventory items will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
 
 <script>
 const canvas = document.getElementById('gameCanvas');
@@ -313,28 +320,7 @@ const xpBar = document.getElementById('xpBar');
 const xpDisplay = document.getElementById('xpDisplay');
 const levelDisplay = document.getElementById('levelDisplay');
 const timeDisplay = document.getElementById('timeDisplay');
-const woodCountUI = document.getElementById('woodCount');
-const stoneCountUI = document.getElementById('stoneCount');
-const berryCountUI = document.getElementById('berryCount');
-const rawMeatCountUI = document.getElementById('rawMeatCount');
-const cookedMeatCountUI = document.getElementById('cookedMeatCount');
-const gemCountUI = document.getElementById('gemCount');
-const petalCountUI = document.getElementById('petalCount');
-const carvedStoneCountUI = document.getElementById('carvedStoneCount');
 const toolStatusUI = document.getElementById('toolStatus');
-// Loot item UI elements
-const furCountUI = document.getElementById('furCount');
-const boneCountUI = document.getElementById('boneCount');
-const herbsCountUI = document.getElementById('herbsCount');
-const clawCountUI = document.getElementById('clawCount');
-const fangCountUI = document.getElementById('fangCount');
-const leatherCountUI = document.getElementById('leatherCount');
-const oreCountUI = document.getElementById('oreCount');
-const potionCountUI = document.getElementById('potionCount');
-const hideCountUI = document.getElementById('hideCount');
-const elixirCountUI = document.getElementById('elixirCount');
-const crystalCountUI = document.getElementById('crystalCount');
-const messageLog = document.getElementById('messageLog');
 const questLog = document.getElementById('questLog');
 const introScreen = document.getElementById('introScreen');
 const startButton = document.getElementById('startButton');
@@ -533,18 +519,12 @@ let gameState = {
 // --- Game Logic ---
 
 function logMessage(message, color = '#e0e0e0') {
-    const p = document.createElement('p');
-    p.textContent = `> ${message}`;
-    p.style.color = color;
-    messageLog.appendChild(p);
-    messageLog.scrollTop = messageLog.scrollHeight;
-    
     // Add to gameplay messages
     const timestamp = Date.now();
     gameState.gameplayMessages.push({ message, color, timestamp });
     
-    // Keep only the last 10 messages
-    if (gameState.gameplayMessages.length > 10) {
+    // Keep only the last 50 messages for chat history
+    if (gameState.gameplayMessages.length > 50) {
         gameState.gameplayMessages.shift();
     }
     
@@ -694,6 +674,63 @@ function updateGameplayMessages() {
             element.style.backgroundColor = 'rgba(0, 0, 0, 0)';
         }
     });
+}
+
+function updateBackpack() {
+    const backpackContent = document.getElementById('backpackContent');
+    if (!backpackContent) return;
+    
+    // Clear existing content
+    backpackContent.innerHTML = '';
+    
+    // Define all inventory items with their properties
+    const inventoryItems = [
+        { key: 'wood', name: 'Wood', icon: '🌲', count: gameState.inventory.wood },
+        { key: 'stone', name: 'Stone', icon: '⛏️', count: gameState.inventory.stone },
+        { key: 'berries', name: 'Berries', icon: '🍓', count: gameState.inventory.berries },
+        { key: 'rawMeat', name: 'Raw Meat', icon: '🥩', count: gameState.inventory.rawMeat },
+        { key: 'gem', name: 'Gem', icon: '💎', count: gameState.inventory.gem },
+        { key: 'petal', name: 'Petal', icon: '🌸', count: gameState.inventory.petal },
+        { key: 'cookedMeat', name: 'Cooked Meat', icon: '🔥', count: gameState.inventory.cookedMeat },
+        { key: 'carvedStone', name: 'Carved Stone', icon: '🗿', count: gameState.inventory.carvedStone },
+        { key: 'fur', name: 'Fur', icon: '🦌', count: gameState.inventory.fur },
+        { key: 'bone', name: 'Bone', icon: '🦴', count: gameState.inventory.bone },
+        { key: 'herbs', name: 'Herbs', icon: '🌿', count: gameState.inventory.herbs },
+        { key: 'claw', name: 'Claw', icon: '🐾', count: gameState.inventory.claw },
+        { key: 'fang', name: 'Fang', icon: '🦷', count: gameState.inventory.fang },
+        { key: 'leather', name: 'Leather', icon: '🧵', count: gameState.inventory.leather },
+        { key: 'ore', name: 'Ore', icon: '⚡', count: gameState.inventory.ore },
+        { key: 'potion', name: 'Potion', icon: '🧪', count: gameState.inventory.potion },
+        { key: 'hide', name: 'Hide', icon: '🐻', count: gameState.inventory.hide },
+        { key: 'elixir', name: 'Elixir', icon: '💊', count: gameState.inventory.elixir },
+        { key: 'crystal', name: 'Crystal', icon: '💎', count: gameState.inventory.crystal }
+    ];
+    
+    // Filter items that have count > 0
+    const availableItems = inventoryItems.filter(item => item.count > 0);
+    
+    if (availableItems.length === 0) {
+        backpackContent.innerHTML = '<div class="col-span-full text-center text-gray-400 py-8">Your backpack is empty</div>';
+        return;
+    }
+    
+    // Create grid container
+    const grid = document.createElement('div');
+    grid.className = 'grid grid-cols-2 md:grid-cols-4 gap-3 text-sm';
+    
+    // Add each item to the grid
+    availableItems.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.className = 'bg-gray-700 p-3 rounded border border-gray-600 text-center';
+        itemDiv.innerHTML = `
+            <div class="text-lg mb-1">${item.icon}</div>
+            <div class="text-xs text-gray-300">${item.name}</div>
+            <div class="text-xs text-yellow-400 font-bold">${item.count}</div>
+        `;
+        grid.appendChild(itemDiv);
+    });
+    
+    backpackContent.appendChild(grid);
 }
 
 function updateQuestLog() {
@@ -3204,26 +3241,6 @@ function updateUI() {
     const hour = String(gameState.time.hour).padStart(2, '0');
     const minute = String(gameState.time.minute).padStart(2, '0');
     timeDisplay.textContent = `Day ${gameState.time.day} - ${hour}:${minute}`;
-    woodCountUI.textContent = gameState.inventory.wood;
-    stoneCountUI.textContent = gameState.inventory.stone;
-    berryCountUI.textContent = gameState.inventory.berries;
-    rawMeatCountUI.textContent = gameState.inventory.rawMeat;
-    cookedMeatCountUI.textContent = gameState.inventory.cookedMeat;
-    gemCountUI.textContent = gameState.inventory.gems;
-    petalCountUI.textContent = gameState.inventory.petals;
-    carvedStoneCountUI.textContent = gameState.inventory.carvedStone;
-    // Update loot item counts (with error handling)
-    if (furCountUI) furCountUI.textContent = gameState.inventory.fur;
-    if (boneCountUI) boneCountUI.textContent = gameState.inventory.bone;
-    if (herbsCountUI) herbsCountUI.textContent = gameState.inventory.herbs;
-    if (clawCountUI) clawCountUI.textContent = gameState.inventory.claw;
-    if (fangCountUI) fangCountUI.textContent = gameState.inventory.fang;
-    if (leatherCountUI) leatherCountUI.textContent = gameState.inventory.leather;
-    if (oreCountUI) oreCountUI.textContent = gameState.inventory.ore;
-    if (potionCountUI) potionCountUI.textContent = gameState.inventory.potion;
-    if (hideCountUI) hideCountUI.textContent = gameState.inventory.hide;
-    if (elixirCountUI) elixirCountUI.textContent = gameState.inventory.elixir;
-    if (crystalCountUI) crystalCountUI.textContent = gameState.inventory.crystal;
     let tools = [];
     if (gameState.tools.axe) tools.push('Axe');
     if (gameState.tools.pickaxe) tools.push('Pickaxe');
@@ -3485,6 +3502,59 @@ function setupEventListeners() {
             const maxY = MAP_SIZE * TILE_SIZE - canvas.height;
             gameState.camera.x = Math.max(0, Math.min(gameState.camera.x, maxX));
             gameState.camera.y = Math.max(0, Math.min(gameState.camera.y, maxY));
+        }
+    });
+    
+    // Chat History functionality
+    const chatHistoryButton = document.getElementById('chatHistoryButton');
+    const chatHistoryModal = document.getElementById('chatHistoryModal');
+    const closeChatHistory = document.getElementById('closeChatHistory');
+    const chatHistoryContent = document.getElementById('chatHistoryContent');
+    
+    chatHistoryButton.addEventListener('click', () => {
+        // Populate chat history content
+        chatHistoryContent.innerHTML = '';
+        gameState.gameplayMessages.forEach(msg => {
+            const div = document.createElement('div');
+            div.textContent = `> ${msg.message}`;
+            div.style.color = msg.color;
+            div.style.marginBottom = '4px';
+            chatHistoryContent.appendChild(div);
+        });
+        
+        // Show modal
+        chatHistoryModal.classList.remove('hidden');
+    });
+    
+    closeChatHistory.addEventListener('click', () => {
+        chatHistoryModal.classList.add('hidden');
+    });
+    
+    // Close modal when clicking outside
+    chatHistoryModal.addEventListener('click', (e) => {
+        if (e.target === chatHistoryModal) {
+            chatHistoryModal.classList.add('hidden');
+        }
+    });
+    
+    // Backpack functionality
+    const backpackButton = document.getElementById('backpackButton');
+    const backpackModal = document.getElementById('backpackModal');
+    const closeBackpack = document.getElementById('closeBackpack');
+    
+    backpackButton.addEventListener('click', () => {
+        updateBackpack(); // Update the backpack content
+        backpackModal.classList.remove('hidden');
+    });
+    
+    closeBackpack.addEventListener('click', () => {
+        backpackModal.classList.add('hidden');
+    });
+    
+    // Close backpack modal when clicking outside
+    backpackModal.addEventListener('click', (e) => {
+        if (e.target === backpackModal) {
+            backpackModal.classList.add('hidden');
         }
     });
 }
