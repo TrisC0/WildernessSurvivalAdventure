@@ -176,7 +176,7 @@
                     <div id="miniMapIndicator" class="absolute top-1 left-1 text-red-500 font-bold text-xs bg-black bg-opacity-50 px-1 rounded">(M)</div>
                 </div>
                 <div id="miniMapLegend" class="text-xs text-center mt-2 text-gray-400">
-                    <span class="inline-block w-3 h-3 bg-green-500 mr-2"></span>You
+                    <span class="inline-block w-3 h-3 bg-purple-500 mr-2"></span>You
                     <span class="inline-block w-3 h-3 bg-blue-500 mx-2"></span>Wizard
                     <span class="inline-block w-3 h-3 bg-red-500 mx-2"></span>Animals
                     <span class="inline-block w-3 h-3 bg-yellow-500 mx-2"></span>Monoliths
@@ -1129,7 +1129,8 @@ function spawnAnimals(count) {
                 maxHp = 10;
             }
             
-            gameState.animals.push({
+            // Create animal object with pack properties for wolves
+            const animalData = {
                 x, 
                 y, 
                 type: type,
@@ -1141,7 +1142,18 @@ function spawnAnimals(count) {
                 hp: hp,
                 maxHp: maxHp,
                 lastHitTimer: 0,
-            });
+            };
+            
+            // Add pack properties for wolves
+            if (type === 'wolf') {
+                animalData.packId = null; // Will be assigned when pack is formed
+                animalData.isPackLeader = false;
+                animalData.packTarget = { x: null, y: null };
+                animalData.smellRange = 12; // Strong sense of smell
+                animalData.lastSmellCheck = 0;
+            }
+            
+            gameState.animals.push(animalData);
         }
     } catch (error) {
         console.error("Error in spawnAnimals:", error);
@@ -1160,6 +1172,155 @@ function spawnInitialAnimals() {
     }
 }
 
+
+// Wolf Pack Management System
+function formWolfPacks() {
+    try {
+        const wolves = gameState.animals.filter(animal => animal.type === 'wolf');
+        const unassignedWolves = wolves.filter(wolf => !wolf.packId);
+        
+        // Group nearby wolves into packs
+        unassignedWolves.forEach(wolf => {
+            if (wolf.packId) return; // Already in a pack
+            
+            // Find nearby wolves within 8 tiles
+            const nearbyWolves = wolves.filter(otherWolf => 
+                otherWolf !== wolf && 
+                !otherWolf.packId &&
+                Math.abs(wolf.x - otherWolf.x) <= 8 && 
+                Math.abs(wolf.y - otherWolf.y) <= 8
+            );
+            
+            if (nearbyWolves.length > 0) {
+                // Create a new pack
+                const packId = `pack_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+                
+                // Make the first wolf the pack leader
+                wolf.packId = packId;
+                wolf.isPackLeader = true;
+                
+                // Add nearby wolves to the pack
+                nearbyWolves.forEach(otherWolf => {
+                    otherWolf.packId = packId;
+                    otherWolf.isPackLeader = false;
+                });
+                
+                logMessage(`A wolf pack forms in the wilderness...`, '#e5c07b');
+            }
+        });
+    } catch (error) {
+        console.error("Error in formWolfPacks:", error);
+    }
+}
+
+function getPackMembers(packId) {
+    return gameState.animals.filter(animal => animal.packId === packId);
+}
+
+function getPackLeader(packId) {
+    return gameState.animals.find(animal => animal.packId === packId && animal.isPackLeader);
+}
+
+function coordinatePackHunting(wolf) {
+    try {
+        if (!wolf.packId) return;
+        
+        const packMembers = getPackMembers(wolf.packId);
+        const packLeader = getPackLeader(wolf.packId);
+        const player = gameState.player;
+        
+        if (!packLeader || packMembers.length < 2) return;
+        
+        // If this wolf is the pack leader, set the pack target
+        if (wolf.isPackLeader) {
+            const distToPlayer = Math.abs(wolf.x - player.x) + Math.abs(wolf.y - player.y);
+            
+            if (distToPlayer <= wolf.smellRange) {
+                // Pack leader detected player, set target
+                wolf.packTarget.x = player.x;
+                wolf.packTarget.y = player.y;
+                wolf.state = 'hunt';
+                
+                // Alert other pack members
+                packMembers.forEach(member => {
+                    if (member !== wolf) {
+                        member.state = 'hunt';
+                        member.packTarget.x = player.x;
+                        member.packTarget.y = player.y;
+                    }
+                });
+            }
+        } else {
+            // Follow pack leader's target
+            if (packLeader.packTarget.x !== null && packLeader.packTarget.y !== null) {
+                wolf.packTarget.x = packLeader.packTarget.x;
+                wolf.packTarget.y = packLeader.packTarget.y;
+                wolf.state = 'hunt';
+            }
+        }
+    } catch (error) {
+        console.error("Error in coordinatePackHunting:", error);
+    }
+}
+
+function getPackAttackPosition(wolf, player) {
+    try {
+        if (!wolf.packId) return { x: player.x, y: player.y };
+        
+        const packMembers = getPackMembers(wolf.packId);
+        const packLeader = getPackLeader(wolf.packId);
+        
+        if (!packLeader || packMembers.length < 2) {
+            return { x: player.x, y: player.y };
+        }
+        
+        // Get pack members that are in view (within screen bounds)
+        const viewportLeft = Math.floor(gameState.camera.x / TILE_SIZE);
+        const viewportRight = viewportLeft + viewportTileCountX;
+        const viewportTop = Math.floor(gameState.camera.y / TILE_SIZE);
+        const viewportBottom = viewportTop + viewportTileCountY;
+        
+        const visiblePackMembers = packMembers.filter(member => 
+            member.x >= viewportLeft && member.x < viewportRight &&
+            member.y >= viewportTop && member.y < viewportBottom
+        );
+        
+        if (visiblePackMembers.length < 2) {
+            return { x: player.x, y: player.y };
+        }
+        
+        // Calculate attack positions around the player
+        const attackPositions = [
+            { x: player.x - 1, y: player.y },     // Left
+            { x: player.x + 1, y: player.y },     // Right
+            { x: player.x, y: player.y - 1 },     // Up
+            { x: player.x, y: player.y + 1 },     // Down
+            { x: player.x - 1, y: player.y - 1 }, // Up-left
+            { x: player.x + 1, y: player.y - 1 }, // Up-right
+            { x: player.x - 1, y: player.y + 1 }, // Down-left
+            { x: player.x + 1, y: player.y + 1 }  // Down-right
+        ];
+        
+        // Find the wolf's index in the visible pack
+        const wolfIndex = visiblePackMembers.findIndex(member => member === wolf);
+        
+        // Assign different attack positions to different wolves
+        if (wolfIndex < attackPositions.length) {
+            return attackPositions[wolfIndex];
+        }
+        
+        // If more wolves than positions, spread them out
+        const angle = (wolfIndex * 2 * Math.PI) / visiblePackMembers.length;
+        const radius = 2;
+        return {
+            x: player.x + Math.round(Math.cos(angle) * radius),
+            y: player.y + Math.round(Math.sin(angle) * radius)
+        };
+    } catch (error) {
+        console.error("Error in getPackAttackPosition:", error);
+        return { x: player.x, y: player.y };
+    }
+}
 
 function dropLoot(animalType) {
     try {
@@ -1276,6 +1437,24 @@ function updateAnimals() {
             } else {
                 animal.state = 'wander';
             }
+        } else if (animal.type === 'wolf') {
+            // Wolf pack behavior
+            coordinatePackHunting(animal);
+            
+            // Check smell range for wolves
+            if (animal.smellRange && distToPlayer <= animal.smellRange) {
+                animal.state = 'hunt';
+                if (animal.isPackLeader) {
+                    animal.packTarget.x = player.x;
+                    animal.packTarget.y = player.y;
+                }
+            } else if (distToPlayer > animal.smellRange + 2) {
+                animal.state = 'wander';
+                if (animal.isPackLeader) {
+                    animal.packTarget.x = null;
+                    animal.packTarget.y = null;
+                }
+            }
         } else if (distToPlayer <= 4 || animal.hp < animal.maxHp) {
             animal.state = 'hunt';
         } else if (distToPlayer > 5) { 
@@ -1287,8 +1466,16 @@ function updateAnimals() {
         let moveY = 0;
         switch (animal.state) {
             case 'hunt':
-                if (animal.x < player.x) moveX = 1; else if (animal.x > player.x) moveX = -1;
-                if (animal.y < player.y) moveY = 1; else if (animal.y > player.y) moveY = -1;
+                if (animal.type === 'wolf' && animal.packId) {
+                    // Wolf pack coordinated hunting
+                    const attackPos = getPackAttackPosition(animal, player);
+                    if (animal.x < attackPos.x) moveX = 1; else if (animal.x > attackPos.x) moveX = -1;
+                    if (animal.y < attackPos.y) moveY = 1; else if (animal.y > attackPos.y) moveY = -1;
+                } else {
+                    // Standard hunting behavior for other animals
+                    if (animal.x < player.x) moveX = 1; else if (animal.x > player.x) moveX = -1;
+                    if (animal.y < player.y) moveY = 1; else if (animal.y > player.y) moveY = -1;
+                }
                 break;
             case 'flee':
                 if (animal.type === 'squirrel' || animal.type === 'rabbit') {
@@ -1365,10 +1552,25 @@ function sleep() {
     gameState.time.hour = 7;
     gameState.time.minute = 0;
     gameState.time.day++;
-    gameState.player.energy = Math.min(100, gameState.player.energy + hoursToSleep * 8);
-    gameState.player.health = Math.min(100, gameState.player.health + hoursToSleep * 2);
-    gameState.player.hunger = Math.max(0, gameState.player.hunger - hoursToSleep * 1.5);
-    logMessage(`You restored health and energy.`);
+    
+    // Check if player is sleeping in a tent at night
+    const playerTile = gameState.world[gameState.player.y][gameState.player.x];
+    const isInTent = playerTile === TILES.TENT;
+    
+    if (isInTent) {
+        // Complete energy restoration when sleeping in tent at night
+        gameState.player.energy = 100;
+        gameState.player.health = Math.min(100, gameState.player.health + hoursToSleep * 2);
+        gameState.player.hunger = Math.max(0, gameState.player.hunger - hoursToSleep * 1.5);
+        logMessage(`You sleep soundly in your tent and wake up fully rested!`, '#61afef');
+    } else {
+        // Regular sleep restoration
+        gameState.player.energy = Math.min(100, gameState.player.energy + hoursToSleep * 8);
+        gameState.player.health = Math.min(100, gameState.player.health + hoursToSleep * 2);
+        gameState.player.hunger = Math.max(0, gameState.player.hunger - hoursToSleep * 1.5);
+        logMessage(`You restored health and energy.`);
+    }
+    
     regrowResources();
 }
 
@@ -2691,7 +2893,7 @@ function drawMiniMap() {
     // Draw player
     const playerMapX = gameState.player.x * scale;
     const playerMapY = gameState.player.y * scale;
-    miniMapCtx.fillStyle = '#10b981';
+    miniMapCtx.fillStyle = '#8b5cf6';
     miniMapCtx.fillRect(playerMapX, playerMapY, Math.ceil(scale), Math.ceil(scale));
     
     // Draw viewport rectangle
@@ -2938,6 +3140,12 @@ function draw() {
             drawAnimalSprite(ax, ay, frame);
         }
         
+        // Draw pack indicators for wolves
+        if (type === 'wolf' && animal.packId) {
+            ctx.fillStyle = animal.isPackLeader ? '#ff6b6b' : '#ffa500';
+            ctx.fillRect(ax + TILE_SIZE - 4, ay, 4, 4);
+        }
+        
         if(animal.lastHitTimer > 0) {
             const healthPercentage = animal.hp / animal.maxHp;
             ctx.fillStyle = '#4a4a4a';
@@ -3059,6 +3267,7 @@ function gameLoop(timestamp) {
             if (timestamp - lastTime > gameTick) {
                 lastTime = timestamp;
                 manageSpawning();
+                formWolfPacks(); // Form wolf packs
                 updateTime();
                 updateStats();
                 updateAnimals();
