@@ -1001,6 +1001,11 @@ function interact() {
 let keysPressed = {};
 function handleInput() {
     if (gameState.isGameOver || gameState.paused || gameState.player.moveCooldown > 0) return;
+    
+    // Clean up keysPressed object periodically to prevent memory leaks
+    if (Object.keys(keysPressed).length > 10) {
+        keysPressed = {};
+    }
     const { player } = gameState;
     let newX = player.x;
     let newY = player.y;
@@ -1145,8 +1150,8 @@ function spawnAnimals(count) {
 
 function spawnInitialAnimals() {
     try {
-        // Spawn 2-4 random animals at the beginning of the game (reduced to prevent crashes)
-        const initialCount = 2 + Math.floor(Math.random() * 3); // 2-4 animals
+        // Spawn 6-10 random animals at the beginning of the game for more wildlife
+        const initialCount = 6 + Math.floor(Math.random() * 5); // 6-10 animals
         spawnAnimals(initialCount);
         logMessage(`The wilderness stirs with ${initialCount} creatures...`, '#e5c07b');
     } catch (error) {
@@ -1154,6 +1159,7 @@ function spawnInitialAnimals() {
         logMessage("The wilderness remains quiet...", '#e5c07b');
     }
 }
+
 
 function dropLoot(animalType) {
     try {
@@ -1375,11 +1381,11 @@ function manageSpawning() {
         if (gameState.time.animalSpawnTimer <= 0) {
             if (gameState.isNight) {
                 logMessage("You hear a howl in the distance...", "#c7c7c7");
-                spawnAnimals(2); // Further reduced to prevent crashes
-                gameState.time.animalSpawnTimer = 150 + Math.random() * 100; // Slower: 150-250 ticks
+                spawnAnimals(2 + Math.floor(Math.random() * 2)); // 2-3 animals at night
+                gameState.time.animalSpawnTimer = 100 + Math.random() * 50; // 100-150 ticks (faster at night)
             } else {
-                spawnAnimals(1); // Further reduced to prevent crashes
-                gameState.time.animalSpawnTimer = 300 + Math.random() * 200; // Slower: 300-500 ticks
+                spawnAnimals(1 + Math.floor(Math.random() * 2)); // 1-2 animals during day
+                gameState.time.animalSpawnTimer = 200 + Math.random() * 100; // 200-300 ticks (50-90 seconds)
             }
         }
     } catch (error) {
@@ -3039,6 +3045,11 @@ function gameLoop(timestamp) {
     try {
         if (gameState.isGameOver) return;
         
+        // Ensure canvas maintains focus for keyboard events
+        if (document.activeElement !== canvas) {
+            canvas.focus();
+        }
+        
         if (!gameState.paused) {
             if (gameState.player.moveCooldown > 0) {
                 gameState.player.moveCooldown--;
@@ -3064,8 +3075,14 @@ function gameLoop(timestamp) {
         requestAnimationFrame(gameLoop);
     } catch (error) {
         console.error("Error in gameLoop:", error);
-        // Try to continue the game loop
-        setTimeout(() => requestAnimationFrame(gameLoop), 100);
+        // Try to continue the game loop with a small delay
+        setTimeout(() => {
+            try {
+                requestAnimationFrame(gameLoop);
+            } catch (retryError) {
+                console.error("Failed to restart game loop:", retryError);
+            }
+        }, 100);
     }
 }
 
