@@ -94,7 +94,7 @@
             <!-- Quest Log -->
             <div class="mb-4">
                 <h2 class="text-lg text-yellow-400 mb-2 text-center">OBJECTIVE</h2>
-                <div id="questLog" class="text-xs bg-gray-900 p-2 rounded text-cyan-300">Survive the crash. Find a way to signal for help.</div>
+                <div id="questLog" class="text-xs bg-gray-900 p-2 rounded text-cyan-300">Find and reactivate the three Elder Keystones to restore balance and open a portal home.</div>
             </div>
 
             <!-- Actions Panel -->
@@ -133,6 +133,18 @@
                     🎒 Open Backpack
                 </button>
             </div>
+            
+            <!-- Level Section -->
+            <div class="mb-4">
+                <h2 class="text-lg text-yellow-400 mb-2 text-center">LEVEL</h2>
+                <div class="bg-gray-800 p-3 rounded">
+                    <div class="text-center">
+                        <div class="text-sm text-yellow-400 mb-1">⭐ LEVEL <span id="levelDisplay">1</span></div>
+                        <div class="text-xs text-green-400 mb-2">XP: <span id="xpDisplay">0</span></div>
+                        <div class="stat-bar-bg h-2 w-full"><div id="xpBar" class="stat-bar bg-green-500" style="width: 0%;"></div></div>
+                    </div>
+                </div>
+            </div>
         </aside>
 
         <!-- Right Panel: Game Canvas -->
@@ -142,21 +154,26 @@
             </div>
             
             <!-- Mini Map Overlay -->
-            <div id="miniMapOverlay" class="absolute top-4 -right-96 bg-gray-900 bg-opacity-90 p-2 rounded-l border border-gray-600 border-r-0 transition-all duration-300">
+            <div id="miniMapOverlay" class="absolute top-4 right-4 z-50">
                 <div class="relative">
-                    <canvas id="miniMap" class="block"></canvas>
+                    <canvas id="miniMap" class="block" style="image-rendering: pixelated; image-rendering: -moz-crisp-edges; image-rendering: crisp-edges;"></canvas>
                     <div id="miniMapIndicator" class="absolute top-1 left-1 text-red-500 font-bold text-xs bg-black bg-opacity-50 px-1 rounded">(M)</div>
                 </div>
                 <div id="miniMapLegend" class="text-xs text-center mt-2 text-gray-400">
-                    <span class="inline-block w-3 h-3 bg-purple-500 mr-2"></span>You
-                    <span class="inline-block w-3 h-3 bg-blue-500 mx-2"></span>Wizard
-                    <span class="inline-block w-3 h-3 bg-red-500 mx-2"></span>Animals
-                    <span class="inline-block w-3 h-3 bg-yellow-500 mx-2"></span>Monoliths
+                    <div class="flex flex-wrap justify-center gap-1">
+                        <span class="inline-block w-2 h-2 bg-purple-500 mr-1"></span>You
+                        <span class="inline-block w-2 h-2 bg-blue-500 mx-1"></span>Wiz
+                        <span class="inline-block w-2 h-2 bg-amber-600 mx-1"></span>Rob
+                        <span class="inline-block w-2 h-2 bg-green-600 mx-1"></span>Dave
+                        <span class="inline-block w-2 h-2 bg-red-500 mx-1"></span>Animals
+                        <span class="inline-block w-2 h-2 bg-yellow-500 mx-1"></span>Monoliths
+                    </div>
                 </div>
                 <div id="miniMapInstructions" class="text-xs text-center mt-1 text-gray-500">
                     Press M for fullscreen
                 </div>
             </div>
+            
             
             <!-- Gameplay Message Overlay -->
             <div id="gameplayMessages" class="absolute bottom-4 left-4 right-4 pointer-events-none">
@@ -206,44 +223,95 @@
 
     </main>
 
-    <!-- Bottom Bar: Stats & Time -->
+    <!-- Bottom Bar: Full Width Stats & Time -->
     <footer class="ui-panel flex-shrink-0">
-         <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-            <!-- Stats -->
-            <div class="w-full md:w-3/4 grid grid-cols-1 md:grid-cols-4 gap-3">
-                <div>
+         <div class="flex flex-col lg:flex-row items-center gap-4">
+            <!-- Full Width Stats -->
+            <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4 w-full">
+                <div class="text-center">
                     <span class="text-sm">❤️ HEALTH</span>
-                    <div class="stat-bar-bg h-4"><div id="healthBar" class="stat-bar bg-red-500" style="width: 100%;"></div></div>
+                    <div class="stat-bar-bg h-6 w-full"><div id="healthBar" class="stat-bar bg-red-500" style="width: 100%;"></div></div>
                 </div>
-                <div>
+                <div class="text-center">
                     <span class="text-sm">🍖 HUNGER</span>
-                    <div class="stat-bar-bg h-4"><div id="hungerBar" class="stat-bar bg-yellow-500" style="width: 100%;"></div></div>
+                    <div class="stat-bar-bg h-6 w-full"><div id="hungerBar" class="stat-bar bg-yellow-500" style="width: 100%;"></div></div>
                 </div>
-                <div>
+                <div class="text-center">
                     <span class="text-sm">⚡ ENERGY</span>
-                    <div class="stat-bar-bg h-4"><div id="energyBar" class="stat-bar bg-blue-500" style="width: 100%;"></div></div>
-                </div>
-                <div>
-                    <span class="text-sm">⭐ LEVEL <span id="levelDisplay">1</span></span>
-                    <div class="text-xs text-green-400 mb-1">XP: <span id="xpDisplay">0</span></div>
-                    <div class="stat-bar-bg h-2"><div id="xpBar" class="stat-bar bg-green-500" style="width: 0%;"></div></div>
+                    <div class="stat-bar-bg h-6 w-full"><div id="energyBar" class="stat-bar bg-blue-500" style="width: 100%;"></div></div>
                 </div>
             </div>
             <!-- Time -->
-            <div class="w-full md:w-auto text-center p-2 bg-gray-900 rounded-md flex-shrink-0">
+            <div class="text-center p-3 bg-gray-900 rounded-md flex-shrink-0">
                 <div id="timeDisplay" class="text-lg text-cyan-300">Day 1 - 07:00</div>
                 <div id="seasonDisplay" class="text-xs text-green-400">Spring</div>
             </div>
         </div>
     </footer>
     
-    <!-- Intro Screen -->
+    <!-- Character Selection Screen -->
     <div id="introScreen" class="absolute inset-0 flex flex-col items-center justify-center intro-screen text-center p-8">
-        <h1 class="text-4xl text-yellow-400 mb-4">The Lost Expedition</h1>
-        <div class="max-w-2xl">
-            <p class="text-lg text-white mb-8">Your research plane has crashed in an uncharted wilderness. The radio is broken. Looking at your notes, you remember this region is known for strange monoliths that emit a powerful energy. If you can find and reactivate them, the energy surge might be enough to signal for rescue.</p>
+        <div class="max-w-6xl w-full">
+            <h1 class="text-4xl text-yellow-400 mb-6">The Sundered Wilds</h1>
+            <div class="bg-gray-900 p-6 rounded-lg border border-gray-600 mb-8">
+                <p class="text-lg text-white mb-4">Three friends around a crackling campfire. Regular guys, around 38 years old, out of their element yet resolute. Their most striking shared feature: the long, rugged beards they've grown since being stranded.</p>
+                <p class="text-base text-gray-300 mb-6">Tris, Rob, and Dave's weekly hike led them into a realm caught in a timeless war between the life-giving <span class="text-green-400">Veridian Weave</span> and a corrupting <span class="text-red-400">Shadow Blight</span>. Their only hope of returning home: reactivate the three shattered <span class="text-yellow-400">Elder Keystones</span> that once protected this land.</p>
+            </div>
+            
+            <h2 class="text-2xl text-yellow-400 mb-4">Choose Your Character</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <!-- TRIS - The Architect -->
+                <div id="character1" class="character-card bg-gray-800 p-4 rounded-lg border border-gray-600 cursor-pointer hover:border-purple-400 transition-all duration-200">
+                    <div class="text-center">
+                        <div class="text-5xl mb-3">🔧</div>
+                        <h3 class="text-lg font-bold text-white mb-2">TRIS - The Architect</h3>
+                        <p class="text-xs text-gray-300 mb-3">The quiet heart of the group with a thoughtful expression and well-kept dark beard.</p>
+                        <div class="text-xs text-purple-400 mb-1">
+                            <strong>Perks:</strong> Advanced crafting, material efficiency, multi-tool
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            <strong>Focus:</strong> Base building, engineering, traps
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ROB - The Sentinel -->
+                <div id="character2" class="character-card bg-gray-800 p-4 rounded-lg border border-gray-600 cursor-pointer hover:border-blue-400 transition-all duration-200">
+                    <div class="text-center">
+                        <div class="text-5xl mb-3">🛡️</div>
+                        <h3 class="text-lg font-bold text-white mb-2">ROB - The Sentinel</h3>
+                        <p class="text-xs text-gray-300 mb-3">The unwavering shield, powerfully built with a stoic demeanor and practical braided beard.</p>
+                        <div class="text-xs text-blue-400 mb-1">
+                            <strong>Perks:</strong> Enhanced health, combat prowess, defensive instincts
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            <strong>Focus:</strong> Combat, defense, weapon crafting
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- DAVE - The Seeker -->
+                <div id="character3" class="character-card bg-gray-800 p-4 rounded-lg border border-gray-600 cursor-pointer hover:border-green-400 transition-all duration-200">
+                    <div class="text-center">
+                        <div class="text-5xl mb-3">🌿</div>
+                        <h3 class="text-lg font-bold text-white mb-2">DAVE - The Seeker</h3>
+                        <p class="text-xs text-gray-300 mb-3">The inventive problem-solver with a curious analytical gaze and wild, unkempt beard.</p>
+                        <div class="text-xs text-green-400 mb-1">
+                            <strong>Perks:</strong> Plant identification, herbal remedies, rare ingredients
+                        </div>
+                        <div class="text-xs text-gray-400">
+                            <strong>Focus:</strong> Alchemy, Weave magic, exploration
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-sm text-gray-400 mb-4">
+                <p>Your choice determines your primary role. The other two friends will become your AI-controlled companions.</p>
+            </div>
+            
+            <button id="startButton" class="craft-button text-xl py-3 px-6 rounded hidden">Begin Your Journey</button>
         </div>
-        <button id="startButton" class="craft-button text-2xl py-4 px-8 rounded">Begin Survival</button>
     </div>
 
     <!-- Game Over Screen -->
@@ -255,8 +323,8 @@
 
     <!-- Victory Screen -->
     <div id="victoryScreen" class="hidden absolute inset-0 flex-col items-center justify-center victory-screen text-center">
-        <h1 class="text-6xl text-green-500 mb-4">RESCUED!</h1>
-        <p class="text-xl text-white mb-8">The monoliths flare to life, sending a beam of pure energy into the sky. You've done it! A rescue team will find you soon.</p>
+        <h1 class="text-6xl text-green-500 mb-4">VICTORY!</h1>
+        <p class="text-xl text-white mb-8">The three Elder Keystones pulse in harmony, their Veridian energy creating a brilliant portal home. The Shadow Blight retreats as the ancient balance is restored. You and your friends step through the portal, returning to your ordinary lives, forever changed by the extraordinary adventure.</p>
         <button onclick="window.location.reload()" class="craft-button text-2xl py-4 px-8 rounded">Play Again</button>
     </div>
 
@@ -293,7 +361,6 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const miniMap = document.getElementById('miniMap');
-const miniMapCtx = miniMap.getContext('2d');
 
 // Polyfill for roundRect if not available
 if (!ctx.roundRect) {
@@ -356,9 +423,11 @@ const TILES = {
     MONOLITH_ACTIVATED: 12,
     MOUNTAIN: 13,
     WIZARD: 14,
-    RABBIT: 15,
-    DEER: 16,
-    SQUIRREL: 17,
+    ROB: 15,
+    DAVE: 16,
+    RABBIT: 17,
+    DEER: 18,
+    SQUIRREL: 19,
 };
 
 const TILE_COLORS = {
@@ -377,6 +446,8 @@ const TILE_COLORS = {
     [TILES.MONOLITH_ACTIVATED]: '#f6e05e',
     [TILES.MOUNTAIN]: '#6b7280',
     [TILES.WIZARD]: '#808080',
+    [TILES.ROB]: '#8b4513',
+    [TILES.DAVE]: '#654321',
     [TILES.RABBIT]: '#d4a574',
     [TILES.DEER]: '#8b4513',
     [TILES.SQUIRREL]: '#a0522d',
@@ -442,6 +513,15 @@ let gameState = {
         isMoving: false,
         walkCycle: 0,
         lastInteraction: 0,
+        wandering: {
+            isWandering: true,
+            pauseTimer: 0,
+            pauseDuration: 0,
+            targetX: 0,
+            targetY: 0,
+            moveTimer: 0,
+            moveCooldown: 0
+        },
         speechBubble: {
             visible: false,
             message: '',
@@ -455,6 +535,98 @@ let gameState = {
             "Seek my counsel, traveler!",
             "The monoliths call to you!"
         ],
+    },
+    rob: {
+        x: 0,
+        y: 0,
+        direction: 'down',
+        isMoving: false,
+        walkCycle: 0,
+        lastInteraction: 0,
+        wandering: {
+            isWandering: true,
+            pauseTimer: 0,
+            pauseDuration: 0,
+            targetX: 0,
+            targetY: 0,
+            moveTimer: 0,
+            moveCooldown: 0
+        },
+        speechBubble: {
+            visible: false,
+            message: '',
+            timer: 0,
+            maxTimer: 180,
+        },
+        calloutMessages: [
+            "Hey there, survivor!",
+            "Need some help, friend?",
+            "I've got some tips for you!",
+            "Come talk to me!",
+            "I know these woods well!"
+        ],
+        adviceMessages: [
+            "The monoliths are your best bet for rescue!",
+            "Gather resources during the day, rest at night.",
+            "Wolves hunt in packs - be careful!",
+            "Build a campfire to keep predators away.",
+            "Cook your meat for better nutrition!",
+            "The wizard knows ancient secrets - find him!",
+            "Tents give you complete rest at night.",
+            "Carved stones are valuable for trading."
+        ],
+        itemOffers: [
+            { item: 'wood', amount: 5, message: "Here's some wood to get you started!" },
+            { item: 'stone', amount: 3, message: "Take these stones - they're useful!" },
+            { item: 'berries', amount: 2, message: "Fresh berries for your journey!" },
+            { item: 'rawMeat', amount: 1, message: "I caught this earlier - it's yours!" }
+        ]
+    },
+    dave: {
+        x: 0,
+        y: 0,
+        direction: 'down',
+        isMoving: false,
+        walkCycle: 0,
+        lastInteraction: 0,
+        wandering: {
+            isWandering: true,
+            pauseTimer: 0,
+            pauseDuration: 0,
+            targetX: 0,
+            targetY: 0,
+            moveTimer: 0,
+            moveCooldown: 0
+        },
+        speechBubble: {
+            visible: false,
+            message: '',
+            timer: 0,
+            maxTimer: 180,
+        },
+        calloutMessages: [
+            "Over here, traveler!",
+            "I'm Rob's brother - Dave!",
+            "Got some useful stuff!",
+            "Need advice? I'm your guy!",
+            "Come chat with me!"
+        ],
+        adviceMessages: [
+            "My brother Rob and I know these woods!",
+            "The monoliths need to be activated in sequence.",
+            "Night time is dangerous - stay near fire!",
+            "Wolves are more active at night.",
+            "Gather moonpetals - they're magical!",
+            "The wizard is ancient and wise - listen to him!",
+            "Build tools to gather resources faster.",
+            "Cooked meat restores more hunger than raw."
+        ],
+        itemOffers: [
+            { item: 'gem', amount: 1, message: "Found this gem - might be useful!" },
+            { item: 'herbs', amount: 2, message: "These herbs can help with healing!" },
+            { item: 'leather', amount: 1, message: "Leather for crafting - take it!" },
+            { item: 'ore', amount: 1, message: "Rare ore I found - it's yours!" }
+        ]
     },
     newAnimals: {
         rabbits: [],
@@ -627,6 +799,196 @@ function checkWizardCallout() {
     }
 }
 
+function checkRobCallout() {
+    if (gameState.rob.x <= 0 || gameState.rob.y <= 0) return;
+    
+    const distToPlayer = Math.sqrt(
+        Math.pow(gameState.player.x - gameState.rob.x, 2) + 
+        Math.pow(gameState.player.y - gameState.rob.y, 2)
+    );
+    
+    // If player is within 6 tiles and speech bubble isn't visible
+    if (distToPlayer <= 6 && !gameState.rob.speechBubble.visible) {
+        // Random chance to call out (about 1 in 300 frames = every 5 seconds)
+        if (Math.random() < 0.003) {
+            gameState.rob.speechBubble.visible = true;
+            gameState.rob.speechBubble.message = gameState.rob.calloutMessages[
+                Math.floor(Math.random() * gameState.rob.calloutMessages.length)
+            ];
+            gameState.rob.speechBubble.timer = gameState.rob.speechBubble.maxTimer;
+        }
+    }
+    
+    // Update speech bubble timer
+    if (gameState.rob.speechBubble.visible) {
+        gameState.rob.speechBubble.timer--;
+        if (gameState.rob.speechBubble.timer <= 0) {
+            gameState.rob.speechBubble.visible = false;
+        }
+    }
+}
+
+function checkDaveCallout() {
+    if (gameState.dave.x <= 0 || gameState.dave.y <= 0) return;
+    
+    const distToPlayer = Math.sqrt(
+        Math.pow(gameState.player.x - gameState.dave.x, 2) + 
+        Math.pow(gameState.player.y - gameState.dave.y, 2)
+    );
+    
+    // If player is within 6 tiles and speech bubble isn't visible
+    if (distToPlayer <= 6 && !gameState.dave.speechBubble.visible) {
+        // Random chance to call out (about 1 in 300 frames = every 5 seconds)
+        if (Math.random() < 0.003) {
+            gameState.dave.speechBubble.visible = true;
+            gameState.dave.speechBubble.message = gameState.dave.calloutMessages[
+                Math.floor(Math.random() * gameState.dave.calloutMessages.length)
+            ];
+            gameState.dave.speechBubble.timer = gameState.dave.speechBubble.maxTimer;
+        }
+    }
+    
+    // Update speech bubble timer
+    if (gameState.dave.speechBubble.visible) {
+        gameState.dave.speechBubble.timer--;
+        if (gameState.dave.speechBubble.timer <= 0) {
+            gameState.dave.speechBubble.visible = false;
+        }
+    }
+}
+
+function isPositionOccupied(x, y, excludeEntity = null) {
+    // Check if position is occupied by player
+    if (gameState.player.x === x && gameState.player.y === y) {
+        return true;
+    }
+    
+    // Check if position is occupied by any NPC
+    if ((gameState.wizard.x === x && gameState.wizard.y === y) ||
+        (gameState.rob.x === x && gameState.rob.y === y) ||
+        (gameState.dave.x === x && gameState.dave.y === y)) {
+        return true;
+    }
+    
+    // Check if position is occupied by any animal
+    const animalAtPosition = gameState.animals.find(animal => animal.x === x && animal.y === y);
+    if (animalAtPosition) {
+        return true;
+    }
+    
+    return false;
+}
+
+function updateNPCWandering() {
+    // Update wizard wandering
+    updateNPCWanderingFor(gameState.wizard);
+    
+    // Update Rob wandering
+    updateNPCWanderingFor(gameState.rob);
+    
+    // Update Dave wandering
+    updateNPCWanderingFor(gameState.dave);
+}
+
+function updateNPCWanderingFor(npc) {
+    if (!npc.wandering.isWandering || npc.x <= 0 || npc.y <= 0) return;
+    
+    const { wandering } = npc;
+    
+    if (wandering.pauseTimer > 0) {
+        // NPC is pausing
+        wandering.pauseTimer--;
+        npc.isMoving = false;
+        return;
+    }
+    
+    if (wandering.moveCooldown > 0) {
+        wandering.moveCooldown--;
+        return;
+    }
+    
+    // Check if we've reached our target or need a new target
+    const atTarget = (npc.x === wandering.targetX && npc.y === wandering.targetY);
+    const needsNewTarget = (wandering.targetX === 0 && wandering.targetY === 0) || atTarget;
+    
+    if (needsNewTarget) {
+        // Find a new random target location
+        const maxAttempts = 20;
+        let attempts = 0;
+        
+        while (attempts < maxAttempts) {
+            const targetX = Math.floor(Math.random() * MAP_SIZE);
+            const targetY = Math.floor(Math.random() * MAP_SIZE);
+            
+            // Check if target is valid (grass tile, not occupied)
+            if (targetX >= 0 && targetX < MAP_SIZE && targetY >= 0 && targetY < MAP_SIZE) {
+                const targetTile = gameState.world[targetY][targetX];
+                const distToPlayer = Math.sqrt(Math.pow(targetX - gameState.player.x, 2) + Math.pow(targetY - gameState.player.y, 2));
+                
+                // Make sure target is on grass, not too close to player, and not occupied by any entity
+                if (targetTile === TILES.GRASS && distToPlayer > 3 && !isPositionOccupied(targetX, targetY)) {
+                    wandering.targetX = targetX;
+                    wandering.targetY = targetY;
+                    break;
+                }
+            }
+            attempts++;
+        }
+        
+        // If we couldn't find a good target, set a pause
+        if (attempts >= maxAttempts) {
+            wandering.pauseTimer = 60 + Math.floor(Math.random() * 120); // 1-3 seconds pause
+            return;
+        }
+    }
+    
+    // Move towards target
+    const dx = wandering.targetX - npc.x;
+    const dy = wandering.targetY - npc.y;
+    
+    if (dx !== 0 || dy !== 0) {
+        let moveX = 0;
+        let moveY = 0;
+        
+        // Move one step towards target
+        if (Math.abs(dx) > Math.abs(dy)) {
+            moveX = dx > 0 ? 1 : -1;
+        } else {
+            moveY = dy > 0 ? 1 : -1;
+        }
+        
+        const newX = npc.x + moveX;
+        const newY = npc.y + moveY;
+        
+        // Check if move is valid
+        if (newX >= 0 && newX < MAP_SIZE && newY >= 0 && newY < MAP_SIZE) {
+            const targetTile = gameState.world[newY][newX];
+            const distToPlayer = Math.sqrt(Math.pow(newX - gameState.player.x, 2) + Math.pow(newY - gameState.player.y, 2));
+            
+            // Check if tile is walkable, not too close to player, and not occupied by any entity
+            if (targetTile === TILES.GRASS && distToPlayer > 2 && !isPositionOccupied(newX, newY)) {
+                npc.x = newX;
+                npc.y = newY;
+                npc.isMoving = true;
+                
+                // Update direction
+                if (moveX > 0) npc.direction = 'right';
+                else if (moveX < 0) npc.direction = 'left';
+                else if (moveY > 0) npc.direction = 'down';
+                else if (moveY < 0) npc.direction = 'up';
+                
+                wandering.moveCooldown = 15 + Math.floor(Math.random() * 10); // Random movement speed
+            }
+        }
+    }
+    
+    // If we've reached the target, start a pause
+    if (npc.x === wandering.targetX && npc.y === wandering.targetY) {
+        wandering.pauseTimer = 180 + Math.floor(Math.random() * 300); // 3-8 seconds pause
+        npc.isMoving = false;
+    }
+}
+
 function updateGameplayMessages() {
     const messages = gameState.gameplayMessages;
     const now = Date.now();
@@ -737,9 +1099,9 @@ function updateQuestLog() {
     const activated = gameState.quest.monolithsActivated;
     const total = gameState.quest.totalMonoliths;
     if (activated < total) {
-        questLog.textContent = `Activate the Monoliths (${activated}/${total}).`;
+        questLog.textContent = `Reactivate the Elder Keystones (${activated}/${total}). The Veridian Weave grows stronger with each keystone restored.`;
     } else {
-        questLog.textContent = "Signal sent! You have been rescued!";
+        questLog.textContent = "All Elder Keystones reactivated! The portal home opens as the Shadow Blight retreats!";
     }
 }
 
@@ -838,6 +1200,73 @@ function generateWorld() {
             wizardPlaced = true;
             logMessage("You sense ancient magic nearby...", "#a188d9");
         }
+    }
+    
+    // Place Rob NPC
+    let robPlaced = false;
+    for(let i = 0; i < grassTiles.length && !robPlaced; i++) {
+        const tile = grassTiles[i];
+        const distToPlayer = Math.sqrt(Math.pow(tile.x - gameState.player.x, 2) + Math.pow(tile.y - gameState.player.y, 2));
+        const distToWizard = Math.sqrt(Math.pow(tile.x - gameState.wizard.x, 2) + Math.pow(tile.y - gameState.wizard.y, 2));
+        
+        if(distToPlayer > 10 && distToPlayer < 20 && distToWizard > 5) { // Place Rob at different distance from wizard
+            gameState.world[tile.y][tile.x] = TILES.ROB;
+            gameState.rob.x = tile.x;
+            gameState.rob.y = tile.y;
+            robPlaced = true;
+            logMessage("You hear a friendly voice calling out...", "#8b4513");
+        }
+    }
+    
+    // Place Dave NPC
+    let davePlaced = false;
+    for(let i = 0; i < grassTiles.length && !davePlaced; i++) {
+        const tile = grassTiles[i];
+        const distToPlayer = Math.sqrt(Math.pow(tile.x - gameState.player.x, 2) + Math.pow(tile.y - gameState.player.y, 2));
+        const distToWizard = Math.sqrt(Math.pow(tile.x - gameState.wizard.x, 2) + Math.pow(tile.y - gameState.wizard.y, 2));
+        const distToRob = Math.sqrt(Math.pow(tile.x - gameState.rob.x, 2) + Math.pow(tile.y - gameState.rob.y, 2));
+        
+        if(distToPlayer > 12 && distToPlayer < 25 && distToWizard > 5 && distToRob > 5) { // Place Dave at different distance from others
+            gameState.world[tile.y][tile.x] = TILES.DAVE;
+            gameState.dave.x = tile.x;
+            gameState.dave.y = tile.y;
+            davePlaced = true;
+            logMessage("Another voice echoes through the forest...", "#228b22");
+        }
+    }
+    
+    // Ensure player spawns on a clear grass tile
+    let playerSpawned = false;
+    let attempts = 0;
+    const maxAttempts = 100;
+    
+    while (!playerSpawned && attempts < maxAttempts) {
+        const currentTile = gameState.world[gameState.player.y][gameState.player.x];
+        if (currentTile === TILES.GRASS) {
+            playerSpawned = true;
+        } else {
+            // Try to find a nearby grass tile
+            const searchRadius = Math.floor(attempts / 10) + 1;
+            for (let dy = -searchRadius; dy <= searchRadius && !playerSpawned; dy++) {
+                for (let dx = -searchRadius; dx <= searchRadius && !playerSpawned; dx++) {
+                    const newX = gameState.player.x + dx;
+                    const newY = gameState.player.y + dy;
+                    if (newX >= 0 && newX < MAP_SIZE && newY >= 0 && newY < MAP_SIZE) {
+                        if (gameState.world[newY][newX] === TILES.GRASS) {
+                            gameState.player.x = newX;
+                            gameState.player.y = newY;
+                            playerSpawned = true;
+                        }
+                    }
+                }
+            }
+        }
+        attempts++;
+    }
+    
+    // If we still haven't found a clear spot, force clear the center tile
+    if (!playerSpawned) {
+        gameState.world[gameState.player.y][gameState.player.x] = TILES.GRASS;
     }
 }
 
@@ -978,7 +1407,7 @@ function interact() {
                     gameState.world[target.y][target.x] = TILES.MONOLITH_ACTIVATED;
                     delete gameState.worldObjects[targetKey];
                     gameState.quest.monolithsActivated++;
-                    logMessage("The monolith hums with power! It's active!", '#f6e05e');
+                    logMessage("The Elder Keystone pulses with Veridian energy! The Shadow Blight recoils as ancient power flows through the land!", '#f6e05e');
                     updateQuestLog();
                     if (gameState.quest.monolithsActivated >= gameState.quest.totalMonoliths) {
                         victoryScreen.classList.remove('hidden');
@@ -986,7 +1415,7 @@ function interact() {
                         gameState.paused = true;
                     }
                 } else {
-                    logMessage(`The monolith seems to require ${monolith.amount} ${monolith.requires}.`, '#e06c75');
+                    logMessage(`The Elder Keystone requires ${monolith.amount} ${monolith.requires} to channel the Veridian Weave's power.`, '#e06c75');
                 }
             }
             break;
@@ -1028,6 +1457,62 @@ function interact() {
             }
             break;
         }
+        case TILES.ROB: {
+            const now = Date.now();
+            if (now - gameState.rob.lastInteraction > 5000) { // 5 second cooldown
+                gameState.rob.lastInteraction = now;
+                
+                // Give advice
+                const adviceMessage = gameState.rob.adviceMessages[
+                    Math.floor(Math.random() * gameState.rob.adviceMessages.length)
+                ];
+                logMessage(`Rob says: "${adviceMessage}"`, '#8b4513');
+                
+                // Give XP for talking to Rob
+                gameState.xp += 1;
+                logMessage("You learn from Rob's experience. (+1 XP)", '#8b4513');
+                
+                // Sometimes give items
+                if (Math.random() < 0.4) {
+                    const itemOffer = gameState.rob.itemOffers[
+                        Math.floor(Math.random() * gameState.rob.itemOffers.length)
+                    ];
+                    gameState.inventory[itemOffer.item] += itemOffer.amount;
+                    logMessage(`Rob gives you: ${itemOffer.message}`, '#61afef');
+                    gameState.xp += 2; // Bonus XP for receiving items
+                }
+                checkLevelUp();
+            }
+            break;
+        }
+        case TILES.DAVE: {
+            const now = Date.now();
+            if (now - gameState.dave.lastInteraction > 5000) { // 5 second cooldown
+                gameState.dave.lastInteraction = now;
+                
+                // Give advice
+                const adviceMessage = gameState.dave.adviceMessages[
+                    Math.floor(Math.random() * gameState.dave.adviceMessages.length)
+                ];
+                logMessage(`Dave says: "${adviceMessage}"`, '#228b22');
+                
+                // Give XP for talking to Dave
+                gameState.xp += 1;
+                logMessage("You learn from Dave's wisdom. (+1 XP)", '#228b22');
+                
+                // Sometimes give items
+                if (Math.random() < 0.4) {
+                    const itemOffer = gameState.dave.itemOffers[
+                        Math.floor(Math.random() * gameState.dave.itemOffers.length)
+                    ];
+                    gameState.inventory[itemOffer.item] += itemOffer.amount;
+                    logMessage(`Dave gives you: ${itemOffer.message}`, '#61afef');
+                    gameState.xp += 2; // Bonus XP for receiving items
+                }
+                checkLevelUp();
+            }
+            break;
+        }
     }
     
     if (interactionDidDamage) {
@@ -1036,6 +1521,7 @@ function interact() {
 }
 
 let keysPressed = {};
+let windowHasFocus = true;
 function handleInput() {
     if (gameState.isGameOver || gameState.paused || gameState.player.moveCooldown > 0) return;
     
@@ -1080,10 +1566,12 @@ function handleInput() {
     if (player.isMoving) {
         if (newX >= 0 && newX < MAP_SIZE && newY >= 0 && newY < MAP_SIZE) {
             const targetTile = gameState.world[newY][newX];
-            // Check if there's an animal at the target position
-            const animalAtTarget = gameState.animals.find(a => a.x === newX && a.y === newY);
             
-            if (targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN && !animalAtTarget) {
+            // Check if target tile is walkable and not occupied by any entity
+            if (targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && 
+                targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN && 
+                targetTile !== TILES.WIZARD && targetTile !== TILES.ROB && targetTile !== TILES.DAVE && 
+                !isPositionOccupied(newX, newY)) {
                 player.x = newX;
                 player.y = newY;
                 player.moveCooldown = 5; // Add a short delay between steps
@@ -1107,6 +1595,17 @@ function updateAnimations() {
     
     if (playerAnimation.toolSwing > 0) {
         playerAnimation.toolSwing--;
+    }
+    
+    // Update NPC walk cycles
+    if (gameState.wizard.isMoving) {
+        gameState.wizard.walkCycle = (gameState.wizard.walkCycle + 0.2) % (Math.PI * 2);
+    }
+    if (gameState.rob.isMoving) {
+        gameState.rob.walkCycle = (gameState.rob.walkCycle + 0.2) % (Math.PI * 2);
+    }
+    if (gameState.dave.isMoving) {
+        gameState.dave.walkCycle = (gameState.dave.walkCycle + 0.2) % (Math.PI * 2);
     }
 }
 
@@ -1543,17 +2042,14 @@ function updateAnimals() {
         const newAnimalY = animal.y + moveY;
         const targetTile = gameState.world[newAnimalY] ? gameState.world[newAnimalY][newAnimalX] : TILES.MOUNTAIN;
         
-        // Check if there's another animal or the player at the target position
-        const animalAtTarget = gameState.animals.find(a => a !== animal && a.x === newAnimalX && a.y === newAnimalY);
-        const playerAtTarget = (player.x === newAnimalX && player.y === newAnimalY);
-
-        if (targetTile !== undefined && targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN && !animalAtTarget && !playerAtTarget) {
-            animal.x = newAnimalX;
-            animal.y = newAnimalY;
+        // Check if target position is walkable and not occupied by any entity
+        if (targetTile !== undefined && targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && 
+            targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN && 
+            targetTile !== TILES.WIZARD && targetTile !== TILES.ROB && targetTile !== TILES.DAVE && 
+            !isPositionOccupied(newAnimalX, newAnimalY)) {
+            animal.x = Math.max(0, Math.min(MAP_SIZE - 1, newAnimalX));
+            animal.y = Math.max(0, Math.min(MAP_SIZE - 1, newAnimalY));
         }
-
-        animal.x = Math.max(0, Math.min(MAP_SIZE - 1, animal.x));
-        animal.y = Math.max(0, Math.min(MAP_SIZE - 1, animal.y));
         
         const dx = animal.x - oldX;
         const dy = animal.y - oldY;
@@ -2390,6 +2886,126 @@ function drawWizardSprite(x, y, frame) {
     ctx.restore();
 }
 
+function drawRobSprite(x, y, frame) {
+    const PIXEL_SIZE = 4;
+    const SPRITE_WIDTH = 16;
+    const SPRITE_HEIGHT = 16;
+    const SPRITE_OFFSET_X = TILE_SIZE / 2 - (SPRITE_WIDTH * PIXEL_SIZE) / 2;
+    const SPRITE_OFFSET_Y = 10;
+
+    const colors = {
+        shirtBrown: '#8b4513',
+        darkShirtBrown: '#654321',
+        pantsBlue: '#4169e1',
+        darkPantsBlue: '#1e3a8a',
+        beardBrown: '#a0522d',
+        darkBeardBrown: '#8b4513',
+        skin: '#fbd7a3',
+        darkSkin: '#e4a768',
+        black: '#212121',
+        white: '#ffffff',
+    };
+
+    ctx.save();
+    ctx.translate(x + SPRITE_OFFSET_X, y + SPRITE_OFFSET_Y);
+
+    const p = (px, py, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * PIXEL_SIZE, py * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    };
+
+    const spriteData = {
+        'standing_down': [
+            // Head
+            [4,2,colors.black],[5,2,colors.skin],[6,2,colors.skin],[7,2,colors.skin],[8,2,colors.skin],[9,2,colors.skin],[10,2,colors.skin],[11,2,colors.black],
+            [3,3,colors.black],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.skin],[8,3,colors.skin],[9,3,colors.skin],[10,3,colors.skin],[11,3,colors.skin],[12,3,colors.black],
+            [3,4,colors.black],[4,4,colors.skin],[5,4,colors.black],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.black],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+            [4,5,colors.darkSkin],[5,5,colors.skin],[6,5,colors.darkSkin],[7,5,colors.darkSkin],[8,5,colors.darkSkin],[9,5,colors.darkSkin],[10,5,colors.skin],[11,5,colors.darkSkin],
+            // Brown shirt
+            [3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],[9,6,colors.black],[10,6,colors.black],[11,6,colors.black],[12,6,colors.black],
+            [2,7,colors.black],[3,7,colors.shirtBrown],[4,7,colors.shirtBrown],[5,7,colors.shirtBrown],[6,7,colors.shirtBrown],[7,7,colors.shirtBrown],[8,7,colors.shirtBrown],[9,7,colors.shirtBrown],[10,7,colors.shirtBrown],[11,7,colors.shirtBrown],[12,7,colors.shirtBrown],[13,7,colors.black],
+            [2,8,colors.black],[3,8,colors.shirtBrown],[4,8,colors.shirtBrown],[5,8,colors.shirtBrown],[6,8,colors.shirtBrown],[7,8,colors.shirtBrown],[8,8,colors.shirtBrown],[9,8,colors.shirtBrown],[10,8,colors.shirtBrown],[11,8,colors.shirtBrown],[12,8,colors.shirtBrown],[13,8,colors.black],
+            [3,9,colors.shirtBrown],[4,9,colors.shirtBrown],[5,9,colors.shirtBrown],[6,9,colors.shirtBrown],[7,9,colors.shirtBrown],[8,9,colors.shirtBrown],[9,9,colors.shirtBrown],[10,9,colors.shirtBrown],[11,9,colors.shirtBrown],
+            [3,10,colors.darkShirtBrown],[4,10,colors.darkShirtBrown],[5,10,colors.darkShirtBrown],[6,10,colors.darkShirtBrown],[7,10,colors.darkShirtBrown],[8,10,colors.darkShirtBrown],[9,10,colors.darkShirtBrown],[10,10,colors.darkShirtBrown],[11,10,colors.darkShirtBrown],
+            // Blue pants
+            [3,11,colors.pantsBlue],[4,11,colors.pantsBlue],[5,11,colors.pantsBlue],[6,11,colors.pantsBlue],[7,11,colors.pantsBlue],[8,11,colors.pantsBlue],[9,11,colors.pantsBlue],[10,11,colors.pantsBlue],[11,11,colors.pantsBlue],
+            [3,12,colors.pantsBlue],[4,12,colors.pantsBlue],[5,12,colors.pantsBlue],[6,12,colors.pantsBlue],[7,12,colors.pantsBlue],[8,12,colors.pantsBlue],[9,12,colors.pantsBlue],[10,12,colors.pantsBlue],[11,12,colors.pantsBlue],
+            [3,13,colors.darkPantsBlue],[4,13,colors.darkPantsBlue],[5,13,colors.darkPantsBlue],[6,13,colors.darkPantsBlue],[7,13,colors.darkPantsBlue],[8,13,colors.darkPantsBlue],[9,13,colors.darkPantsBlue],[10,13,colors.darkPantsBlue],[11,13,colors.darkPantsBlue],
+            // Brown beard
+            [2,5,colors.beardBrown],[3,5,colors.beardBrown],[12,5,colors.beardBrown],[13,5,colors.beardBrown],
+            [1,6,colors.beardBrown],[2,6,colors.darkBeardBrown],[3,6,colors.darkBeardBrown],[12,6,colors.darkBeardBrown],[13,6,colors.darkBeardBrown],[14,6,colors.beardBrown],
+            [1,7,colors.beardBrown],[2,7,colors.darkBeardBrown],[13,7,colors.darkBeardBrown],[14,7,colors.beardBrown],
+            [1,8,colors.beardBrown],[2,8,colors.darkBeardBrown],[13,8,colors.darkBeardBrown],[14,8,colors.beardBrown],
+            [1,9,colors.beardBrown],[2,9,colors.darkBeardBrown],[13,9,colors.darkBeardBrown],[14,9,colors.beardBrown],
+        ]
+    };
+
+    const pixels = spriteData[frame] || spriteData['standing_down'];
+    pixels.forEach(([px, py, color]) => p(px, py, color));
+
+    ctx.restore();
+}
+
+function drawDaveSprite(x, y, frame) {
+    const PIXEL_SIZE = 4;
+    const SPRITE_WIDTH = 16;
+    const SPRITE_HEIGHT = 16;
+    const SPRITE_OFFSET_X = TILE_SIZE / 2 - (SPRITE_WIDTH * PIXEL_SIZE) / 2;
+    const SPRITE_OFFSET_Y = 10;
+
+    const colors = {
+        shirtGreen: '#228b22',
+        darkShirtGreen: '#006400',
+        pantsBrown: '#8b4513',
+        darkPantsBrown: '#654321',
+        beardRed: '#cd853f',
+        darkBeardRed: '#a0522d',
+        skin: '#fbd7a3',
+        darkSkin: '#e4a768',
+        black: '#212121',
+        white: '#ffffff',
+    };
+
+    ctx.save();
+    ctx.translate(x + SPRITE_OFFSET_X, y + SPRITE_OFFSET_Y);
+
+    const p = (px, py, color) => {
+        ctx.fillStyle = color;
+        ctx.fillRect(px * PIXEL_SIZE, py * PIXEL_SIZE, PIXEL_SIZE, PIXEL_SIZE);
+    };
+
+    const spriteData = {
+        'standing_down': [
+            // Head
+            [4,2,colors.black],[5,2,colors.skin],[6,2,colors.skin],[7,2,colors.skin],[8,2,colors.skin],[9,2,colors.skin],[10,2,colors.skin],[11,2,colors.black],
+            [3,3,colors.black],[4,3,colors.skin],[5,3,colors.skin],[6,3,colors.skin],[7,3,colors.skin],[8,3,colors.skin],[9,3,colors.skin],[10,3,colors.skin],[11,3,colors.skin],[12,3,colors.black],
+            [3,4,colors.black],[4,4,colors.skin],[5,4,colors.black],[6,4,colors.skin],[7,4,colors.skin],[8,4,colors.skin],[9,4,colors.black],[10,4,colors.skin],[11,4,colors.skin],[12,4,colors.black],
+            [4,5,colors.darkSkin],[5,5,colors.skin],[6,5,colors.darkSkin],[7,5,colors.darkSkin],[8,5,colors.darkSkin],[9,5,colors.darkSkin],[10,5,colors.skin],[11,5,colors.darkSkin],
+            // Green shirt
+            [3,6,colors.black],[4,6,colors.black],[5,6,colors.black],[6,6,colors.black],[7,6,colors.black],[8,6,colors.black],[9,6,colors.black],[10,6,colors.black],[11,6,colors.black],[12,6,colors.black],
+            [2,7,colors.black],[3,7,colors.shirtGreen],[4,7,colors.shirtGreen],[5,7,colors.shirtGreen],[6,7,colors.shirtGreen],[7,7,colors.shirtGreen],[8,7,colors.shirtGreen],[9,7,colors.shirtGreen],[10,7,colors.shirtGreen],[11,7,colors.shirtGreen],[12,7,colors.shirtGreen],[13,7,colors.black],
+            [2,8,colors.black],[3,8,colors.shirtGreen],[4,8,colors.shirtGreen],[5,8,colors.shirtGreen],[6,8,colors.shirtGreen],[7,8,colors.shirtGreen],[8,8,colors.shirtGreen],[9,8,colors.shirtGreen],[10,8,colors.shirtGreen],[11,8,colors.shirtGreen],[12,8,colors.shirtGreen],[13,8,colors.black],
+            [3,9,colors.shirtGreen],[4,9,colors.shirtGreen],[5,9,colors.shirtGreen],[6,9,colors.shirtGreen],[7,9,colors.shirtGreen],[8,9,colors.shirtGreen],[9,9,colors.shirtGreen],[10,9,colors.shirtGreen],[11,9,colors.shirtGreen],
+            [3,10,colors.darkShirtGreen],[4,10,colors.darkShirtGreen],[5,10,colors.darkShirtGreen],[6,10,colors.darkShirtGreen],[7,10,colors.darkShirtGreen],[8,10,colors.darkShirtGreen],[9,10,colors.darkShirtGreen],[10,10,colors.darkShirtGreen],[11,10,colors.darkShirtGreen],
+            // Brown pants
+            [3,11,colors.pantsBrown],[4,11,colors.pantsBrown],[5,11,colors.pantsBrown],[6,11,colors.pantsBrown],[7,11,colors.pantsBrown],[8,11,colors.pantsBrown],[9,11,colors.pantsBrown],[10,11,colors.pantsBrown],[11,11,colors.pantsBrown],
+            [3,12,colors.pantsBrown],[4,12,colors.pantsBrown],[5,12,colors.pantsBrown],[6,12,colors.pantsBrown],[7,12,colors.pantsBrown],[8,12,colors.pantsBrown],[9,12,colors.pantsBrown],[10,12,colors.pantsBrown],[11,12,colors.pantsBrown],
+            [3,13,colors.darkPantsBrown],[4,13,colors.darkPantsBrown],[5,13,colors.darkPantsBrown],[6,13,colors.darkPantsBrown],[7,13,colors.darkPantsBrown],[8,13,colors.darkPantsBrown],[9,13,colors.darkPantsBrown],[10,13,colors.darkPantsBrown],[11,13,colors.darkPantsBrown],
+            // Reddish beard
+            [2,5,colors.beardRed],[3,5,colors.beardRed],[12,5,colors.beardRed],[13,5,colors.beardRed],
+            [1,6,colors.beardRed],[2,6,colors.darkBeardRed],[3,6,colors.darkBeardRed],[12,6,colors.darkBeardRed],[13,6,colors.darkBeardRed],[14,6,colors.beardRed],
+            [1,7,colors.beardRed],[2,7,colors.darkBeardRed],[13,7,colors.darkBeardRed],[14,7,colors.beardRed],
+            [1,8,colors.beardRed],[2,8,colors.darkBeardRed],[13,8,colors.darkBeardRed],[14,8,colors.beardRed],
+            [1,9,colors.beardRed],[2,9,colors.darkBeardRed],[13,9,colors.darkBeardRed],[14,9,colors.beardRed],
+        ]
+    };
+
+    const pixels = spriteData[frame] || spriteData['standing_down'];
+    pixels.forEach(([px, py, color]) => p(px, py, color));
+
+    ctx.restore();
+}
+
 function drawRabbitSprite(x, y, frame) {
     const PIXEL_SIZE = 3;
     const SPRITE_WIDTH = 12;
@@ -2827,11 +3443,20 @@ function drawSpeechBubble(x, y, message) {
     ctx.restore();
 }
 
+// Mini Map System
+let miniMapCanvas, miniMapCtx;
+
+function initMiniMap() {
+    miniMapCanvas = document.getElementById('miniMap');
+    miniMapCtx = miniMapCanvas.getContext('2d');
+    miniMapCtx.imageSmoothingEnabled = false;
+}
+
 function toggleMiniMapFullscreen() {
     gameState.miniMapFullscreen = !gameState.miniMapFullscreen;
-    updateMiniMapOverlay();
+    updateMiniMapDisplay();
     
-    // Ensure game canvas maintains focus for keyboard events after a brief delay
+    // Ensure game canvas maintains focus
     setTimeout(() => {
         if (canvas) {
             canvas.focus();
@@ -2839,42 +3464,64 @@ function toggleMiniMapFullscreen() {
     }, 50);
 }
 
-function updateMiniMapOverlay() {
+function updateMiniMapDisplay() {
     const overlay = document.getElementById('miniMapOverlay');
     const legend = document.getElementById('miniMapLegend');
     const instructions = document.getElementById('miniMapInstructions');
     const indicator = document.getElementById('miniMapIndicator');
     
     if (gameState.miniMapFullscreen) {
-        // Fullscreen mode
-        overlay.className = 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-95 p-4 rounded border border-gray-600 transition-all duration-300 z-50';
-        overlay.style.pointerEvents = 'none'; // Don't capture mouse events
-        overlay.tabIndex = -1; // Don't capture focus
-        legend.className = 'text-sm text-center mt-3 text-gray-300';
-        instructions.textContent = 'Press M to minimize';
-        indicator.style.display = 'none'; // Hide indicator in fullscreen
+        // Fullscreen mode - center and expand
+        overlay.className = 'absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-gray-900 bg-opacity-95 p-6 rounded-lg border border-gray-600 transition-all duration-500 ease-out z-50';
+        overlay.style.transform = 'translate(-50%, -50%)';
+        legend.className = 'text-lg text-center mt-4 text-gray-300';
+        instructions.textContent = 'Press M to minimize or click to close';
+        indicator.style.display = 'none';
     } else {
-        // Peeking mode - just showing from the side
-        overlay.className = 'absolute top-4 -right-96 bg-gray-900 bg-opacity-90 p-2 rounded-l border border-gray-600 border-r-0 transition-all duration-300';
-        overlay.style.pointerEvents = 'auto'; // Allow mouse events for minimap clicking
-        overlay.tabIndex = -1; // Don't capture focus
+        // Peeking mode - slide from right edge
+        overlay.className = 'absolute top-4 right-4 bg-gray-900 bg-opacity-90 p-3 rounded-l-lg border border-gray-600 border-r-0 transition-all duration-500 ease-out z-50';
+        overlay.style.transform = 'translateX(calc(100% - 80px))';
         legend.className = 'text-xs text-center mt-2 text-gray-400';
         instructions.textContent = 'Press M for fullscreen';
-        indicator.style.display = 'block'; // Show indicator when peeking
+        indicator.style.display = 'block';
     }
+    
+    drawMiniMap();
 }
 
 function drawMiniMap() {
-    const miniMapSize = gameState.miniMapFullscreen ? 400 : 120;
-    const scale = miniMapSize / MAP_SIZE;
+    let displaySize, internalSize;
     
-    // Set canvas size
-    miniMap.width = miniMapSize;
-    miniMap.height = miniMapSize;
+    if (gameState.miniMapFullscreen) {
+        // Calculate 80% of the smaller dimension of the game canvas
+        const gameCanvas = document.getElementById('gameCanvas');
+        const canvasWidth = gameCanvas.clientWidth;
+        const canvasHeight = gameCanvas.clientHeight;
+        const minDimension = Math.min(canvasWidth, canvasHeight);
+        displaySize = Math.floor(minDimension * 0.8);
+        internalSize = displaySize * 2; // 2x for crisp rendering
+    } else {
+        // Peeking mode - smaller size
+        displaySize = 100;
+        internalSize = 200;
+    }
+    
+    const scale = internalSize / MAP_SIZE;
+    
+    // Set canvas internal size for crisp rendering
+    miniMap.width = internalSize;
+    miniMap.height = internalSize;
+    
+    // Set CSS size for display
+    miniMap.style.width = displaySize + 'px';
+    miniMap.style.height = displaySize + 'px';
+    
+    // Enable crisp rendering
+    miniMapCtx.imageSmoothingEnabled = false;
     
     // Clear mini map
     miniMapCtx.fillStyle = '#2d3748';
-    miniMapCtx.fillRect(0, 0, miniMapSize, miniMapSize);
+    miniMapCtx.fillRect(0, 0, internalSize, internalSize);
     
     // Draw terrain (simplified)
     for (let y = 0; y < MAP_SIZE; y++) {
@@ -2898,7 +3545,7 @@ function drawMiniMap() {
         }
     }
     
-    // Draw monoliths
+    // Draw monoliths first (so they appear behind other entities)
     for (let y = 0; y < MAP_SIZE; y++) {
         for (let x = 0; x < MAP_SIZE; x++) {
             const tile = gameState.world[y][x];
@@ -2911,27 +3558,78 @@ function drawMiniMap() {
         }
     }
     
-    // Draw wizard
-    if (gameState.wizard.x > 0 && gameState.wizard.y > 0) {
-        const mapX = gameState.wizard.x * scale;
-        const mapY = gameState.wizard.y * scale;
-        miniMapCtx.fillStyle = '#3b82f6';
-        miniMapCtx.fillRect(mapX, mapY, Math.ceil(scale), Math.ceil(scale));
-    }
-    
-    // Draw animals (wolves)
+    // Draw animals (wolves) - larger and with outline
     gameState.animals.forEach(animal => {
         const mapX = animal.x * scale;
         const mapY = animal.y * scale;
+        const size = Math.max(2, Math.ceil(scale * 0.8));
+        
+        // Draw outline
+        miniMapCtx.fillStyle = '#000000';
+        miniMapCtx.fillRect(mapX - 1, mapY - 1, size + 2, size + 2);
+        
+        // Draw animal
         miniMapCtx.fillStyle = '#ef4444';
-        miniMapCtx.fillRect(mapX, mapY, Math.ceil(scale), Math.ceil(scale));
+        miniMapCtx.fillRect(mapX, mapY, size, size);
     });
     
-    // Draw player
+    // Draw wizard - larger and with outline
+    if (gameState.wizard.x > 0 && gameState.wizard.y > 0) {
+        const mapX = gameState.wizard.x * scale;
+        const mapY = gameState.wizard.y * scale;
+        const size = Math.max(2, Math.ceil(scale * 0.8));
+        
+        // Draw outline
+        miniMapCtx.fillStyle = '#000000';
+        miniMapCtx.fillRect(mapX - 1, mapY - 1, size + 2, size + 2);
+        
+        // Draw wizard
+        miniMapCtx.fillStyle = '#3b82f6';
+        miniMapCtx.fillRect(mapX, mapY, size, size);
+    }
+    
+    // Draw Rob - larger and with outline
+    if (gameState.rob.x > 0 && gameState.rob.y > 0) {
+        const mapX = gameState.rob.x * scale;
+        const mapY = gameState.rob.y * scale;
+        const size = Math.max(2, Math.ceil(scale * 0.8));
+        
+        // Draw outline
+        miniMapCtx.fillStyle = '#000000';
+        miniMapCtx.fillRect(mapX - 1, mapY - 1, size + 2, size + 2);
+        
+        // Draw Rob
+        miniMapCtx.fillStyle = '#8b4513';
+        miniMapCtx.fillRect(mapX, mapY, size, size);
+    }
+    
+    // Draw Dave - larger and with outline
+    if (gameState.dave.x > 0 && gameState.dave.y > 0) {
+        const mapX = gameState.dave.x * scale;
+        const mapY = gameState.dave.y * scale;
+        const size = Math.max(2, Math.ceil(scale * 0.8));
+        
+        // Draw outline
+        miniMapCtx.fillStyle = '#000000';
+        miniMapCtx.fillRect(mapX - 1, mapY - 1, size + 2, size + 2);
+        
+        // Draw Dave
+        miniMapCtx.fillStyle = '#228b22';
+        miniMapCtx.fillRect(mapX, mapY, size, size);
+    }
+    
+    // Draw player - largest and with outline
     const playerMapX = gameState.player.x * scale;
     const playerMapY = gameState.player.y * scale;
+    const playerSize = Math.max(3, Math.ceil(scale * 1.0));
+    
+    // Draw outline
+    miniMapCtx.fillStyle = '#000000';
+    miniMapCtx.fillRect(playerMapX - 1, playerMapY - 1, playerSize + 2, playerSize + 2);
+    
+    // Draw player
     miniMapCtx.fillStyle = '#8b5cf6';
-    miniMapCtx.fillRect(playerMapX, playerMapY, Math.ceil(scale), Math.ceil(scale));
+    miniMapCtx.fillRect(playerMapX, playerMapY, playerSize, playerSize);
     
     // Draw viewport rectangle
     const viewportX = gameState.camera.x / TILE_SIZE * scale;
@@ -3087,6 +3785,12 @@ function draw() {
                 case TILES.WIZARD:
                     // Wizard tile is just a placeholder - the actual wizard sprite is drawn separately
                     break;
+                case TILES.ROB:
+                    // Rob tile is just a placeholder - the actual Rob sprite is drawn separately
+                    break;
+                case TILES.DAVE:
+                    // Dave tile is just a placeholder - the actual Dave sprite is drawn separately
+                    break;
             }
         }
     }
@@ -3203,6 +3907,30 @@ function draw() {
             drawSpeechBubble(wx, wy, gameState.wizard.speechBubble.message);
         }
     }
+    
+    // Draw Rob NPC
+    if (gameState.rob.x > 0 && gameState.rob.y > 0) {
+        const rx = gameState.rob.x * TILE_SIZE;
+        const ry = gameState.rob.y * TILE_SIZE;
+        drawRobSprite(rx, ry, `standing_${gameState.rob.direction}`);
+        
+        // Draw speech bubble if visible
+        if (gameState.rob.speechBubble.visible) {
+            drawSpeechBubble(rx, ry, gameState.rob.speechBubble.message);
+        }
+    }
+    
+    // Draw Dave NPC
+    if (gameState.dave.x > 0 && gameState.dave.y > 0) {
+        const dx = gameState.dave.x * TILE_SIZE;
+        const dy = gameState.dave.y * TILE_SIZE;
+        drawDaveSprite(dx, dy, `standing_${gameState.dave.direction}`);
+        
+        // Draw speech bubble if visible
+        if (gameState.dave.speechBubble.visible) {
+            drawSpeechBubble(dx, dy, gameState.dave.speechBubble.message);
+        }
+    }
 
     if (gameState.isNight) {
         ctx.fillStyle = 'rgba(10, 10, 40, 0.5)'; ctx.fillRect(gameState.camera.x, gameState.camera.y, canvas.width, canvas.height);
@@ -3271,8 +3999,13 @@ function gameLoop(timestamp) {
         if (gameState.isGameOver) return;
         
         // Ensure canvas maintains focus for keyboard events
-        if (document.activeElement !== canvas) {
+        if (document.activeElement !== canvas && windowHasFocus) {
             canvas.focus();
+        }
+        
+        // Clear stuck keys if window doesn't have focus
+        if (!windowHasFocus) {
+            keysPressed = {};
         }
         
         if (!gameState.paused) {
@@ -3295,6 +4028,9 @@ function gameLoop(timestamp) {
             updateUI();
             updateGameplayMessages();
             checkWizardCallout();
+            checkRobCallout();
+            checkDaveCallout();
+            updateNPCWandering();
         }
         
         draw();
@@ -3333,11 +4069,6 @@ function setupEventListeners() {
         craftingContent.classList.add('hidden-tab');
     });
     
-    startButton.addEventListener('click', () => {
-        introScreen.classList.add('hidden');
-        gameState.paused = false;
-        logMessage("The humming of the monoliths calls to you...", "#a188d9");
-    });
     
     window.addEventListener('keydown', (e) => {
         keysPressed[e.key] = true;
@@ -3475,19 +4206,52 @@ function setupEventListeners() {
         canvas.focus();
     });
     
+    // Add canvas-specific keyboard event listeners for better focus handling
+    canvas.addEventListener('keydown', (e) => {
+        keysPressed[e.key] = true;
+        if(e.key === ' '){
+             e.preventDefault(); 
+        }
+        if(e.key === 'm' || e.key === 'M'){
+             e.preventDefault();
+             toggleMiniMapFullscreen();
+        }
+    });
+    
+    canvas.addEventListener('keyup', (e) => {
+        keysPressed[e.key] = false;
+    });
+    
     // Ensure canvas maintains focus when window regains focus
     window.addEventListener('focus', () => {
+        windowHasFocus = true;
         canvas.focus();
+        // Clear any stuck keys when regaining focus
+        keysPressed = {};
+    });
+    
+    // Handle window blur to clear stuck keys
+    window.addEventListener('blur', () => {
+        windowHasFocus = false;
+        keysPressed = {};
     });
     
     // Mini map click functionality
     miniMap.addEventListener('click', (e) => {
+        if (!gameState.miniMapFullscreen) return; // Only handle clicks when minimap is open
+        
         const rect = miniMap.getBoundingClientRect();
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
         
-        const miniMapSize = gameState.miniMapFullscreen ? 400 : 120;
-        const scale = miniMapSize / MAP_SIZE;
+        // Calculate dynamic sizing (same as drawMiniMap)
+        const gameCanvas = document.getElementById('gameCanvas');
+        const canvasWidth = gameCanvas.clientWidth;
+        const canvasHeight = gameCanvas.clientHeight;
+        const minDimension = Math.min(canvasWidth, canvasHeight);
+        const displaySize = Math.floor(minDimension * 0.8);
+        const internalSize = displaySize * 2;
+        const scale = internalSize / MAP_SIZE;
         
         const worldX = Math.floor(x / scale);
         const worldY = Math.floor(y / scale);
@@ -3503,6 +4267,10 @@ function setupEventListeners() {
             gameState.camera.x = Math.max(0, Math.min(gameState.camera.x, maxX));
             gameState.camera.y = Math.max(0, Math.min(gameState.camera.y, maxY));
         }
+        
+        // Close minimap after clicking
+        gameState.miniMapFullscreen = false;
+        updateMiniMapDisplay();
     });
     
     // Chat History functionality
@@ -3569,11 +4337,90 @@ function resizeCanvas() {
 
     viewportTileCountX = Math.ceil(newWidth / TILE_SIZE);
     viewportTileCountY = Math.ceil(newHeight / TILE_SIZE);
+    
+    // Redraw minimap with new sizing
+    if (miniMapCanvas && miniMapCtx) {
+        drawMiniMap();
+    }
 }
 
 // Initialize game when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     try {
+        // Character selection
+        let selectedCharacter = null;
+        
+        document.getElementById('character1').addEventListener('click', () => {
+            selectCharacter('tris');
+        });
+        
+        document.getElementById('character2').addEventListener('click', () => {
+            selectCharacter('rob');
+        });
+        
+        document.getElementById('character3').addEventListener('click', () => {
+            selectCharacter('dave');
+        });
+        
+        function selectCharacter(character) {
+            // Remove previous selection
+            document.querySelectorAll('.character-card').forEach(card => {
+                card.classList.remove('border-green-400', 'border-blue-400', 'border-purple-400');
+                card.classList.add('border-gray-600');
+            });
+            
+            // Highlight selected character
+            const selectedCard = document.getElementById(`character${character === 'tris' ? '1' : character === 'rob' ? '2' : '3'}`);
+            selectedCard.classList.remove('border-gray-600');
+            selectedCard.classList.add(character === 'tris' ? 'border-purple-400' : character === 'rob' ? 'border-blue-400' : 'border-green-400');
+            
+            selectedCharacter = character;
+            document.getElementById('startButton').classList.remove('hidden');
+            
+            // Update character info
+            updateCharacterInfo(character);
+        }
+        
+        function updateCharacterInfo(character) {
+            const characterInfo = {
+                tris: {
+                    name: "Tris - The Architect",
+                    description: "The quiet heart of the group, crafting solutions to survive in this twisted realm.",
+                    perks: "Advanced crafting, material efficiency, engineering expertise"
+                },
+                rob: {
+                    name: "Rob - The Sentinel", 
+                    description: "The unwavering shield, ready to protect his friends from the Shadow Blight.",
+                    perks: "Enhanced health, combat prowess, defensive instincts"
+                },
+                dave: {
+                    name: "Dave - The Seeker",
+                    description: "The inventive mind, drawn to the mysteries of the Veridian Weave.",
+                    perks: "Plant identification, herbal remedies, rare ingredient discovery"
+                }
+            };
+            
+            const info = characterInfo[character];
+            logMessage(`Selected: ${info.name} - ${info.description}`, "#a188d9");
+        }
+        
+        startButton.addEventListener('click', () => {
+            if (!selectedCharacter) return;
+            
+            introScreen.classList.add('hidden');
+            gameState.paused = false;
+            
+            // Set character-specific starting message
+            const messages = {
+                tris: "Your analytical mind begins cataloging the strange technology and twisted nature around you...",
+                rob: "Your protective instincts kick in as you survey the corrupted landscape ahead...",
+                dave: "The Veridian Weave calls to you, its gentle energy flowing through the ancient forest..."
+            };
+            
+            logMessage(messages[selectedCharacter], "#a188d9");
+            logMessage("The Elder Keystones await. Find and reactivate them to restore balance and open a portal home.", "#f6e05e");
+        });
+        
         // Generate world and spawn initial animals
         generateWorld();
         spawnInitialAnimals(); // Spawn initial animals at game start
@@ -3581,7 +4428,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Setup game systems
         resizeCanvas();
         setupEventListeners();
-        updateMiniMapOverlay(); // Initialize minimap overlay styling
+        
+        // Initialize minimap in peeking state
+        gameState.miniMapFullscreen = false;
+        initMiniMap(); // Initialize minimap canvas
+        updateMiniMapDisplay(); // Initialize minimap overlay styling
+        drawMiniMap(); // Draw initial minimap
         
         // Start the game loop first
         requestAnimationFrame(gameLoop);
