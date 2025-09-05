@@ -94,7 +94,7 @@
             <!-- Quest Log -->
             <div class="mb-4">
                 <h2 class="text-lg text-yellow-400 mb-2 text-center">OBJECTIVE</h2>
-                <div id="questLog" class="text-xs bg-gray-900 p-2 rounded text-cyan-300">Find and reactivate the three Elder Keystones to restore balance and open a portal home.</div>
+                <div id="questLog" class="text-xs bg-gray-900 p-2 rounded text-cyan-300">Find your missing friends and light three bonfires to signal for helicopter rescue.</div>
             </div>
 
             <!-- Actions Panel -->
@@ -113,6 +113,8 @@
                         <button id="craftCarvedStone" class="craft-button p-2 rounded">Carved Stone (50S)</button>
                         <button id="craftCampfire" class="craft-button p-2 rounded">Fire (15W, 5S)</button>
                         <button id="craftTent" class="craft-button p-2 rounded">Tent (20W, 10S)</button>
+                        <button id="craftFlint" class="craft-button p-2 rounded">Flint (10S)</button>
+                        <button id="craftSteel" class="craft-button p-2 rounded">Steel (5O)</button>
                     </div>
                     <div class="text-center text-xs mt-2">Tools: <span id="toolStatus">None</span></div>
                 </div>
@@ -166,7 +168,7 @@
                         <span class="inline-block w-2 h-2 bg-amber-600 mx-1"></span>Rob
                         <span class="inline-block w-2 h-2 bg-green-600 mx-1"></span>Dave
                         <span class="inline-block w-2 h-2 bg-red-500 mx-1"></span>Animals
-                        <span class="inline-block w-2 h-2 bg-yellow-500 mx-1"></span>Monoliths
+                        <span class="inline-block w-2 h-2 bg-orange-500 mx-1"></span>Bonfires
                     </div>
                 </div>
                 <div id="miniMapInstructions" class="text-xs text-center mt-1 text-gray-500">
@@ -252,10 +254,10 @@
     <!-- Character Selection Screen -->
     <div id="introScreen" class="absolute inset-0 flex flex-col items-center justify-center intro-screen text-center p-8">
         <div class="max-w-6xl w-full">
-            <h1 class="text-4xl text-yellow-400 mb-6">The Sundered Wilds</h1>
+            <h1 class="text-4xl text-yellow-400 mb-6">The Forest</h1>
             <div class="bg-gray-900 p-6 rounded-lg border border-gray-600 mb-8">
                 <p class="text-lg text-white mb-4">Three friends around a crackling campfire. Regular guys, around 38 years old, out of their element yet resolute. Their most striking shared feature: the long, rugged beards they've grown since being stranded.</p>
-                <p class="text-base text-gray-300 mb-6">Tris, Rob, and Dave's weekly hike led them into a realm caught in a timeless war between the life-giving <span class="text-green-400">Veridian Weave</span> and a corrupting <span class="text-red-400">Shadow Blight</span>. Their only hope of returning home: reactivate the three shattered <span class="text-yellow-400">Elder Keystones</span> that once protected this land.</p>
+                <p class="text-base text-gray-300 mb-6">Tris, Rob, and Dave's weekly hike went wrong when they got lost in the deep woods. With no food, water, or shelter, they must survive the harsh wilderness and fend off dangerous animals. Their only hope of returning home: find your missing friends and light three <span class="text-yellow-400">bonfires</span> to signal for helicopter rescue.</p>
             </div>
             
             <h2 class="text-2xl text-yellow-400 mb-4">Choose Your Character</h2>
@@ -300,7 +302,7 @@
                             <strong>Perks:</strong> Plant identification, herbal remedies, rare ingredients
                         </div>
                         <div class="text-xs text-gray-400">
-                            <strong>Focus:</strong> Alchemy, Weave magic, exploration
+                            <strong>Focus:</strong> Survival skills, wilderness knowledge, exploration
                         </div>
                     </div>
                 </div>
@@ -324,7 +326,7 @@
     <!-- Victory Screen -->
     <div id="victoryScreen" class="hidden absolute inset-0 flex-col items-center justify-center victory-screen text-center">
         <h1 class="text-6xl text-green-500 mb-4">VICTORY!</h1>
-        <p class="text-xl text-white mb-8">The three Elder Keystones pulse in harmony, their Veridian energy creating a brilliant portal home. The Shadow Blight retreats as the ancient balance is restored. You and your friends step through the portal, returning to your ordinary lives, forever changed by the extraordinary adventure.</p>
+        <p class="text-xl text-white mb-8">The three bonfires burn bright, sending smoke signals high into the sky. The sound of helicopter blades echoes through the forest as your rescue arrives. You and your friends climb aboard, returning to your ordinary lives, forever changed by the extraordinary adventure.</p>
         <button onclick="window.location.reload()" class="craft-button text-2xl py-4 px-8 rounded">Play Again</button>
     </div>
 
@@ -419,8 +421,8 @@ const TILES = {
     MINED_ROCK: 8,
     EMPTY_BUSH: 9,
     MOONPETAL_FLOWER: 10,
-    MONOLITH: 11,
-    MONOLITH_ACTIVATED: 12,
+    BONFIRE: 11,
+    BONFIRE_LIT: 12,
     MOUNTAIN: 13,
     WIZARD: 14,
     ROB: 15,
@@ -442,8 +444,8 @@ const TILE_COLORS = {
     [TILES.MINED_ROCK]: '#6a6a6a',
     [TILES.EMPTY_BUSH]: '#71845a',
     [TILES.MOONPETAL_FLOWER]: '#a188d9',
-    [TILES.MONOLITH]: '#4a5568',
-    [TILES.MONOLITH_ACTIVATED]: '#f6e05e',
+    [TILES.BONFIRE]: '#8b4513',
+    [TILES.BONFIRE_LIT]: '#ff4500',
     [TILES.MOUNTAIN]: '#6b7280',
     [TILES.WIZARD]: '#808080',
     [TILES.ROB]: '#8b4513',
@@ -492,6 +494,8 @@ let gameState = {
         hide: 0,
         elixir: 0,
         crystal: 0,
+        flint: 0,
+        steel: 0,
     },
     xp: 0,
     level: 1,
@@ -501,8 +505,9 @@ let gameState = {
         sword: false,
     },
     quest: {
-        monolithsActivated: 0,
-        totalMonoliths: 3,
+        friendsFound: 0,
+        bonfiresLit: 0,
+        totalBonfires: 3,
     },
     world: [],
     animals: [],
@@ -533,7 +538,7 @@ let gameState = {
             "I have wisdom to share!",
             "The ancient secrets await!",
             "Seek my counsel, traveler!",
-            "The monoliths call to you!"
+            "The bonfires await your signal!"
         ],
     },
     rob: {
@@ -543,6 +548,7 @@ let gameState = {
         isMoving: false,
         walkCycle: 0,
         lastInteraction: 0,
+        following: false,
         wandering: {
             isWandering: true,
             pauseTimer: 0,
@@ -566,7 +572,7 @@ let gameState = {
             "I know these woods well!"
         ],
         adviceMessages: [
-            "The monoliths are your best bet for rescue!",
+            "The bonfires are your best bet for rescue!",
             "Gather resources during the day, rest at night.",
             "Wolves hunt in packs - be careful!",
             "Build a campfire to keep predators away.",
@@ -589,6 +595,7 @@ let gameState = {
         isMoving: false,
         walkCycle: 0,
         lastInteraction: 0,
+        following: false,
         wandering: {
             isWandering: true,
             pauseTimer: 0,
@@ -613,10 +620,10 @@ let gameState = {
         ],
         adviceMessages: [
             "My brother Rob and I know these woods!",
-            "The monoliths need to be activated in sequence.",
+            "The bonfires need to be lit to signal for rescue.",
             "Night time is dangerous - stay near fire!",
             "Wolves are more active at night.",
-            "Gather moonpetals - they're magical!",
+            "Gather moonpetals - they have healing properties!",
             "The wizard is ancient and wise - listen to him!",
             "Build tools to gather resources faster.",
             "Cooked meat restores more hunger than raw."
@@ -683,7 +690,7 @@ let gameState = {
             { name: 'Ancient Gem', type: 'gem', amount: 1, description: 'Mystical gem' },
             { name: 'Iron Sword', type: 'weapon', amount: 1, description: 'Sharp iron blade' },
             { name: 'Health Elixir', type: 'elixir', amount: 1, description: 'Powerful healing' },
-            { name: 'Magic Crystal', type: 'crystal', amount: 1, description: 'Glowing crystal' }
+            { name: 'Crystal', type: 'crystal', amount: 1, description: 'Glowing crystal' }
         ]
     },
 };
@@ -1065,7 +1072,9 @@ function updateBackpack() {
         { key: 'potion', name: 'Potion', icon: '🧪', count: gameState.inventory.potion },
         { key: 'hide', name: 'Hide', icon: '🐻', count: gameState.inventory.hide },
         { key: 'elixir', name: 'Elixir', icon: '💊', count: gameState.inventory.elixir },
-        { key: 'crystal', name: 'Crystal', icon: '💎', count: gameState.inventory.crystal }
+        { key: 'crystal', name: 'Crystal', icon: '💎', count: gameState.inventory.crystal },
+        { key: 'flint', name: 'Flint', icon: '⚡', count: gameState.inventory.flint },
+        { key: 'steel', name: 'Steel', icon: '⚒️', count: gameState.inventory.steel }
     ];
     
     // Filter items that have count > 0
@@ -1096,12 +1105,16 @@ function updateBackpack() {
 }
 
 function updateQuestLog() {
-    const activated = gameState.quest.monolithsActivated;
-    const total = gameState.quest.totalMonoliths;
-    if (activated < total) {
-        questLog.textContent = `Reactivate the Elder Keystones (${activated}/${total}). The Veridian Weave grows stronger with each keystone restored.`;
+    const friendsFound = gameState.quest.friendsFound || 0;
+    const bonfiresLit = gameState.quest.bonfiresLit || 0;
+    const totalBonfires = 3;
+    
+    if (friendsFound < 2) {
+        questLog.textContent = `Find your missing friends (${friendsFound}/2) and light bonfires (${bonfiresLit}/${totalBonfires}) for rescue.`;
+    } else if (bonfiresLit < totalBonfires) {
+        questLog.textContent = `All friends found! Light the bonfires (${bonfiresLit}/${totalBonfires}) to signal for helicopter rescue.`;
     } else {
-        questLog.textContent = "All Elder Keystones reactivated! The portal home opens as the Shadow Blight retreats!";
+        questLog.textContent = "All bonfires lit! The helicopter is coming to rescue you!";
     }
 }
 
@@ -1169,21 +1182,20 @@ function generateWorld() {
         }
     }
     
-    // Place Monoliths on distant grass tiles
-    let monolithsPlaced = 0;
-    for(let i = 0; i < grassTiles.length && monolithsPlaced < gameState.quest.totalMonoliths; i++) {
+    // Place Bonfires on distant grass tiles
+    let bonfiresPlaced = 0;
+    for(let i = 0; i < grassTiles.length && bonfiresPlaced < gameState.quest.totalBonfires; i++) {
         const tile = grassTiles[i];
          const distToPlayer = Math.sqrt(Math.pow(tile.x - gameState.player.x, 2) + Math.pow(tile.y - gameState.player.y, 2));
 
-        if(distToPlayer > 12) { // Place monoliths far away
-            gameState.world[tile.y][tile.x] = TILES.MONOLITH;
-            const requirements = ['gems', 'petals', 'carvedStone'];
+        if(distToPlayer > 12) { // Place bonfires far away
+            gameState.world[tile.y][tile.x] = TILES.BONFIRE;
             gameState.worldObjects[`${tile.x},${tile.y}`] = { 
-                type: TILES.MONOLITH,
-                requires: requirements[monolithsPlaced],
-                amount: requirements[monolithsPlaced] === 'carvedStone' ? 1 : 5
+                type: TILES.BONFIRE,
+                requires: 'flintAndSteel',
+                amount: 1
             };
-            monolithsPlaced++;
+            bonfiresPlaced++;
         }
     }
     
@@ -1198,7 +1210,7 @@ function generateWorld() {
             gameState.wizard.x = tile.x;
             gameState.wizard.y = tile.y;
             wizardPlaced = true;
-            logMessage("You sense ancient magic nearby...", "#a188d9");
+            logMessage("You sense something important nearby...", "#a188d9");
         }
     }
     
@@ -1399,23 +1411,24 @@ function interact() {
             logMessage(`You carefully picked a glowing Moonpetal.`, '#a188d9');
             break;
         }
-        case TILES.MONOLITH: {
-            const monolith = gameState.worldObjects[targetKey];
-            if (monolith) {
-                if (gameState.inventory[monolith.requires] >= monolith.amount) {
-                    gameState.inventory[monolith.requires] -= monolith.amount;
-                    gameState.world[target.y][target.x] = TILES.MONOLITH_ACTIVATED;
+        case TILES.BONFIRE: {
+            const bonfire = gameState.worldObjects[targetKey];
+            if (bonfire) {
+                if (gameState.inventory.flint > 0 && gameState.inventory.steel > 0) {
+                    gameState.inventory.flint -= 1;
+                    gameState.inventory.steel -= 1;
+                    gameState.world[target.y][target.x] = TILES.BONFIRE_LIT;
                     delete gameState.worldObjects[targetKey];
-                    gameState.quest.monolithsActivated++;
-                    logMessage("The Elder Keystone pulses with Veridian energy! The Shadow Blight recoils as ancient power flows through the land!", '#f6e05e');
+                    gameState.quest.bonfiresLit++;
+                    logMessage("The bonfire roars to life! Flames dance high into the sky, sending smoke signals for rescue!", '#ff4500');
                     updateQuestLog();
-                    if (gameState.quest.monolithsActivated >= gameState.quest.totalMonoliths) {
+                    if (gameState.quest.bonfiresLit >= gameState.quest.totalBonfires) {
                         victoryScreen.classList.remove('hidden');
                         victoryScreen.classList.add('flex');
                         gameState.paused = true;
                     }
                 } else {
-                    logMessage(`The Elder Keystone requires ${monolith.amount} ${monolith.requires} to channel the Veridian Weave's power.`, '#e06c75');
+                    logMessage(`The bonfire needs flint and steel to be lit.`, '#e06c75');
                 }
             }
             break;
@@ -1435,10 +1448,10 @@ function interact() {
                 gameState.wizard.lastInteraction = now;
                 const messages = [
                     "The ancient wizard studies you with wise eyes...",
-                    "'The monoliths hold the key to your salvation, young one.'",
+                    "'The bonfires hold the key to your salvation, young one.'",
                     "'Seek the glowing petals that bloom only in moonlight.'",
                     "'The gems in the earth speak of ancient power.'",
-                    "'Carve stone with purpose, for the monoliths demand tribute.'"
+                    "'Carve stone with purpose, for the bonfires demand tribute.'"
                 ];
                 const randomMessage = messages[Math.floor(Math.random() * messages.length)];
                 logMessage(randomMessage, '#a188d9');
@@ -1569,7 +1582,7 @@ function handleInput() {
             
             // Check if target tile is walkable and not occupied by any entity
             if (targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && 
-                targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN && 
+                targetTile !== TILES.BONFIRE && targetTile !== TILES.BONFIRE_LIT && targetTile !== TILES.MOUNTAIN && 
                 targetTile !== TILES.WIZARD && targetTile !== TILES.ROB && targetTile !== TILES.DAVE && 
                 !isPositionOccupied(newX, newY)) {
                 player.x = newX;
@@ -2044,7 +2057,7 @@ function updateAnimals() {
         
         // Check if target position is walkable and not occupied by any entity
         if (targetTile !== undefined && targetTile !== TILES.TREE && targetTile !== TILES.ROCK && targetTile !== TILES.WATER && 
-            targetTile !== TILES.MONOLITH && targetTile !== TILES.MOUNTAIN && 
+            targetTile !== TILES.BONFIRE && targetTile !== TILES.BONFIRE_LIT && targetTile !== TILES.MOUNTAIN && 
             targetTile !== TILES.WIZARD && targetTile !== TILES.ROB && targetTile !== TILES.DAVE && 
             !isPositionOccupied(newAnimalX, newAnimalY)) {
             animal.x = Math.max(0, Math.min(MAP_SIZE - 1, newAnimalX));
@@ -3545,14 +3558,14 @@ function drawMiniMap() {
         }
     }
     
-    // Draw monoliths first (so they appear behind other entities)
+    // Draw bonfires first (so they appear behind other entities)
     for (let y = 0; y < MAP_SIZE; y++) {
         for (let x = 0; x < MAP_SIZE; x++) {
             const tile = gameState.world[y][x];
-            if (tile === TILES.MONOLITH || tile === TILES.MONOLITH_ACTIVATED) {
+            if (tile === TILES.BONFIRE || tile === TILES.BONFIRE_LIT) {
                 const mapX = x * scale;
                 const mapY = y * scale;
-                miniMapCtx.fillStyle = tile === TILES.MONOLITH_ACTIVATED ? '#f6e05e' : '#fbbf24';
+                miniMapCtx.fillStyle = tile === TILES.BONFIRE_LIT ? '#ff4500' : '#8b4513';
                 miniMapCtx.fillRect(mapX, mapY, Math.ceil(scale), Math.ceil(scale));
             }
         }
@@ -3754,14 +3767,14 @@ function draw() {
                     ctx.fillStyle = '#d4c2fc';
                     ctx.beginPath(); ctx.arc(x*TILE_SIZE+32, y*TILE_SIZE+28, 6, 0, Math.PI * 2); ctx.fill();
                     break;
-                case TILES.MONOLITH:
-                case TILES.MONOLITH_ACTIVATED:
-                    ctx.fillStyle = tile === TILES.MONOLITH ? '#4a5568' : '#68604a';
+                case TILES.BONFIRE:
+                case TILES.BONFIRE_LIT:
+                    ctx.fillStyle = tile === TILES.BONFIRE ? '#8b4513' : '#ff4500';
                     ctx.fillRect(x*TILE_SIZE + 12, y*TILE_SIZE+8, 40, 48);
-                    ctx.fillStyle = tile === TILES.MONOLITH ? '#2d3748' : '#4a442d';
+                    ctx.fillStyle = tile === TILES.BONFIRE ? '#654321' : '#ff6347';
                     ctx.fillRect(x*TILE_SIZE + 18, y*TILE_SIZE+14, 28, 36);
-                    if (tile === TILES.MONOLITH_ACTIVATED) {
-                        ctx.fillStyle = '#f6e05e';
+                    if (tile === TILES.BONFIRE_LIT) {
+                        ctx.fillStyle = '#ff6347';
                         ctx.beginPath(); ctx.arc(x * TILE_SIZE + 32, y * TILE_SIZE + 32, 8, 0, Math.PI * 2); ctx.fill();
                     }
                     break;
@@ -3981,6 +3994,8 @@ function updateUI() {
     document.getElementById('craftCarvedStone').disabled = gameState.inventory.stone < 50;
     document.getElementById('craftCampfire').disabled = gameState.inventory.wood < 15 || gameState.inventory.stone < 5;
     document.getElementById('craftTent').disabled = gameState.inventory.wood < 20 || gameState.inventory.stone < 10;
+    document.getElementById('craftFlint').disabled = gameState.inventory.stone < 10;
+    document.getElementById('craftSteel').disabled = gameState.inventory.ore < 5;
     
     document.getElementById('eatBerry').disabled = gameState.inventory.berries <= 0;
     document.getElementById('eatCookedMeat').disabled = gameState.inventory.cookedMeat <= 0;
@@ -4152,6 +4167,28 @@ function setupEventListeners() {
             } else {
                 logMessage('You can only build on clear grass.', '#e06c75');
             }
+        }
+    });
+
+    document.getElementById('craftFlint').addEventListener('click', () => {
+        if (gameState.inventory.stone >= 10) {
+            gameState.inventory.stone -= 10;
+            gameState.inventory.flint += 1;
+            logMessage('You crafted a piece of flint.', '#e5c07b');
+            updateInventory();
+        } else {
+            logMessage('You need 10 stone to craft flint.', '#e06c75');
+        }
+    });
+
+    document.getElementById('craftSteel').addEventListener('click', () => {
+        if (gameState.inventory.ore >= 5) {
+            gameState.inventory.ore -= 5;
+            gameState.inventory.steel += 1;
+            logMessage('You forged a piece of steel.', '#e5c07b');
+            updateInventory();
+        } else {
+            logMessage('You need 5 ore to forge steel.', '#e06c75');
         }
     });
 
@@ -4385,17 +4422,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const characterInfo = {
                 tris: {
                     name: "Tris - The Architect",
-                    description: "The quiet heart of the group, crafting solutions to survive in this twisted realm.",
+                    description: "The quiet heart of the group, crafting solutions to survive in the forest.",
                     perks: "Advanced crafting, material efficiency, engineering expertise"
                 },
                 rob: {
                     name: "Rob - The Sentinel", 
-                    description: "The unwavering shield, ready to protect his friends from the Shadow Blight.",
+                    description: "The unwavering shield, ready to protect his friends from the dangers of the forest.",
                     perks: "Enhanced health, combat prowess, defensive instincts"
                 },
                 dave: {
                     name: "Dave - The Seeker",
-                    description: "The inventive mind, drawn to the mysteries of the Veridian Weave.",
+                    description: "The inventive mind, drawn to the mysteries of the forest.",
                     perks: "Plant identification, herbal remedies, rare ingredient discovery"
                 }
             };
@@ -4412,13 +4449,13 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Set character-specific starting message
             const messages = {
-                tris: "Your analytical mind begins cataloging the strange technology and twisted nature around you...",
-                rob: "Your protective instincts kick in as you survey the corrupted landscape ahead...",
-                dave: "The Veridian Weave calls to you, its gentle energy flowing through the ancient forest..."
+                tris: "Your analytical mind begins cataloging the forest around you, looking for signs of your friends...",
+                rob: "Your protective instincts kick in as you survey the dangerous forest ahead...",
+                dave: "The forest calls to you, its natural beauty hiding the dangers within..."
             };
             
             logMessage(messages[selectedCharacter], "#a188d9");
-            logMessage("The Elder Keystones await. Find and reactivate them to restore balance and open a portal home.", "#f6e05e");
+            logMessage("Find your missing friends and light three bonfires to signal for helicopter rescue.", "#f6e05e");
         });
         
         // Generate world and spawn initial animals
